@@ -4,8 +4,10 @@
  "fps": 30,
  "theme": "broadcast",
  "channel": "The Canadian Data Project",
- "ghost": 0.35,
+ "ghost": 0.0,
  "keepHead": true,
+ "area": true,
+ "loopTo": 28,
  "title": "Did temporary foreign workers hold down Canadian wages?",
  "years": [
   1997,
@@ -60,7 +62,7 @@
  "decimals": 2,
  "kicker": "Real hourly wages · 2025 dollars · Canada",
  "hook": {
-  "seconds": 3.2,
+  "seconds": 2.0,
   "question": "Did temporary foreign workers <em>hold down wages</em>?"
  },
  "yearSub": "Average hourly wage, adjusted for inflation to 2025 dollars",
@@ -69,6 +71,7 @@
    "name": "all",
    "label": "All workers",
    "color": "#0E2A47",
+   "area": false,
    "values": {
     "1997": 28.32,
     "1998": 28.38,
@@ -159,23 +162,39 @@
    "anchor": "end"
   }
  ],
- "between": "Between cards, the year counts up and each line extends to that year's inflation-adjusted average hourly wage; dashed lines mark Temporary Foreign Worker Program changes; bars below (separate scale) show TFWP permit holders on December 31.",
+ "between": "The video opens on the 2024 total, rewinds to 1997, then plays forward. Between cards, the year counts up and each line extends to that year's inflation-adjusted average hourly wage; dashed lines mark Temporary Foreign Worker Program changes; bars below (separate scale) show TFWP permit holders on December 31.",
  "plan": [
   {
+   "kind": "jump",
+   "to": 28
+  },
+  {
+   "kind": "beat",
+   "s": 2.0,
+   "kicker": "2024 · a record (preliminary)",
+   "big": "236,130",
+   "line": "temporary foreign workers. <em>So what happened to wages?</em>",
+   "focus": [
+    "Temporary foreign workers (TFWP permits, Dec. 31)"
+   ],
+   "cardTop": 268,
+   "instant": true
+  },
+  {
    "kind": "run",
-   "to": 3,
-   "s": 3.2,
-   "ease": "linear"
+   "to": 0,
+   "s": 0.9,
+   "ease": "inout"
   },
   {
    "kind": "run",
    "to": 17,
-   "s": 8.5,
+   "s": 5.0,
    "ease": "linear"
   },
   {
    "kind": "beat",
-   "s": 3.8,
+   "s": 2.9,
    "kicker": "Food & hotels · 2002–2014",
    "big": "+1.0%/yr",
    "line": "real wage growth as TFW permits went from 29,220 to 93,745",
@@ -189,13 +208,13 @@
   {
    "kind": "run",
    "to": 22,
-   "s": 3.0,
+   "s": 1.8,
    "ease": "inout",
    "riser": true
   },
   {
    "kind": "beat",
-   "s": 3.8,
+   "s": 3.3,
    "kicker": "Food & hotels · 2014–2019",
    "big": "+1.8%/yr",
    "line": "after the cap; permits fell to 46,050 by 2017. <em>Minimum wages also rose</em>, so this alone can’t prove why",
@@ -209,28 +228,16 @@
   {
    "kind": "run",
    "to": 28,
-   "s": 3.0,
+   "s": 1.6,
    "ease": "out"
   },
   {
-   "kind": "beat",
-   "s": 3.4,
-   "kicker": "2024 · preliminary",
-   "big": "236,130",
-   "line": "TFWP permit holders on Dec. 31, the most since at least 2000. Food & hotel wages 2019–2025: +0.8%/yr",
-   "focus": [
-    "Temporary foreign workers (TFWP permits, Dec. 31)",
-    "Food & hotels"
-   ],
-   "cardTop": 268
-  },
-  {
    "kind": "summary",
-   "s": 6.0
+   "s": 5.0
   },
   {
    "kind": "loop",
-   "s": 0.8
+   "s": 0.6
   }
  ],
  "summary": {

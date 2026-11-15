@@ -23,6 +23,7 @@ const lastAt = (s, k) => { for (let j = Math.min(k, K - 1); j >= 0; j--) if (s.c
 const fps = SC.fps || 30;
 const SEG = []; let acc = 0, u = 0;
 for (const st of SC.plan) {
+  if (st.kind === 'jump') { u = st.to; continue; }   // cold open: start the timeline at another point
   const n = Math.round(st.s * fps);
   if (st.kind === 'run') { SEG.push({ ...st, n, u0: u, u1: st.to }); u = st.to; } else SEG.push({ ...st, n, u0: u, u1: u });
 }
@@ -31,7 +32,7 @@ const N = acc, fHook = Math.round(SC.hook.seconds * fps);
 const shape = { linear: t => t, out: t => 1 - (1 - t) * (1 - t), in: t => t * t, inout: ease };
 function where(f) {
   const s = SEG.find(x => f >= x.f0 && f < x.f1) || SEG.at(-1), t = s.n ? (f - s.f0) / s.n : 0;
-  return { s, t, u: s.kind === 'run' ? lerp(s.u0, s.u1, (shape[s.ease] || shape.linear)(t)) : s.kind === 'loop' ? 0 : s.u0 };
+  return { s, t, u: s.kind === 'run' ? lerp(s.u0, s.u1, (shape[s.ease] || shape.linear)(t)) : s.kind === 'loop' ? (SC.loopTo ?? 0) : s.u0 };
 }
 
 // ---------------------------------------------------------------- chart geometry
@@ -61,6 +62,7 @@ function path(s, uu) {
   }
   return { d, tip };
 }
+let FR = 0;
 function chart(uu, alpha, focus) {
   const k = Math.round(uu);
   let o = grid(alpha), labs = [];
@@ -87,9 +89,15 @@ function chart(uu, alpha, focus) {
   if (SC.ghost) for (const s of S) o += `<path d="${path(s, K - 1).d}" fill="none" stroke="${s.color}" stroke-width="2" stroke-dasharray="2 5" opacity="${(alpha * SC.ghost).toFixed(3)}"/>`;
   for (const s of S) {
     const { d, tip } = path(s, uu); if (!tip) continue;
-    const a = alpha * (focus && !focus.has(s.name) ? 0.18 : 1);
+    const a = alpha * (focus && !focus.has(s.name) && !focus.has(s.label) ? 0.18 : 1), gi = 'ga' + s.name;
+    if ((s.area ?? SC.area) && !d.slice(1).includes('M')) {   // soft area under an unbroken line
+      o += `<defs><linearGradient id="${gi}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${s.color}" stop-opacity=".28"/><stop offset="1" stop-color="${s.color}" stop-opacity="0"/></linearGradient></defs>`;
+      o += `<path d="${d}L${tip[0].toFixed(1)},${Y1}L${px(s.k0).toFixed(1)},${Y1}Z" fill="url(#${gi})" opacity="${a.toFixed(3)}"/>`;
+    }
     o += `<path d="${d}" style="color:${s.color}" fill="none" stroke="${s.color}" stroke-width="${s.width || 4}" stroke-linejoin="round" stroke-linecap="round" opacity="${a.toFixed(3)}"/>`;
-    o += `<circle cx="${tip[0].toFixed(1)}" cy="${tip[1].toFixed(1)}" r="6" fill="${s.color}" stroke="${T.halo}" stroke-width="2" opacity="${a.toFixed(3)}"/>`;
+    const ph = ((FR % 24) / 24);                   // pulse ring on the moving tip
+    o += `<circle cx="${tip[0].toFixed(1)}" cy="${tip[1].toFixed(1)}" r="${(7 + 14 * ph).toFixed(1)}" fill="none" stroke="${s.color}" stroke-width="2" opacity="${(a * 0.6 * (1 - ph)).toFixed(3)}"/>`;
+    o += `<circle cx="${tip[0].toFixed(1)}" cy="${tip[1].toFixed(1)}" r="7" fill="${s.color}" stroke="${T.halo}" stroke-width="2.5" opacity="${a.toFixed(3)}"/>`;
     const la = lastAt(s, k); if (la) labs.push({ s, y: tip[1], v: la[1], a });
   }
   // labels at the right edge of the plot, pushed apart so they never overlap
@@ -128,19 +136,35 @@ function cueAt(f) {
   if (a.s.kind === 'run' && ya !== yb && ya % 10 === 0) return 'tick';
   return '';
 }
+
+// rewind effect for cold opens: shown while a run goes backwards in time (pure function of the frame)
+const rewEl = document.createElement('div'); rewEl.id = 'rewind';
+rewEl.innerHTML = '<div class="rw-lines"></div><div class="rw-tag">◀◀ <span></span></div>';
+Object.assign(rewEl.style, { position: 'absolute', inset: '0', pointerEvents: 'none', opacity: '0', zIndex: '20' });
+document.getElementById('stage').appendChild(rewEl);
+const rwCss = document.createElement('style');
+rwCss.textContent = `#rewind .rw-lines{position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.10) 0 2px,transparent 2px 6px);mix-blend-mode:overlay}
+#rewind .rw-tag{position:absolute;left:50%;top:600px;transform:translateX(-50%);padding:14px 26px 12px;background:rgba(10,14,20,.86);color:#fff;font:700 54px/1 var(--sans);letter-spacing:.04em;border-radius:6px;white-space:nowrap}`;
+document.head.appendChild(rwCss);
+function rewindAt(w, f) {
+  const s = w.s; if (!(s.kind === 'run' && s.u1 < s.u0)) { rewEl.style.opacity = 0; return; }
+  const t = (f - s.f0) / Math.max(1, s.n); rewEl.style.opacity = Math.min(1, Math.sin(Math.PI * t) * 1.6).toFixed(3);
+  rewEl.querySelector('span').textContent = YR[Math.max(0, Math.min(YR.length - 1, Math.round(w.u)))];
+}
+
 function renderFrame(f) {
   f = Math.max(0, Math.min(N - 1, Math.round(f)));
-  const w = where(f), s = w.s, k = Math.round(w.u), y = YR[k];
+  FR = f; const w = where(f); rewindAt(w, f); const s = w.s, k = Math.round(w.u), y = YR[k];
   const inBeat = s.kind === 'beat', inSum = s.kind === 'summary', inLoop = s.kind === 'loop';
   const tIn = (n = 10) => clamp01((f - s.f0 + 1) / n), tOut = (n = 10) => clamp01((s.f1 - f) / n);
   const focus = inBeat && s.focus ? new Set(s.focus) : null;
   const sumA = inSum ? tIn(12) : inLoop ? clamp01(1 - (f - s.f0) / (s.n * 0.35)) : 0;
   const barsA = inSum ? 1 - tIn(12) : inLoop ? ease(clamp01(((f - s.f0) / s.n - 0.3) / 0.7)) : 1;
-  $('chart').innerHTML = chart(w.u, barsA, focus && Math.min(tIn(8), tOut(8)) > 0.5 ? focus : null);
+  $('chart').innerHTML = chart(w.u, barsA, focus && (s.instant ? tOut(8) : Math.min(tIn(8), tOut(8))) > 0.5 ? focus : null);
   $('year').textContent = y; $('yearbox').style.opacity = barsA.toFixed(3);
   $('head').style.opacity = (SC.keepHead ? 1 : inSum ? 1 - tIn(12) : inLoop ? barsA : 1).toFixed(3);
   const bt = $('beat');
-  if (inBeat) { const a = Math.min(tIn(9), tOut(9)); bt.querySelector('.kick').textContent = s.kicker; bt.querySelector('.big').textContent = s.big; bt.querySelector('.line').innerHTML = s.line;
+  if (inBeat) { const a = s.instant ? tOut(9) : Math.min(tIn(9), tOut(9)); bt.querySelector('.kick').textContent = s.kicker; bt.querySelector('.big').textContent = s.big; bt.querySelector('.line').innerHTML = s.line;
     bt.style.opacity = a; bt.style.top = (s.cardTop || 560) + 'px'; bt.style.transform = `translateY(${((1 - ease(a)) * 24).toFixed(1)}px)`; } else bt.style.opacity = 0;
   sm.querySelector('.chart').innerHTML = SC.summary.chart === false ? '' : sumChart(inSum ? clamp01((f - s.f0 - 8) / 40) : 1); sm.style.opacity = sumA.toFixed(3);
   sm.style.transform = `scale(${(0.96 + 0.04 * ease(inSum ? tIn(14) : 1)).toFixed(4)})`;
