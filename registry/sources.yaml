@@ -271,6 +271,30 @@ sources:
       - "Current (nominal) dollars, not adjusted for inflation."
       - "Average of the existing purpose-built rental stock; movers typically face higher rents than the average."
 
+  statcan_14100064:
+    title: "Employee wages by industry, annual"
+    publisher: "Statistics Canada"
+    table_id: "14-10-0064-01"
+    doi: "https://doi.org/10.25318/1410006401-eng"
+    landing_url: "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410006401"
+    download_url: "https://www150.statcan.gc.ca/n1/tbl/csv/14100064-eng.zip"
+    raw_file: "data/raw/statcan/14100064-eng.zip"
+    sha256: "0016f2c94c7d5bdc9771fee5d6d97d121065e54d9bc83394bda195172b0e38ae"
+    retrieved: "2026-11-14"
+    release_in_file: "Released 2026-01-09; covers 1997–2025"
+    reporting_period: "Annual average of the monthly Labour Force Survey"
+    coverage: "Canada and provinces; employees (self-employed excluded)"
+    units: "Current dollars per hour"
+    licence: "Statistics Canada Open Licence"
+    licence_url: "https://www.statcan.gc.ca/en/reference/licence"
+    attribution: "Source: Statistics Canada. Table 14-10-0064-01 Employee wages by industry, annual."
+    quality_class: official_statistics
+    methodology_notes:
+      - "Average hourly wage rate, both full- and part-time employees, usual wages before taxes."
+      - "Average wages shift when the mix of workers changes (e.g. more low-wage jobs lowers the average without anyone's pay falling)."
+    limitations:
+      - "Shows wages, not why they changed; policy effects need a comparison design (see cited research)."
+
   statcan_18100005:
     title: "Consumer Price Index, annual average, not seasonally adjusted"
     publisher: "Statistics Canada"
