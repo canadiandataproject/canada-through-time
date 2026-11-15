@@ -138,11 +138,11 @@ function renderFrame(f) {
   const barsA = inSum ? 1 - tIn(12) : inLoop ? ease(clamp01(((f - s.f0) / s.n - 0.3) / 0.7)) : 1;
   $('chart').innerHTML = chart(w.u, barsA, focus && Math.min(tIn(8), tOut(8)) > 0.5 ? focus : null);
   $('year').textContent = y; $('yearbox').style.opacity = barsA.toFixed(3);
-  $('head').style.opacity = (inSum ? 1 - tIn(12) : inLoop ? barsA : 1).toFixed(3);
+  $('head').style.opacity = (SC.keepHead ? 1 : inSum ? 1 - tIn(12) : inLoop ? barsA : 1).toFixed(3);
   const bt = $('beat');
   if (inBeat) { const a = Math.min(tIn(9), tOut(9)); bt.querySelector('.kick').textContent = s.kicker; bt.querySelector('.big').textContent = s.big; bt.querySelector('.line').innerHTML = s.line;
     bt.style.opacity = a; bt.style.top = (s.cardTop || 560) + 'px'; bt.style.transform = `translateY(${((1 - ease(a)) * 24).toFixed(1)}px)`; } else bt.style.opacity = 0;
-  sm.querySelector('.chart').innerHTML = sumChart(inSum ? clamp01((f - s.f0 - 8) / 40) : 1); sm.style.opacity = sumA.toFixed(3);
+  sm.querySelector('.chart').innerHTML = SC.summary.chart === false ? '' : sumChart(inSum ? clamp01((f - s.f0 - 8) / 40) : 1); sm.style.opacity = sumA.toFixed(3);
   sm.style.transform = `scale(${(0.96 + 0.04 * ease(inSum ? tIn(14) : 1)).toFixed(4)})`;
   $('glow').style.opacity = (inBeat ? Math.min(tIn(9), tOut(9)) : inSum ? sumA * 0.8 : 0).toFixed(3);
   $('flash').style.opacity = 0;

@@ -13,14 +13,14 @@ txt = f"""# Short: wages and the Temporary Foreign Worker Program
 Real (inflation-adjusted) hourly wages, 1997–2025, with Temporary Foreign Worker Program changes marked.
 
 📊 The numbers (Statistics Canada, 2025 dollars)
-• Restaurants & hotels (food services): {p(fc['2002-2014'])}/yr real wage growth 2002–2014, while the program was open to low-wage jobs
+• Restaurants & hotels (food services): {p(fc['2002-2014'])}/yr real wage growth 2002–2014, while the program was open to lower-skill jobs
 • {p(fc['2014-2019'])}/yr 2014–2019, after low-wage hiring was capped (minimum wages also rose then)
 • {p(fc['2019-2025'])}/yr 2019–2025
 • Temporary Foreign Worker Program permit holders on Dec. 31 (IRCC): {tf['2002']:,} in 2002 → {tf['2014']:,} in 2014 → {lo[1]:,} in {lo[0]} → {tf['2024']:,} in 2024 (preliminary; most since at least 2000)
 • All workers: ${rw['all']['1997']:.2f} → ${rw['all']['2025']:.2f}/hr since 1997; food services ${rw['food']['1997']:.2f} → ${rw['food']['2025']:.2f}
 
 🔬 What research found
-A peer-reviewed study comparing similar low-skill jobs (Chen & Fang, 2025) found the 2014 limits raised wages 3.7–4.5% for low-wage Canadians in the affected jobs. The effect is real, but modest. A chart alone can't show cause: wages also move with minimum wages, the economy, and which workers are counted.
+A peer-reviewed study (Chen & Fang, 2025) compared low-wage jobs that relied on temporary foreign workers with similar jobs the 2014 limits didn't touch. After the limits, Canadians in the affected jobs earned 3.7–4.5% more, roughly 70–80¢ an hour on a typical restaurant or hotel wage. So the effect is real, but modest. A chart alone can't show cause: wages also move with minimum wages, the economy, and which workers are counted.
 
 💬 Should Canada keep, tighten or end the low-wage stream? Tell us why.
 
@@ -37,7 +37,7 @@ Explore wages and jobs by province: https://tjreeve-ship-it.github.io/canada-thr
 Did temporary foreign workers hold down Canadian wages?
 
 Real wages in restaurants & hotels:
-2002–2014 (open to low-wage jobs): {p(fc['2002-2014'])}/yr
+2002–2014 (open to lower-skill jobs): {p(fc['2002-2014'])}/yr
 2014–2019 (after the cap): {p(fc['2014-2019'])}/yr
 
 A study comparing similar jobs: the 2014 limits raised affected wages 3.7–4.5%. Real, but modest.
