@@ -1,0 +1,35 @@
+/* NOTEBOOK — a field notebook: grid paper, a red margin, ink map, typewriter numbers, handwritten notes on sticky paper. */
+@font-face { font-family: "Caveat"; font-weight: 600; src: url(../fonts/caveat-latin-600-normal.woff2) format("woff2"); }
+@font-face { font-family: "Caveat"; font-weight: 700; src: url(../fonts/caveat-latin-700-normal.woff2) format("woff2"); }
+@font-face { font-family: "IBM Plex Mono"; font-weight: 500; src: url(../fonts/ibm-plex-mono-latin-500-normal.woff2) format("woff2"); }
+@font-face { font-family: "IBM Plex Mono"; font-weight: 600; src: url(../fonts/ibm-plex-mono-latin-600-normal.woff2) format("woff2"); }
+@font-face { font-family: "IBM Plex Mono"; font-weight: 700; src: url(../fonts/ibm-plex-mono-latin-700-normal.woff2) format("woff2"); }
+:root { --page: #F6F1E4; --ink-1: #23211C; --ink-2: #4B4740; --ink-3: #6F6A60; --accent: #C2412D; --accent-deep: #9A2F1F;
+  --serif: "Caveat", cursive; --sans: "IBM Plex Mono", monospace;
+  --t-page: #F6F1E4; --t-ink1: #23211C; --t-ink2: #4B4740; --t-ink3: #6F6A60; --t-accent: #C2412D; --t-land: rgba(255,255,255,.55); --t-land-stroke: #3A3730;
+  --t-grid: #C9D6E2; --t-zero: #2C2A25; --t-other: #A7A196; --t-bar-ink: #FFFFFF; --t-halo: #F6F1E4; --t-sans: "IBM Plex Mono"; --t-num: "IBM Plex Mono";
+  --t-fonts: 600 20px "Caveat" | 700 20px "Caveat" | 500 20px "IBM Plex Mono" | 600 20px "IBM Plex Mono" | 700 20px "IBM Plex Mono"; }
+#sky { background: var(--page);
+  background-image: linear-gradient(rgba(120,160,200,.22) 1px, transparent 1px), linear-gradient(90deg, rgba(120,160,200,.22) 1px, transparent 1px);
+  background-size: 24px 24px; background-position: 0 6px; }
+.deco-a { position: absolute; top: 0; bottom: 0; left: 26px; width: 2px; background: rgba(194,65,45,.55); }
+.deco-b { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(120% 80% at 50% 45%, transparent 60%, rgba(120,95,50,.14) 100%); }
+#glow { display: none; }
+#kicker { font: 600 15px/1 var(--sans); letter-spacing: .08em; color: var(--accent); }
+#q { font: 700 58px/.98 var(--serif); letter-spacing: 0; }
+#q em { color: var(--accent); background: linear-gradient(transparent 62%, rgba(255,214,90,.75) 62%, rgba(255,214,90,.75) 92%, transparent 92%); }
+#year { font: 700 76px/.9 var(--sans); letter-spacing: -.04em; }
+#yearbox .cnt { font: 700 64px/1 var(--serif) !important; color: var(--accent); }
+#yearbox .cl { font: 500 15px/1.35 var(--sans) !important; }
+#beat { background: #FFF2A6; color: #23211C; border-left: 0; transform-origin: 50% 0; box-shadow: 0 14px 30px rgba(60,45,10,.22); rotate: -1.2deg; padding: 30px 30px 28px; }
+#beat::before { content: ""; position: absolute; left: 50%; top: -16px; width: 140px; height: 30px; margin-left: -70px; background: rgba(220,215,200,.75); rotate: 2deg; }
+.kick { font: 600 15px/1 var(--sans); letter-spacing: .06em; color: var(--accent); }
+.big { font: 700 98px/.9 var(--sans); letter-spacing: -.05em; }
+.line { font: 700 40px/1.02 var(--serif); }
+.line em { color: var(--accent); }
+#summary .big { font: 700 104px/.9 var(--sans); letter-spacing: -.06em; color: var(--accent); }
+#summary .line { font-size: 44px; }
+#summary .sub { font: 500 16px/1.45 var(--sans); }
+#note { font: 400 12px/1.4 var(--sans); }
+#flash { background: #FFF2A6; }
+#bug { position: absolute; right: 40px; top: 60px; font: 700 26px/1 var(--serif); color: var(--ink-3); rotate: -3deg; }

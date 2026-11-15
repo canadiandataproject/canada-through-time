@@ -14,9 +14,11 @@ const D = await (async () => {
   const raw = await J(DS.file), countries = {};
   for (const [code, name] of Object.entries(DS.names)) { const ser = raw.data[code]; if (!ser) throw new Error('no series ' + code);
     countries[name] = Object.fromEntries(Object.entries(ser).map(([y, r]) => [y, r[DS.field] ?? null])); }
-  return { countries, total: null };
+  const ref = DS.reference ? Object.fromEntries(Object.entries(raw.data[DS.reference.code]).map(([y, r]) => [y, r[DS.field] ?? null])) : null;
+  return { countries, total: null, ref };
 })();
 await Promise.all(['600 20px "Public Sans"', '500 20px "Public Sans"', '700 20px "Source Serif 4"', '600 20px "Source Serif 4"'].map(f => document.fonts.load(f)));
+const T = await (await import('../short-themes/theme.js')).applyTheme(SC);   // look: colours and fonts for SVG drawing
 const $ = id => document.getElementById(id);
 
 // ---------------------------------------------------------------- data
@@ -56,8 +58,13 @@ function where(f) {
 const barsEl = $('bars'), ROW = SC.row || 68, MAXW = 500;
 const els = {};
 for (const c of SHOW) { const d = document.createElement('div'); d.className = 'bar'; d.innerHTML = '<span class="rk"></span><i></i><span class="nm"></span><span class="val"></span>'; if (SC.row) d.style.height = (SC.row - 8) + 'px'; barsEl.appendChild(d); els[c] = d; }
-const colorOf = c => (SC.colors || {})[c] || SC.otherColor || '#A39D8A';
-const measure = document.createElement('canvas').getContext('2d'); measure.font = '600 24px "Public Sans"';
+// optional reference line (e.g. Canada's rate) drawn across the bars at its published value
+const REF = D.ref ? YR.map(y => D.ref[y] ?? null) : null;
+let refEl = null;
+if (REF) { refEl = document.createElement('div'); refEl.id = 'ref'; refEl.innerHTML = '<b></b>'; barsEl.appendChild(refEl); }
+const colorOf = c => (SC.colors || {})[c] || SC.otherColor || T.other;
+const measure = document.createElement('canvas').getContext('2d'); measure.font = getComputedStyle(Object.assign(document.body.appendChild(document.createElement('span')), { className: 'bar' }).appendChild(Object.assign(document.createElement('span'), { className: 'nm' }))).font;
+const UPPER = SC.theme === 'broadcast';
 const valAt = (c, uu) => { const i = Math.max(0, Math.min(K - 1, Math.floor(uu))), j = Math.min(K - 1, i + 1), t = clamp01(uu - i), a = V[c][i] ?? 0, b = V[c][j] ?? 0; return lerp(a, b, t); };
 const posAt = (c, uu) => { const i = Math.max(0, Math.min(K - 1, Math.floor(uu))), j = Math.min(K - 1, i + 1), t = ease(clamp01(uu - i)), r = k => Math.min(RANK[k][c] ?? TOP + 1, TOP + 1); return lerp(r(i), r(j), t); };
 function drawBars(uu, alpha, focus) {
@@ -66,14 +73,18 @@ function drawBars(uu, alpha, focus) {
   for (const c of SHOW) {
     const el = els[c], d = vis.find(x => x.c === c);
     if (!d) { el.style.opacity = 0; continue; }
-    const w = Math.max(6, d.v / vmax * MAXW), nameW = measure.measureText(short(c)).width + 28, inside = w > nameW;
+    const w = Math.max(6, d.v / vmax * MAXW), nameW = measure.measureText(UPPER ? short(c).toUpperCase() : short(c)).width + 28, inside = w > nameW;
     const fade = clamp01((TOP - 0.2 - d.p) / 0.8) * alpha * (focus && !focus.has(c) ? 0.22 : 1);
     el.style.top = (d.p * ROW).toFixed(1) + 'px'; el.style.opacity = fade.toFixed(3);
     const bar = el.querySelector('i'); bar.style.width = w.toFixed(1) + 'px'; bar.style.background = colorOf(c);
     const nm = el.querySelector('.nm'); nm.textContent = short(c); nm.className = 'nm' + (inside ? '' : ' out'); nm.style.left = (inside ? 14 : w + 12) + 'px';
     const pub = V[c][k], val = el.querySelector('.val');
     val.textContent = pub == null ? '' : fmt(pub); val.style.left = ((inside ? w : w + nameW - 2) + 12).toFixed(1) + 'px';
-    
+  }
+  if (refEl) {
+    const i = Math.max(0, Math.min(K - 1, Math.floor(uu))), j = Math.min(K - 1, i + 1), rv = lerp(REF[i] ?? 0, REF[j] ?? 0, clamp01(uu - i));
+    refEl.style.left = (40 + rv / vmax * MAXW).toFixed(1) + 'px'; refEl.style.opacity = (alpha * (focus ? 0.4 : 1)).toFixed(3);
+    refEl.querySelector('b').textContent = REF[k] == null ? '' : `${SC.data.reference.label} ${fmt(REF[k])}`;
   }
 }
 
@@ -83,7 +94,7 @@ function sumChart(grow) {
   let out = '';
   vals.forEach((v, i) => { const g = clamp01(grow * K - i); if (v == null || g <= 0) return; const h = v / mx * (H - 34) * ease(g);
     out += `<rect x="${(i * bw + 2).toFixed(1)}" y="${(H - 22 - h).toFixed(1)}" width="${(bw - 4).toFixed(1)}" height="${h.toFixed(1)}" rx="2" fill="${colorOf(c)}" opacity="${i === K - 1 ? 1 : 0.55}"/>`; });
-  const lab = (i, a) => `<text x="${a === 'end' ? W : 0}" y="${H - 4}" text-anchor="${a}" font-family="Public Sans" font-size="15" fill="#655F4E">${YR[i]}: ${fmt(vals[i])}</text>`;
+  const lab = (i, a) => `<text x="${a === 'end' ? W : 0}" y="${H - 4}" text-anchor="${a}" font-family="${T.sans}" font-size="15" fill="${T.ink3}">${YR[i]}: ${fmt(vals[i])}</text>`;
   return `<svg width="${W}" height="${H}">${out}${grow >= 1 ? lab(0, 'start') + lab(K - 1, 'end') : ''}</svg>`;
 }
 

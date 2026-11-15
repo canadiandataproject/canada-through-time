@@ -8,11 +8,14 @@
   2020
  ],
  "ramp": [
-  "#3F6E8C",
-  "#ECE6D6",
-  "#B8472F"
+  "#2F6DB5",
+  "#F1ECDD",
+  "#C2412D"
  ],
  "range": 2.0,
+ "theme": "notebook",
+ "wobble": 3,
+ "channel": "The Canadian Data Project",
  "kicker": "Long-running weather stations · 10-year average",
  "between": "Between cards, the 10-year window steps forward one year at a time; each dot is a station coloured by its 10-year average minus its own 1961–1990 average, and the counter shows how many were warmer.",
  "hook": {

@@ -9,6 +9,7 @@ const SC = JSON.parse(new TextDecoder().decode(Uint8Array.from(atob((Q.get('stud
 const J = u => fetch(u).then(r => { if (!r.ok) throw new Error(u); return r.json(); });
 const [A, P] = await Promise.all([J('../data/climate/ahccd.json'), J('../data/provinces.geojson')]);
 await Promise.all(['600 20px "Public Sans"', '500 20px "Public Sans"', '700 20px "Source Serif 4"', '600 20px "Source Serif 4"'].map(f => document.fonts.load(f)));
+const T = await (await import('../short-themes/theme.js')).applyTheme(SC);   // look: colours and fonts for SVG drawing
 const $ = id => document.getElementById(id);
 const lerp = (a, b, t) => a + (b - a) * t, clamp01 = x => Math.max(0, Math.min(1, x)), ease = t => t * t * (3 - 2 * t);
 
@@ -65,19 +66,20 @@ function legend() {
   const x = 40, y = 940, w = 220; let st = '';
   for (let i = 0; i <= 20; i++) st += `<stop offset="${i * 5}%" stop-color="${colour((i / 10 - 1) * SC.range)}"/>`;
   return `<defs><linearGradient id="lg">${st}</linearGradient></defs><rect x="${x}" y="${y}" width="${w}" height="12" rx="3" fill="url(#lg)"/>` +
-    [[-SC.range, 'start', 0], [0, 'middle', w / 2], [SC.range, 'end', w]].map(([v, a, o]) => `<text x="${x + o}" y="${y + 32}" text-anchor="${a}" font-family="Public Sans" font-size="15" fill="#4A4636">${v === 0 ? 'same' : fmtC(v)}</text>`).join('') +
-    `<text x="${x}" y="${y - 10}" font-family="Public Sans" font-size="15" font-weight="600" fill="#1F1D14">vs the station’s 1961–1990 average</text>`;
+    [[-SC.range, 'start', 0], [0, 'middle', w / 2], [SC.range, 'end', w]].map(([v, a, o]) => `<text x="${x + o}" y="${y + 32}" text-anchor="${a}" font-family="${T.sans}" font-size="15" fill="${T.ink2}">${v === 0 ? 'same' : fmtC(v)}</text>`).join('') +
+    `<text x="${x}" y="${y - 10}" font-family="${T.sans}" font-size="15" font-weight="600" fill="${T.ink1}">vs the station’s 1961–1990 average</text>`;
 }
 const LEG = legend();
 function map(uu, alpha, focus) {
   const i = Math.max(0, Math.min(K - 1, Math.floor(uu))), j = Math.min(K - 1, i + 1), t = uu - i;
-  let o = `<path d="${outline}" fill="#FBF8EF" stroke="#B9B19C" stroke-width="1" opacity="${alpha.toFixed(3)}"/>`, ring = '';
+  const wob = SC.wobble ? `<defs><filter id="wob" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7"/><feDisplacementMap in="SourceGraphic" scale="${SC.wobble}"/></filter></defs>` : '';
+  let o = wob + `<path d="${outline}" fill="${T.land}" stroke="${T.landStroke}" stroke-width="${SC.wobble ? 1.6 : 1}" ${SC.wobble ? 'filter="url(#wob)"' : ''} opacity="${alpha.toFixed(3)}"/>`, ring = '';
   for (const s of ST) {
     const a = s.an[i], b = s.an[j]; let v, op;
     if (a != null && b != null) { v = lerp(a, b, t); op = 1; } else if (a != null) { v = a; op = 1 - t; } else if (b != null) { v = b; op = t; } else continue;
     const fo = focus ? (focus.has(s.id) ? 1 : 0.15) : 1;
     o += `<circle cx="${sx(s.xy[0]).toFixed(1)}" cy="${sy(s.xy[1]).toFixed(1)}" r="6.4" fill="${colour(v)}" stroke="rgba(31,29,20,.35)" stroke-width=".8" opacity="${(op * alpha * fo).toFixed(3)}"/>`;
-    if (focus && focus.has(s.id)) ring += `<circle cx="${sx(s.xy[0]).toFixed(1)}" cy="${sy(s.xy[1]).toFixed(1)}" r="13" fill="none" stroke="#1F1D14" stroke-width="2.5"/>`;
+    if (focus && focus.has(s.id)) ring += `<circle cx="${sx(s.xy[0]).toFixed(1)}" cy="${sy(s.xy[1]).toFixed(1)}" r="13" fill="none" stroke="${T.ink1}" stroke-width="2.5"/>`;
   }
   return o + ring + `<g opacity="${alpha.toFixed(3)}">${LEG}</g>`;
 }
@@ -88,8 +90,8 @@ function sumChart(grow) {
   let o = '';
   ks.forEach((k, i) => { const [up, n] = COUNT[k], sh = up / n, g = ease(clamp01(grow * ks.length - i)), h = sh * (H - 46) * g;
     o += `<rect x="${(i * bw + 3).toFixed(1)}" y="${(H - 24 - h).toFixed(1)}" width="${(bw - 6).toFixed(1)}" height="${h.toFixed(1)}" rx="2" fill="${colour(sh >= 0.5 ? SC.range * 0.8 : -SC.range * 0.8)}"/>`;
-    if (g > 0.98) o += `<text x="${(i * bw + bw / 2).toFixed(1)}" y="${(H - 30 - h).toFixed(1)}" text-anchor="middle" font-family="Public Sans" font-size="13" font-weight="600" fill="#1F1D14">${up < n && Math.round(sh * 100) === 100 ? (Math.floor(sh * 1000) / 10).toFixed(1) : Math.round(sh * 100)}%</text>`;
-    o += `<text x="${(i * bw + bw / 2).toFixed(1)}" y="${H - 4}" text-anchor="middle" font-family="Public Sans" font-size="12" fill="#655F4E">${String(YR[k] - 9).slice(2)}–${String(YR[k]).slice(2)}</text>`; });
+    if (g > 0.98) o += `<text x="${(i * bw + bw / 2).toFixed(1)}" y="${(H - 30 - h).toFixed(1)}" text-anchor="middle" font-family="${T.sans}" font-size="13" font-weight="600" fill="${T.ink1}">${up < n && Math.round(sh * 100) === 100 ? (Math.floor(sh * 1000) / 10).toFixed(1) : Math.round(sh * 100)}%</text>`;
+    o += `<text x="${(i * bw + bw / 2).toFixed(1)}" y="${H - 4}" text-anchor="middle" font-family="${T.sans}" font-size="12" fill="${T.ink3}">${String(YR[k] - 9).slice(2)}–${String(YR[k]).slice(2)}</text>`; });
   return `<svg width="${W}" height="${H}">${o}</svg>`;
 }
 

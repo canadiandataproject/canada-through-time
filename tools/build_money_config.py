@@ -24,6 +24,7 @@ b = lambda v: f"${abs(v) / 1000:,.0f} billion"
 print({g: round(tot[g] / 1000, 1) for g in PT + ["CAN", "OUT"]})
 
 cfg = dict(
+    palette=dict(pos="#C27A2C", neg="#2F6F8F", posInk="#8A5216", negInk="#1F4E66"),   # orange = Ottawa collected more than it spent; blue = spent more
     id="short-ottawa-collected-vs-spent", format="9x16", fps=30, title="Federal money collected vs spent, by province", years=[Y0, Y1],
     kicker=f"Federal money · {Y0}–{Y1}", leadLabel="Running total", leadSub="collected − spent, current $",
     hook=dict(seconds=3.0, question="Where does Ottawa collect <em>more than it spends</em>?"),

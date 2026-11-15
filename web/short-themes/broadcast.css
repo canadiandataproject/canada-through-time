@@ -1,0 +1,40 @@
+/* BROADCAST — news-graphic energy: a navy band, condensed caps, a red year box, lower-third cards. */
+@font-face { font-family: "Anton"; font-weight: 400; src: url(../fonts/anton-latin-400-normal.woff2) format("woff2"); }
+@font-face { font-family: "Schibsted Grotesk"; font-weight: 500; src: url(../fonts/schibsted-grotesk-latin-500-normal.woff2) format("woff2"); }
+@font-face { font-family: "Schibsted Grotesk"; font-weight: 600; src: url(../fonts/schibsted-grotesk-latin-600-normal.woff2) format("woff2"); }
+@font-face { font-family: "Schibsted Grotesk"; font-weight: 700; src: url(../fonts/schibsted-grotesk-latin-700-normal.woff2) format("woff2"); }
+:root { --page: #F2EFE8; --ink-1: #0E1B2C; --ink-2: #3B4A5C; --ink-3: #66707D; --accent: #D62839; --accent-deep: #A61B2A; --navy: #0E2A47;
+  --serif: "Anton", Impact, sans-serif; --sans: "Schibsted Grotesk", Arial, sans-serif;
+  --t-page: #F2EFE8; --t-ink1: #0E1B2C; --t-ink2: #3B4A5C; --t-ink3: #66707D; --t-accent: #D62839; --t-land: #FFFFFF; --t-land-stroke: #9AA6B3;
+  --t-grid: #D9DDE2; --t-zero: #0E2A47; --t-other: #B9C2CC; --t-bar-ink: #FFFFFF; --t-halo: #F2EFE8; --t-sans: "Schibsted Grotesk"; --t-num: "Anton";
+  --t-fonts: 400 20px "Anton" | 500 20px "Schibsted Grotesk" | 600 20px "Schibsted Grotesk" | 700 20px "Schibsted Grotesk"; }
+#sky { background: linear-gradient(180deg, #F7F5F0 0%, #EDE9E0 100%); }
+.deco-a { position: absolute; left: 0; right: 0; top: 70px; height: 196px; background: var(--navy); }
+.deco-b { position: absolute; left: 0; right: 0; top: 266px; height: 8px; background: var(--accent); }
+.deco-c { position: absolute; left: 0; right: 0; top: 0; bottom: 0; pointer-events: none;
+  background: repeating-linear-gradient(135deg, rgba(14,42,71,.025) 0 2px, transparent 2px 14px); }
+#head { top: 92px; }
+#kicker { color: #FFFFFF; background: var(--accent); display: inline-block; padding: 7px 10px 6px; border-radius: 2px; font: 700 14px/1 var(--sans); letter-spacing: .16em; }
+#q { color: #FFFFFF; font: 400 46px/1.04 var(--serif); text-transform: uppercase; letter-spacing: .005em; margin-top: 14px; }
+#q em { color: #FFD23F; }
+#yearbox { top: 300px; }
+#year { font: 400 108px/.86 var(--serif); color: #FFFFFF; background: var(--accent); padding: 10px 16px 6px; border-radius: 3px; letter-spacing: 0; }
+#lead .k { background: var(--navy); }
+#lead .n { font: 700 32px/1 var(--sans); letter-spacing: -.01em; }
+.bar i { border-radius: 2px; }
+.bar .nm { font: 700 23px/1 var(--sans); text-transform: uppercase; letter-spacing: .02em; }
+.bar .val { font: 700 23px/1 var(--sans); }
+#beat { background: var(--navy); color: #FFFFFF; border-left: 0; border-top: 8px solid var(--accent); border-radius: 2px; box-shadow: 0 22px 50px rgba(14,27,44,.35); }
+#beat .kick { color: #FFD23F; }
+#beat .big { font: 400 112px/.9 var(--serif); letter-spacing: 0; }
+#beat .line { font: 600 29px/1.2 var(--sans); }
+#beat .line em { color: #FFD23F; }
+#summary .kick { color: var(--accent); }
+#summary .big { font: 400 160px/.9 var(--serif); color: var(--navy); }
+#summary .line { font: 700 34px/1.15 var(--sans); }
+#summary .line em { color: var(--accent); }
+.kick { font: 700 15px/1 var(--sans); letter-spacing: .16em; }
+#flash { background: #FFFFFF; }
+#bug { position: absolute; right: 40px; top: 32px; font: 700 13px/1 var(--sans); letter-spacing: .18em; text-transform: uppercase; color: var(--navy); }
+#bug::before { content: ""; display: inline-block; width: 9px; height: 9px; margin-right: 8px; background: var(--accent); border-radius: 50%; vertical-align: 1px; }
+#lead .v { font: 700 24px/1 var(--sans); color: var(--accent); }
