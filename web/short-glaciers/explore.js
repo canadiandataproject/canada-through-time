@@ -9,6 +9,7 @@ const SC = JSON.parse(new TextDecoder().decode(Uint8Array.from(atob((Q.get('stud
 const J = u => fetch(u).then(r => { if (!r.ok) throw new Error(u); return r.json(); });
 const G = await J('../data/climate/glaciers.json');
 await Promise.all(['600 20px "Public Sans"', '500 20px "Public Sans"', '700 20px "Source Serif 4"', '600 20px "Source Serif 4"'].map(f => document.fonts.load(f)));
+const T = await (await import('../short-themes/theme.js')).applyTheme(SC);   // look: colours and fonts for SVG drawing
 const $ = id => document.getElementById(id);
 const lerp = (a, b, t) => a + (b - a) * t, clamp01 = x => Math.max(0, Math.min(1, x)), ease = t => t * t * (3 - 2 * t);
 
@@ -46,10 +47,10 @@ const px = k => X0 + (X1 - X0) * k / (K - 1), py = v => Y0 + (Y1 - Y0) * (VMAX -
 function grid(alpha) {
   let o = `<g opacity="${alpha.toFixed(3)}">`;
   for (let v = 0; v >= VMIN; v -= SC.gridStep) {
-    o += `<line x1="${X0}" x2="${X1 + 6}" y1="${py(v).toFixed(1)}" y2="${py(v).toFixed(1)}" stroke="${v === 0 ? '#8C8672' : '#D6CFBC'}" stroke-width="${v === 0 ? 1.5 : 1}"/>`;
-    o += `<text x="${X0}" y="${(py(v) - 6).toFixed(1)}" font-family="Public Sans" font-size="14" fill="#655F4E">${v === 0 ? '0 (first year measured)' : fmtM(v)}</text>`;
+    o += `<line x1="${X0}" x2="${X1 + 6}" y1="${py(v).toFixed(1)}" y2="${py(v).toFixed(1)}" stroke="${v === 0 ? T.zero : T.grid}" stroke-width="${v === 0 ? 1.5 : 1}"/>`;
+    o += `<text x="${X0}" y="${(py(v) - 6).toFixed(1)}" font-family="${T.sans}" font-size="14" fill="${T.ink3}">${v === 0 ? '0 (first year measured)' : fmtM(v)}</text>`;
   }
-  for (const y of SC.xTicks) { const k = y - YR[0]; o += `<text x="${px(k).toFixed(1)}" y="${Y1 + 24}" text-anchor="middle" font-family="Public Sans" font-size="14" fill="#655F4E">${y}</text>`; }
+  for (const y of SC.xTicks) { const k = y - YR[0]; o += `<text x="${px(k).toFixed(1)}" y="${Y1 + 24}" text-anchor="middle" font-family="${T.sans}" font-size="14" fill="${T.ink3}">${y}</text>`; }
   return o + '</g>';
 }
 function path(s, uu) {
@@ -70,11 +71,13 @@ function path(s, uu) {
 function chart(uu, alpha, focus) {
   const k = Math.round(uu);
   let o = grid(alpha), labs = [];
+  // faint preview of every full line, so the first frame already shows where this goes (published values, not a forecast)
+  if (SC.ghost) for (const s of S) o += `<path d="${path(s, K - 1).d}" fill="none" stroke="${s.color}" stroke-width="2" stroke-dasharray="2 5" opacity="${(alpha * SC.ghost).toFixed(3)}"/>`;
   for (const s of S) {
     const { d, tip } = path(s, uu); if (!tip) continue;
     const a = alpha * (focus && !focus.has(s.name) ? 0.18 : 1);
-    o += `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="${s.width || 4}" stroke-linejoin="round" stroke-linecap="round" opacity="${a.toFixed(3)}"/>`;
-    o += `<circle cx="${tip[0].toFixed(1)}" cy="${tip[1].toFixed(1)}" r="6" fill="${s.color}" stroke="#FBF8EF" stroke-width="2" opacity="${a.toFixed(3)}"/>`;
+    o += `<path d="${d}" style="color:${s.color}" fill="none" stroke="${s.color}" stroke-width="${s.width || 4}" stroke-linejoin="round" stroke-linecap="round" opacity="${a.toFixed(3)}"/>`;
+    o += `<circle cx="${tip[0].toFixed(1)}" cy="${tip[1].toFixed(1)}" r="6" fill="${s.color}" stroke="${T.halo}" stroke-width="2" opacity="${a.toFixed(3)}"/>`;
     const la = lastAt(s, k); if (la) labs.push({ s, y: tip[1], v: la[1], a });
   }
   // labels at the right edge of the plot, pushed apart so they never overlap
@@ -83,7 +86,7 @@ function chart(uu, alpha, focus) {
   if (labs.length) labs[0].ly = labs[0].ly ?? labs[0].y;
   const over = labs.length ? labs.at(-1).ly - (Y1 + 4) : 0; if (over > 0) labs.forEach(l => l.ly -= over);
   for (const l of labs) {
-    o += `<text x="${X1 + 18}" y="${(l.ly + 6).toFixed(1)}" font-family="Public Sans" font-size="21" font-weight="600" fill="#1F1D14" opacity="${l.a.toFixed(3)}"><tspan fill="${l.s.color}">●</tspan> ${l.s.label} <tspan font-weight="500" fill="#4A4636">${fmtM(l.v)}</tspan></text>`;
+    o += `<text x="${X1 + 18}" y="${(l.ly + 6).toFixed(1)}" font-family="${T.sans}" font-size="21" font-weight="600" fill="${T.ink1}" opacity="${l.a.toFixed(3)}"><tspan fill="${l.s.color}">●</tspan> ${l.s.label} <tspan font-weight="500" fill="${T.ink2}">${fmtM(l.v)}</tspan></text>`;
   }
   return o;
 }
@@ -93,9 +96,9 @@ function sumChart(grow) {
   const rows = S.map(s => ({ s, v: lastAt(s, K - 1)[1] })).sort((a, b) => a.v - b.v), mx = Math.max(...rows.map(r => -r.v)), W = 640, RH = 34;
   let o = '';
   rows.forEach((r, i) => { const g = ease(clamp01(grow * rows.length - i)), w = (-r.v / mx) * 290 * g, y = i * RH;
-    o += `<text x="0" y="${y + 23}" font-family="Public Sans" font-size="18" font-weight="600" fill="#1F1D14">${r.s.label}</text>`;
+    o += `<text x="0" y="${y + 23}" font-family="${T.sans}" font-size="18" font-weight="600" fill="${T.ink1}">${r.s.label}</text>`;
     o += `<rect x="170" y="${y + 6}" width="${Math.max(0, w).toFixed(1)}" height="${RH - 12}" rx="3" fill="${r.s.color}"/>`;
-    if (g > 0.98) o += `<text x="${(178 + w).toFixed(1)}" y="${y + 23}" font-family="Public Sans" font-size="17" font-weight="500" fill="#4A4636">${fmtM(r.v)} since ${r.s.y0}</text>`; });
+    if (g > 0.98) o += `<text x="${(178 + w).toFixed(1)}" y="${y + 23}" font-family="${T.sans}" font-size="17" font-weight="500" fill="${T.ink2}">${fmtM(r.v)} since ${r.s.y0}</text>`; });
   return `<svg width="${W}" height="${rows.length * RH}">${o}</svg>`;
 }
 

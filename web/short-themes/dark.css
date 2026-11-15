@@ -1,0 +1,28 @@
+/* DARK — near-black night sky, luminous data, heavy grotesk numbers. */
+@font-face { font-family: "Schibsted Grotesk"; font-weight: 500; src: url(../fonts/schibsted-grotesk-latin-500-normal.woff2) format("woff2"); }
+@font-face { font-family: "Schibsted Grotesk"; font-weight: 600; src: url(../fonts/schibsted-grotesk-latin-600-normal.woff2) format("woff2"); }
+@font-face { font-family: "Schibsted Grotesk"; font-weight: 700; src: url(../fonts/schibsted-grotesk-latin-700-normal.woff2) format("woff2"); }
+:root { --page: #070B10; --ink-1: #F3F5F7; --ink-2: #AEB8C2; --ink-3: #74808C; --accent: #FF6A4D; --accent-deep: #FF6A4D;
+  --serif: "Schibsted Grotesk", Arial, sans-serif; --sans: "Schibsted Grotesk", Arial, sans-serif;
+  --t-page: #070B10; --t-ink1: #F3F5F7; --t-ink2: #AEB8C2; --t-ink3: #74808C; --t-accent: #FF6A4D; --t-land: #121A23; --t-land-stroke: #2E3B48;
+  --t-grid: #1C2733; --t-zero: #56636F; --t-other: #3A4652; --t-bar-ink: #FFFFFF; --t-halo: #070B10; --t-sans: "Schibsted Grotesk"; --t-num: "Schibsted Grotesk";
+  --t-fonts: 500 20px "Schibsted Grotesk" | 600 20px "Schibsted Grotesk" | 700 20px "Schibsted Grotesk"; }
+html, body { background: var(--page); color: var(--ink-1); }
+#sky { background: radial-gradient(90% 55% at 50% 58%, #142130 0%, #0A1118 55%, #05080C 100%); }
+#glow { background: radial-gradient(closest-side, rgba(255,106,77,.22), rgba(255,106,77,0)); }
+.deco-a { position: absolute; inset: 0; pointer-events: none; opacity: .5;
+  background-image: radial-gradient(1px 1px at 12% 18%, #fff8, transparent), radial-gradient(1px 1px at 78% 9%, #fff6, transparent), radial-gradient(1px 1px at 63% 27%, #fff5, transparent),
+    radial-gradient(1px 1px at 31% 6%, #fff5, transparent), radial-gradient(1px 1px at 88% 31%, #fff4, transparent), radial-gradient(1px 1px at 6% 36%, #fff4, transparent); }
+.deco-b { position: absolute; left: 0; right: 0; bottom: 0; height: 420px; background: linear-gradient(to top, rgba(0,0,0,.55), transparent); pointer-events: none; }
+#kicker { color: var(--accent); letter-spacing: .2em; }
+#q { font: 700 50px/1.02 var(--sans); letter-spacing: -.02em; }
+#year { font: 700 120px/.8 var(--sans); letter-spacing: -.05em; }
+#yearbox .sub { color: var(--ink-2); }
+#beat { background: #0D141C; border: 1px solid rgba(255,255,255,.08); border-left: 6px solid var(--accent); box-shadow: 0 24px 70px rgba(0,0,0,.6); }
+.big { font: 700 110px/.88 var(--sans); letter-spacing: -.05em; }
+.line { font: 600 30px/1.18 var(--sans); letter-spacing: -.01em; }
+#summary .big { color: var(--accent); text-shadow: 0 0 40px rgba(255,106,77,.35); }
+#note, #note b { color: var(--ink-3); }
+#chart path { filter: drop-shadow(0 0 6px currentColor); }
+#flash { background: #FF6A4D; }
+#bug { position: absolute; right: 40px; top: 58px; font: 600 13px/1 var(--sans); letter-spacing: .16em; text-transform: uppercase; color: var(--ink-3); }

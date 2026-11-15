@@ -27,7 +27,7 @@ PROV = {"AB": "Alta.", "NT": "N.W.T."}
 idx = lambda y: y - Y0
 c1 = lambda a: ("+" if a > 0 else "−") + f"{abs(a):.1f} °C"
 cfg = dict(
-    id="short-warming-stations", format="9x16", fps=30, title="How many of Canada's weather stations got warmer?", years=[Y0, Y1], ramp=["#3F6E8C", "#ECE6D6", "#B8472F"], range=2.0,
+    id="short-warming-stations", format="9x16", fps=30, title="How many of Canada's weather stations got warmer?", years=[Y0, Y1], ramp=["#2F6DB5", "#F1ECDD", "#C2412D"], range=2.0, theme="notebook", wobble=3, channel="The Canadian Data Project",
     kicker="Long-running weather stations · 10-year average",
     between="Between cards, the 10-year window steps forward one year at a time; each dot is a station coloured by its 10-year average minus its own 1961–1990 average, and the counter shows how many were warmer.",
     hook=dict(seconds=3.2, question="How many of Canada’s weather stations have <em>warmed</em>?"),

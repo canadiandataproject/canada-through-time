@@ -8,7 +8,7 @@
   2025
  ],
  "top": 10,
- "row": 54,
+ "row": 52,
  "order": "asc",
  "valueFormat": "pct1",
  "noun": "province",
@@ -27,20 +27,27 @@
    "SK": "Saskatchewan",
    "AB": "Alberta",
    "BC": "British Columbia"
+  },
+  "reference": {
+   "code": "CAN",
+   "label": "Canada"
   }
  },
+ "theme": "broadcast",
+ "channel": "The Canadian Data Project",
+ "between": "Between cards, the year counts up; the #1 (lowest) province and its published rate are shown, and a dashed line marks Canada’s rate that year.",
  "kicker": "Unemployment rate · 10 provinces · lowest ranked #1",
  "hook": {
   "seconds": 3.2,
-  "question": "Which province has had Canada’s <em>lowest</em> unemployment rate?"
+  "question": "Which province has Canada’s <em>lowest unemployment</em>?"
  },
  "colors": {
-  "Quebec": "#3F6E8C",
-  "Alberta": "#C9962E",
-  "Saskatchewan": "#5E7F3A",
-  "Newfoundland and Labrador": "#B8472F"
+  "Quebec": "#1F5FA8",
+  "Alberta": "#E39B2D",
+  "Saskatchewan": "#2E8B57",
+  "Newfoundland and Labrador": "#D62839"
  },
- "otherColor": "#ABA592",
+ "otherColor": "#B4BDC8",
  "short": {
   "Newfoundland and Labrador": "Newfoundland",
   "Prince Edward Island": "P.E.I.",

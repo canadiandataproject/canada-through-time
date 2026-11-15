@@ -4,7 +4,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 C = json.loads((ROOT / "timelapses/short-glaciers.json").read_text()); F = C["figures"]; g = F["glaciers"]
 m = lambda v: f"−{abs(v):.1f} m"
-p, h, pl = g["Peyto"], g["Helm"], g["Place"]
+p, h, pl = g["Peyto"], g["Helm"], g["Place"]; sp = F["peyto_split"]
 lo, hi = F["arctic_range"]
 txt = f"""# Short #8
 
@@ -17,7 +17,7 @@ Every Canadian glacier with 40+ years of measurements, as a running total.
 • {F['negative']} of {F['count']} Canadian glaciers measured 40+ years have lost ice overall
 • Helm (B.C.): {m(h['total'])} since {h['first']}
 • Place (B.C.): {m(pl['total'])} since {pl['first']}
-• Peyto (Alberta): {m(p['total'])} since {p['first']}
+• Peyto (Alberta): {m(p['total'])} since {p['first']}: {m(sp['early'])} in its first {sp['early_years']} years, then {m(sp['late'])} in the next {sp['late_years']}
 • Arctic ice caps: {m(lo)} to {m(hi)}
 • 2023 was the biggest one-year loss ever measured at Helm ({m(h['worst_value'])}), Place ({m(pl['worst_value'])}) and Peyto ({m(p['worst_value'])})
 
@@ -37,7 +37,7 @@ Explore Peyto and every measured glacier: https://tjreeve-ship-it.github.io/cana
 ## X
 How much ice have Canada's glaciers lost?
 
-Peyto (Alberta): {m(p['total'])} of water equivalent since {p['first']}.
+Peyto (Alberta): {m(sp['early'])} in its first {sp['early_years']} measured years. {m(sp['late'])} in the {sp['late_years']} since.
 Helm (B.C.): {m(h['total'])} since {h['first']}.
 {F['negative']} of {F['count']} glaciers measured 40+ years: net loss.
 2023: biggest one-year loss ever measured at Helm, Place and Peyto.

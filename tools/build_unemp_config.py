@@ -31,12 +31,14 @@ assert len(ever) == 6 and nl_all and qc_run == [2021, 2022, 2023, 2024] and qc83
 idx = lambda y: YRS.index(y)
 N = {k: v for k, v in NAMES.items()}
 cfg = dict(
-    id="short-lowest-unemployment", format="9x16", fps=30, title="Which province has Canada's lowest unemployment rate?", years=[Y0, Y1], top=10, row=54,
+    id="short-lowest-unemployment", format="9x16", fps=30, title="Which province has Canada's lowest unemployment rate?", years=[Y0, Y1], top=10, row=52,
     order="asc", valueFormat="pct1", noun="province",
-    data=dict(kind="lfs", file="../data/more/lfs.json", field="ur", names=NAMES),
+    data=dict(kind="lfs", file="../data/more/lfs.json", field="ur", names=NAMES, reference=dict(code="CAN", label="Canada")),
+    theme="broadcast", channel="The Canadian Data Project",
+    between="Between cards, the year counts up; the #1 (lowest) province and its published rate are shown, and a dashed line marks Canada’s rate that year.",
     kicker="Unemployment rate · 10 provinces · lowest ranked #1",
-    hook=dict(seconds=3.2, question="Which province has had Canada’s <em>lowest</em> unemployment rate?"),
-    colors={N["QC"]: "#3F6E8C", N["AB"]: "#C9962E", N["SK"]: "#5E7F3A", N["NL"]: "#B8472F"}, otherColor="#ABA592",
+    hook=dict(seconds=3.2, question="Which province has Canada’s <em>lowest unemployment</em>?"),
+    colors={N["QC"]: "#1F5FA8", N["AB"]: "#E39B2D", N["SK"]: "#2E8B57", N["NL"]: "#D62839"}, otherColor="#B4BDC8",
     short={N["NL"]: "Newfoundland", N["PE"]: "P.E.I.", N["BC"]: "B.C.", N["NS"]: "Nova Scotia", N["NB"]: "New Brunswick"},
     plan=[
         dict(kind="run", to=1.0, s=3.2, ease="linear"),

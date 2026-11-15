@@ -33,7 +33,9 @@ svg.innerHTML = prov.features.map(f => `<path id="p-${f.properties.abbr}" d="${p
     return (lead ? `<line x1="${x0.toFixed(1)}" y1="${y0.toFixed(1)}" x2="${x.toFixed(1)}" y2="${(y - 6).toFixed(1)}" stroke="#4A4636" stroke-width="1"/>` : '')
       + `<g id="l-${g}"><text x="${x.toFixed(1)}" y="${(y - 10).toFixed(1)}" text-anchor="middle" font-size="15" fill="#4A4636">${g}</text><text class="amt" x="${x.toFixed(1)}" y="${(y + 12).toFixed(1)}" text-anchor="middle" font-size="20"></text></g>`; }).join('');
 const hex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)), rgb = c => `rgb(${c.map(Math.round).join(',')})`, mix = (a, b, t) => a.map((x, i) => lerp(x, b[i], t));
-const LAND = hex('#FBF8EF'), POS = hex('#2F6F8F'), NEG = hex('#C27A2C'), DIM = hex('#ECE8DD'), REF = SC.colourScale || 200000;
+const PAL = Object.assign({ pos: '#2F6F8F', neg: '#C27A2C', posInk: '#1F4E66', negInk: '#8A5216' }, SC.palette || {});   // palette can be set in the configuration
+document.documentElement.style.setProperty('--pos', PAL.pos); document.documentElement.style.setProperty('--neg', PAL.neg);
+const LAND = hex('#FBF8EF'), POS = hex(PAL.pos), NEG = hex(PAL.neg), DIM = hex('#ECE8DD'), REF = SC.colourScale || 200000;
 const fillOf = v => mix(LAND, v >= 0 ? POS : NEG, 0.12 + 0.88 * Math.sqrt(clamp01(Math.abs(v) / REF)));
 
 // ---------------------------------------------------------------- timeline
@@ -49,7 +51,7 @@ function sumChart(grow) {
   const rows = PT.map(g => [g, CUM[g][K - 1]]).sort((a, b) => b[1] - a[1]), W = 640, RH = 42, mid = 330, mx = Math.max(...rows.map(r => Math.abs(r[1]))), sc = 250 / mx;
   let o = `<line x1="${mid}" x2="${mid}" y1="0" y2="${rows.length * RH}" stroke="#1F1D14" stroke-opacity=".5"/>`;
   rows.forEach(([g, v], i) => { const gg = ease(clamp01(grow * 1.6 - i * 0.05)), w = Math.abs(v) * sc * gg, y = i * RH + 4, pos = v >= 0;
-    o += `<rect x="${(pos ? mid : mid - w).toFixed(1)}" y="${y}" width="${w.toFixed(1)}" height="${RH - 12}" rx="3" fill="${pos ? '#2F6F8F' : '#C27A2C'}"/>`
+    o += `<rect x="${(pos ? mid : mid - w).toFixed(1)}" y="${y}" width="${w.toFixed(1)}" height="${RH - 12}" rx="3" fill="${pos ? PAL.pos : PAL.neg}"/>`
       + `<text x="${pos ? mid - 10 : mid + 10}" y="${y + 22}" text-anchor="${pos ? 'end' : 'start'}" font-family="Public Sans" font-weight="600" font-size="19" fill="#1F1D14">${SC.names[g]}</text>`
       + (gg > 0.95 ? `<text x="${(pos ? mid + w + 8 : mid - w - 8).toFixed(1)}" y="${y + 22}" text-anchor="${pos ? 'start' : 'end'}" font-family="Public Sans" font-weight="600" font-size="19" fill="#4A4636">${B(v)}</text>` : ''); });
   return `<svg width="${W}" height="${rows.length * RH}" overflow="visible">${o}</svg>`;
@@ -74,7 +76,7 @@ function renderFrame(f) {
   for (const g of PT) {
     const v = cumAt(g, w.u); let c = fillOf(v); if (focus && !focus.has(g)) c = mix(c, DIM, 0.75 * fa);
     $('p-' + g).setAttribute('fill', rgb(c));
-    const l = $('l-' + g); l.querySelector('.amt').textContent = B(CUM[g][k]); l.querySelector('.amt').setAttribute('fill', CUM[g][k] >= 0 ? '#1F4E66' : '#8A5216');
+    const l = $('l-' + g); l.querySelector('.amt').textContent = B(CUM[g][k]); l.querySelector('.amt').setAttribute('fill', CUM[g][k] >= 0 ? PAL.posInk : PAL.negInk);
     l.style.opacity = (focus && !focus.has(g) ? 1 - 0.75 * fa : 1).toFixed(3);
   }
   ['NT', 'NU'].forEach(g => { const p = $('p-' + g); if (p) p.setAttribute('stroke-width', '0.8'); });

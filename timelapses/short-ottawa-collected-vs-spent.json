@@ -1,4 +1,10 @@
 {
+ "palette": {
+  "pos": "#C27A2C",
+  "neg": "#2F6F8F",
+  "posInk": "#8A5216",
+  "negInk": "#1F4E66"
+ },
  "id": "short-ottawa-collected-vs-spent",
  "format": "9x16",
  "fps": 30,

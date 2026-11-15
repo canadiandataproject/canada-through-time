@@ -51,3 +51,5 @@ html, body { margin: 0; width: 720px; height: 1280px; overflow: hidden; backgrou
 #flash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
 #summary .ccap { margin-top: 34px; font: 600 15px/1 var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
 #summary .chart { margin-top: 12px; height: 210px; }
+#ref { position: absolute; top: 0; bottom: 0; width: 0; border-left: 2px dashed var(--ink-1); z-index: 3; }
+#ref b { position: absolute; bottom: 0px; left: 6px; white-space: nowrap; font: 700 16px/1 var(--sans); color: var(--page); background: var(--ink-1); padding: 5px 7px 4px; border-radius: 3px; }
