@@ -35,7 +35,7 @@ function where(f) {
 }
 
 // ---------------------------------------------------------------- chart geometry
-const X0 = 52, X1 = 428, Y0 = 470, Y1 = 985, [VMIN, VMAX] = SC.yRange;
+const X0 = 52, X1 = 428, Y0 = 470, Y1 = SC.chartBottom || 985, [VMIN, VMAX] = SC.yRange;
 const px = k => X0 + (X1 - X0) * k / (K - 1), py = v => Y0 + (Y1 - Y0) * (VMAX - v) / (VMAX - VMIN);
 function grid(alpha) {
   let o = `<g opacity="${alpha.toFixed(3)}">`;
@@ -43,7 +43,7 @@ function grid(alpha) {
     o += `<line x1="${X0}" x2="${X1 + 6}" y1="${py(v).toFixed(1)}" y2="${py(v).toFixed(1)}" stroke="${T.grid}" stroke-width="1"/>`;
     o += `<text x="${X0}" y="${(py(v) - 6).toFixed(1)}" font-family="${T.sans}" font-size="14" fill="${T.ink3}">${(SC.prefix || '') + v + (SC.suffix || '')}</text>`;
   }
-  for (const y of SC.xTicks) { const k = y - YR[0]; o += `<text x="${px(k).toFixed(1)}" y="${Y1 + 24}" text-anchor="middle" font-family="${T.sans}" font-size="14" fill="${T.ink3}">${y}</text>`; }
+  for (const y of SC.xTicks) { const k = y - YR[0]; o += `<text x="${px(k).toFixed(1)}" y="${(SC.panel ? SC.panel.bottom : Y1) + 24}" text-anchor="middle" font-family="${T.sans}" font-size="14" fill="${T.ink3}">${y}</text>`; }
   return o + '</g>';
 }
 function path(s, uu) {
@@ -64,12 +64,24 @@ function path(s, uu) {
 function chart(uu, alpha, focus) {
   const k = Math.round(uu);
   let o = grid(alpha), labs = [];
+  if (SC.panel) {                            // a second, separate panel (own scale, no shared axis) of yearly bars
+    const P = SC.panel, vals = YR.map(y => P.values[y] ?? null), mx = Math.max(...vals.filter(v => v != null)), bw = (X1 - X0) / K * 0.72;
+    o += `<text x="${X0}" y="${P.top - 10}" font-family="${T.sans}" font-size="16" font-weight="700" fill="${P.color}" opacity="${alpha.toFixed(3)}">${P.label}</text>`;
+    o += `<line x1="${X0}" x2="${X1 + 6}" y1="${P.bottom}" y2="${P.bottom}" stroke="${T.grid}" stroke-width="1" opacity="${alpha.toFixed(3)}"/>`;
+    let last = null;
+    vals.forEach((v, k) => { if (v == null) return; const g = clamp01(uu - k + 1); if (g <= 0) return;
+      const h = (P.bottom - P.top) * v / mx * ease(g), x = px(k) - bw / 2;
+      o += `<rect x="${x.toFixed(1)}" y="${(P.bottom - h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" fill="${P.color}" opacity="${(alpha * (focus && !focus.has(P.label) ? 0.25 : 0.9)).toFixed(3)}"/>`;
+      if (k <= Math.round(uu)) last = [k, v]; });
+    const kk = Math.round(uu);
+    if (last) o += `<text x="${(X1 + 18).toFixed(1)}" y="${(P.top + 30).toFixed(1)}" font-family="${T.sans}" font-size="21" font-weight="600" fill="${T.ink1}" opacity="${alpha.toFixed(3)}"><tspan fill="${P.color}">●</tspan> ${last[1].toLocaleString('en-CA')}${last[0] < kk ? ` <tspan font-size="15" fill="${T.ink3}">(${YR[last[0]]})</tspan>` : ''}</text>`;
+  }
   for (const ev of SC.events || []) {          // dated event markers appear as the timeline reaches them
     const ke = ev.year - YR[0] + (ev.frac || 0), a = alpha * clamp01((uu - ke) * 3);
     if (a <= 0) continue;
     const x = px(ke).toFixed(1);
-    o += `<line x1="${x}" x2="${x}" y1="${Y0 - 10}" y2="${Y1}" stroke="${T.ink1}" stroke-width="1.5" stroke-dasharray="5 5" opacity="${(a * 0.8).toFixed(3)}"/>`;
-    o += `<text x="${(+x + 6).toFixed(1)}" y="${(Y0 - 14 + (ev.row || 0) * 20).toFixed(1)}" font-family="${T.sans}" font-size="16" font-weight="700" fill="${T.ink1}" opacity="${a.toFixed(3)}">${ev.label}</text>`;
+    o += `<line x1="${x}" x2="${x}" y1="${Y0 - 10}" y2="${SC.panel ? SC.panel.bottom : Y1}" stroke="${T.ink1}" stroke-width="1.5" stroke-dasharray="5 5" opacity="${(a * 0.8).toFixed(3)}"/>`;
+    o += `<text x="${(ev.anchor === 'end' ? +x - 6 : +x + 6).toFixed(1)}" text-anchor="${ev.anchor || 'start'}" y="${(Y0 - 14 + (ev.row || 0) * 20).toFixed(1)}" font-family="${T.sans}" font-size="16" font-weight="700" fill="${T.ink1}" opacity="${a.toFixed(3)}">${ev.label}</text>`;
   }
   // faint preview of every full line, so the first frame already shows where this goes (published values, not a forecast)
   if (SC.ghost) for (const s of S) o += `<path d="${path(s, K - 1).d}" fill="none" stroke="${s.color}" stroke-width="2" stroke-dasharray="2 5" opacity="${(alpha * SC.ghost).toFixed(3)}"/>`;

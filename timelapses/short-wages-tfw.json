@@ -16,6 +16,40 @@
  ],
  "gridStart": 15,
  "gridStep": 5,
+ "chartBottom": 790,
+ "panel": {
+  "label": "Temporary foreign workers (TFWP permits, Dec. 31)",
+  "color": "#E39B2D",
+  "top": 852,
+  "bottom": 985,
+  "values": {
+   "2000": 22470,
+   "2001": 26130,
+   "2002": 29220,
+   "2003": 33955,
+   "2004": 37150,
+   "2005": 43320,
+   "2006": 53925,
+   "2007": 78225,
+   "2008": 110505,
+   "2009": 112475,
+   "2010": 92070,
+   "2011": 81525,
+   "2012": 86505,
+   "2013": 103910,
+   "2014": 93745,
+   "2015": 60000,
+   "2016": 51065,
+   "2017": 46050,
+   "2018": 56025,
+   "2019": 73355,
+   "2020": 76400,
+   "2021": 81430,
+   "2022": 119130,
+   "2023": 187455,
+   "2024": 236130
+  }
+ },
  "xTicks": [
   2000,
   2010,
@@ -120,10 +154,11 @@
    "year": 2024,
    "frac": 0.73,
    "label": "2024: capped again",
-   "row": 0
+   "row": 2,
+   "anchor": "end"
   }
  ],
- "between": "Between cards, the year counts up and each line extends to that year's inflation-adjusted average hourly wage; dashed lines mark Temporary Foreign Worker Program changes.",
+ "between": "Between cards, the year counts up and each line extends to that year's inflation-adjusted average hourly wage; dashed lines mark Temporary Foreign Worker Program changes; bars below (separate scale) show TFWP permit holders on December 31.",
  "plan": [
   {
    "kind": "run",
@@ -139,12 +174,13 @@
   },
   {
    "kind": "beat",
-   "s": 3.4,
-   "kicker": "Restaurants & hotels (food services) · 2002–2014",
+   "s": 3.8,
+   "kicker": "Food & hotels · 2002–2014",
    "big": "+1.0%/yr",
-   "line": "real wage growth while the program was open to low-wage jobs",
+   "line": "real wage growth as TFW permits went from 29,220 to 93,745",
    "focus": [
-    "Food & hotels"
+    "Food & hotels",
+    "Temporary foreign workers (TFWP permits, Dec. 31)"
    ],
    "sfx": "tick",
    "cardTop": 268
@@ -158,12 +194,13 @@
   },
   {
    "kind": "beat",
-   "s": 3.6,
-   "kicker": "Restaurants & hotels (food services) · 2014–2019",
+   "s": 3.8,
+   "kicker": "Food & hotels · 2014–2019",
    "big": "+1.8%/yr",
-   "line": "after low-wage hiring was capped. <em>Minimum wages also rose</em>, so this alone can’t prove why",
+   "line": "after the cap; permits fell to 46,050 by 2017. <em>Minimum wages also rose</em>, so this alone can’t prove why",
    "focus": [
-    "Food & hotels"
+    "Food & hotels",
+    "Temporary foreign workers (TFWP permits, Dec. 31)"
    ],
    "sfx": "hit",
    "cardTop": 268
@@ -173,6 +210,18 @@
    "to": 28,
    "s": 3.0,
    "ease": "out"
+  },
+  {
+   "kind": "beat",
+   "s": 3.4,
+   "kicker": "2024 · preliminary",
+   "big": "236,130",
+   "line": "TFWP permit holders on Dec. 31, the most since at least 2000. Food & hotel wages 2019–2025: +0.8%/yr",
+   "focus": [
+    "Temporary foreign workers (TFWP permits, Dec. 31)",
+    "Food & hotels"
+   ],
+   "cardTop": 268
   },
   {
    "kind": "summary",
@@ -189,10 +238,11 @@
   "line": "wages for low-wage Canadians in jobs hit by the 2014 limits. <em>Real, but modest.</em>",
   "sub": "Chen & Fang, Journal of Ethnic and Migration Studies (2025), LFS 2005–2019. Wages: Statistics Canada 14-10-0064-01, CPI 18-10-0005-01."
  },
- "note": "<b>Source:</b> Statistics Canada, tables 14-10-0064-01 (average hourly wage, all employees 15+) and 18-10-0005-01 (CPI, to 2025 dollars). Program dates: Government of Canada (July 2002 low-skill pilot; June 20, 2014 overhaul; Sept 26, 2024 changes). Averages change when the mix of workers changes. Lines grow between years as animation.",
+ "note": "<b>Source:</b> Statistics Canada, tables 14-10-0064-01 (average hourly wage, all employees 15+) and 18-10-0005-01 (CPI, to 2025 dollars); IRCC open data, TFWP permit holders on Dec. 31 (preliminary; 2025 not yet published). Program dates: Government of Canada (July 2002 low-skill pilot; June 20, 2014 overhaul; Sept 26, 2024 changes). Averages change when the mix of workers changes. Lines grow between years as animation.",
  "sources": [
   "statcan_14100064",
-  "statcan_18100005"
+  "statcan_18100005",
+  "ircc_tfwp_year_end"
  ],
  "references": [
   "Chen, W.-H. & Fang, T. (2025). Restricting temporary foreign labour: evidence on wage effects from Canada's 2014 policy reform. Journal of Ethnic and Migration Studies. IZA DP 18240: https://www.iza.org/publications/dp18240",
@@ -203,6 +253,37 @@
  ],
  "method": "Average hourly wages (current dollars) multiplied by CPI(2025)/CPI(year). Growth rates are compound annual rates between the named years. The chart is descriptive; the causal estimate is quoted from the cited difference-in-differences study, not computed here.",
  "figures": {
+  "tfwp_dec31": {
+   "2000": 22470,
+   "2001": 26130,
+   "2002": 29220,
+   "2003": 33955,
+   "2004": 37150,
+   "2005": 43320,
+   "2006": 53925,
+   "2007": 78225,
+   "2008": 110505,
+   "2009": 112475,
+   "2010": 92070,
+   "2011": 81525,
+   "2012": 86505,
+   "2013": 103910,
+   "2014": 93745,
+   "2015": 60000,
+   "2016": 51065,
+   "2017": 46050,
+   "2018": 56025,
+   "2019": 73355,
+   "2020": 76400,
+   "2021": 81430,
+   "2022": 119130,
+   "2023": 187455,
+   "2024": 236130
+  },
+  "tfwp_low_post": [
+   2017,
+   46050
+  ],
   "real_wage": {
    "all": {
     "1997": 28.32,
