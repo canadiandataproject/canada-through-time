@@ -26,7 +26,7 @@ ab19, ab20, ab20_rank, ab19_rank = ur("AB", 2019), ur("AB", 2020), rank_high("AB
 years_at = {p: sum(p in lowest[y] for y in YRS) for p in ever}
 print("ever lowest:", ever, "changes:", changes, "years at/sharing #1:", years_at)
 print("QC alone lowest:", qc_run, "| QC 1983", qc83, "rank from top", qc83_rank, "| AB 2019", ab19, ab19_rank, "-> 2020", ab20, ab20_rank)
-assert len(ever) == 6 and nl_all and qc_run == [2021, 2022, 2023, 2024] and qc83 == 14.2 and qc83_rank == 3 and ab20 == 11.4 and ab20_rank == 2
+assert 11 - qc83_rank == 8 and len(ever) == 6 and nl_all and qc_run == [2021, 2022, 2023, 2024] and qc83 == 14.2 and qc83_rank == 3 and ab20 == 11.4 and ab20_rank == 2
 
 idx = lambda y: YRS.index(y)
 N = {k: v for k, v in NAMES.items()}
@@ -34,24 +34,26 @@ cfg = dict(
     id="short-lowest-unemployment", format="9x16", fps=30, title="Which province has Canada's lowest unemployment rate?", years=[Y0, Y1], top=10, row=52,
     order="asc", valueFormat="pct1", noun="province",
     data=dict(kind="lfs", file="../data/more/lfs.json", field="ur", names=NAMES, reference=dict(code="CAN", label="Canada")),
-    theme="broadcast", channel="The Canadian Data Project",
-    between="Between cards, the year counts up; the #1 (lowest) province and its published rate are shown, and a dashed line marks Canada’s rate that year.",
+    theme="broadcast", channel="The Canadian Data Project", loopTo=len(YRS) - 1,
+    between="The video opens on 2025, rewinds to 1976, then plays forward. Between cards, the year counts up; the #1 (lowest) province and its published rate are shown, and a dashed line marks Canada’s rate that year.",
     kicker="Unemployment rate · 10 provinces · lowest ranked #1",
-    hook=dict(seconds=3.2, question="Which province has Canada’s <em>lowest unemployment</em>?"),
+    hook=dict(seconds=2.1, question="Which province has Canada’s <em>lowest unemployment</em>?"),
     colors={N["QC"]: "#1F5FA8", N["AB"]: "#E39B2D", N["SK"]: "#2E8B57", N["NL"]: "#D62839"}, otherColor="#B4BDC8",
     short={N["NL"]: "Newfoundland", N["PE"]: "P.E.I.", N["BC"]: "B.C.", N["NS"]: "Nova Scotia", N["NB"]: "New Brunswick"},
-    plan=[
-        dict(kind="run", to=1.0, s=3.2, ease="linear"),
-        dict(kind="run", to=idx(1983), s=4.6, ease="linear"),
-        dict(kind="beat", s=2.8, kicker="1983", big=f"{qc83:.1f}%", line=f"<em>Quebec</em>: the {['', '', '2nd', '3rd', '4th'][qc83_rank]}-highest rate of the 10 provinces", focus=[N["QC"]], cardTop=450),
-        dict(kind="run", to=idx(2019), s=9.0, ease="inout", riser=True),
-        dict(kind="run", to=idx(2020), s=1.0, ease="out"),
-        dict(kind="beat", s=2.8, kicker="2020", big=f"{ab20:.1f}%", line=f"<em>Alberta</em>: from {ab19:.1f}% the year before to the 2nd-highest rate in Canada", focus=[N["AB"]], sfx="hit", cardTop=450),
-        dict(kind="run", to=idx(2024), s=3.0, ease="inout"),
-        dict(kind="beat", s=2.8, kicker=f"{qc_run[0]}–{qc_run[-1]}", big=f"{len(qc_run)} years", line="in a row, <em>Quebec</em> had the lowest rate of any province", focus=[N["QC"]], cardTop=700),
-        dict(kind="run", to=idx(Y1), s=1.2, ease="out"),
-        dict(kind="summary", s=4.6),
-        dict(kind="loop", s=0.8),
+    plan=[   # cold open on 2025, rewind, then the race (about 26 s)
+        dict(kind="jump", to=idx(Y1)),
+        dict(kind="beat", s=2.1, kicker=f"1983 → {qc_run[0]} · one province", big=f"#{11 - qc83_rank} → #1", line="From the 3rd-highest unemployment to Canada’s lowest. <em>Watch who.</em>", cardTop=450, instant=True),
+        dict(kind="run", to=0, s=0.9, ease="inout"),
+        dict(kind="run", to=idx(1983), s=2.6, ease="linear"),
+        dict(kind="beat", s=2.4, kicker="1983", big=f"{qc83:.1f}%", line=f"<em>Quebec</em>: the {['', '', '2nd', '3rd', '4th'][qc83_rank]}-highest rate of the 10 provinces", focus=[N["QC"]], cardTop=450),
+        dict(kind="run", to=idx(2019), s=5.4, ease="inout", riser=True),
+        dict(kind="run", to=idx(2020), s=0.7, ease="out"),
+        dict(kind="beat", s=2.6, kicker="2020", big=f"{ab20:.1f}%", line=f"<em>Alberta</em>: from {ab19:.1f}% the year before to the 2nd-highest rate in Canada", focus=[N["AB"]], sfx="hit", cardTop=450),
+        dict(kind="run", to=idx(2024), s=2.0, ease="inout"),
+        dict(kind="beat", s=2.6, kicker=f"{qc_run[0]}–{qc_run[-1]}", big=f"{len(qc_run)} years", line="in a row, <em>Quebec</em> had the lowest rate of any province", focus=[N["QC"]], cardTop=700),
+        dict(kind="run", to=idx(Y1), s=0.6, ease="out"),
+        dict(kind="summary", s=4.2),
+        dict(kind="loop", s=0.6),
     ],
     summary=dict(country=N["QC"], chartCaption=f"Quebec’s unemployment rate, {Y0}–{Y1}", kicker=f"{Y0}–{Y1}", big=str(len(ever)),
                  line="different provinces have had Canada’s <em>lowest</em> unemployment rate",

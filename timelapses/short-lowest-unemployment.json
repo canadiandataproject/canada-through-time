@@ -35,10 +35,11 @@
  },
  "theme": "broadcast",
  "channel": "The Canadian Data Project",
- "between": "Between cards, the year counts up; the #1 (lowest) province and its published rate are shown, and a dashed line marks Canada’s rate that year.",
+ "loopTo": 49,
+ "between": "The video opens on 2025, rewinds to 1976, then plays forward. Between cards, the year counts up; the #1 (lowest) province and its published rate are shown, and a dashed line marks Canada’s rate that year.",
  "kicker": "Unemployment rate · 10 provinces · lowest ranked #1",
  "hook": {
-  "seconds": 3.2,
+  "seconds": 2.1,
   "question": "Which province has Canada’s <em>lowest unemployment</em>?"
  },
  "colors": {
@@ -57,20 +58,33 @@
  },
  "plan": [
   {
+   "kind": "jump",
+   "to": 49
+  },
+  {
+   "kind": "beat",
+   "s": 2.1,
+   "kicker": "1983 → 2021 · one province",
+   "big": "#8 → #1",
+   "line": "From the 3rd-highest unemployment to Canada’s lowest. <em>Watch who.</em>",
+   "cardTop": 450,
+   "instant": true
+  },
+  {
    "kind": "run",
-   "to": 1.0,
-   "s": 3.2,
-   "ease": "linear"
+   "to": 0,
+   "s": 0.9,
+   "ease": "inout"
   },
   {
    "kind": "run",
    "to": 7,
-   "s": 4.6,
+   "s": 2.6,
    "ease": "linear"
   },
   {
    "kind": "beat",
-   "s": 2.8,
+   "s": 2.4,
    "kicker": "1983",
    "big": "14.2%",
    "line": "<em>Quebec</em>: the 3rd-highest rate of the 10 provinces",
@@ -82,19 +96,19 @@
   {
    "kind": "run",
    "to": 43,
-   "s": 9.0,
+   "s": 5.4,
    "ease": "inout",
    "riser": true
   },
   {
    "kind": "run",
    "to": 44,
-   "s": 1.0,
+   "s": 0.7,
    "ease": "out"
   },
   {
    "kind": "beat",
-   "s": 2.8,
+   "s": 2.6,
    "kicker": "2020",
    "big": "11.4%",
    "line": "<em>Alberta</em>: from 6.9% the year before to the 2nd-highest rate in Canada",
@@ -107,12 +121,12 @@
   {
    "kind": "run",
    "to": 48,
-   "s": 3.0,
+   "s": 2.0,
    "ease": "inout"
   },
   {
    "kind": "beat",
-   "s": 2.8,
+   "s": 2.6,
    "kicker": "2021–2024",
    "big": "4 years",
    "line": "in a row, <em>Quebec</em> had the lowest rate of any province",
@@ -124,16 +138,16 @@
   {
    "kind": "run",
    "to": 49,
-   "s": 1.2,
+   "s": 0.6,
    "ease": "out"
   },
   {
    "kind": "summary",
-   "s": 4.6
+   "s": 4.2
   },
   {
    "kind": "loop",
-   "s": 0.8
+   "s": 0.6
   }
  ],
  "summary": {
