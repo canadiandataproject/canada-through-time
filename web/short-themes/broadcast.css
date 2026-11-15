@@ -38,3 +38,4 @@
 #bug { position: absolute; right: 40px; top: 32px; font: 700 13px/1 var(--sans); letter-spacing: .18em; text-transform: uppercase; color: var(--navy); }
 #bug::before { content: ""; display: inline-block; width: 9px; height: 9px; margin-right: 8px; background: var(--accent); border-radius: 50%; vertical-align: 1px; }
 #lead .v { font: 700 24px/1 var(--sans); color: var(--accent); }
+#summary { top: 310px; }
