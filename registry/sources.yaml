@@ -475,6 +475,29 @@ sources:
       - "2011 values come from the voluntary National Household Survey and are not shown."
 
   # ------------------------------------------------------------------ immigration, economy, language bundle (retrieved 2026-11-13)
+  ircc_tfwp_year_end:
+    title: "Canada – Temporary Foreign Worker Program (TFWP) work permit holders on December 31st by province/territory of intended destination and program"
+    publisher: "Immigration, Refugees and Citizenship Canada (IRCC)"
+    landing_url: "https://open.canada.ca/data/en/dataset/360024f2-17e9-4558-bfc1-3616485d65b9"
+    download_url: "https://www.ircc.canada.ca/opendata-donneesouvertes/data/EN_ODP_annual-TR-work-TFW_PT_program_year_end.xlsx"
+    raw_file: "data/raw/ircc/EN_ODP_annual-TR-work-TFW_PT_program_year_end.xlsx"
+    sha256: "3f6019798f9f8ca42656f852470c19523ac2f2e3039f7909da98f245e866803a"
+    retrieved: "2026-11-14"
+    release_in_file: "Source: IRCC, December 31 2024; covers 2000–2024"
+    reporting_period: "Stock on December 31 of each year"
+    coverage: "Canada, by province/territory and program"
+    units: "Persons holding a valid TFWP work permit on December 31"
+    licence: "Open Government Licence – Canada"
+    licence_url: "https://open.canada.ca/en/open-government-licence-canada"
+    attribution: "Source: Immigration, Refugees and Citizenship Canada, TFWP work permit holders on December 31st (open data). Contains information licensed under the Open Government Licence – Canada."
+    quality_class: official_statistics
+    methodology_notes:
+      - "Counts people holding a valid TFWP permit on December 31; more people hold permits at some point during a year than on December 31."
+      - "The file notes its tables were revised to reflect the June 20, 2014 overhaul: TFWP covers LMIA-based permits, and the International Mobility Program is reported separately."
+      - "Values 0–5 shown as '--'; others rounded to the nearest 5. IRCC marks the data as preliminary and subject to change."
+    limitations:
+      - "Most of the 2022–2024 rise in temporary residents came from the International Mobility Program and students, which are not in this file."
+
   ircc_pr_citizenship:
     title: "Canada – Admissions of Permanent Residents by Country of Citizenship"
     publisher: "Immigration, Refugees and Citizenship Canada (IRCC)"

@@ -20,6 +20,15 @@ for r in rows("14100064-eng.zip"):
             and r["Gender"] == "Total - Gender" and r["Age group"] == "15 years and over" and r["VALUE"]):
         for k, name in IND.items():
             if r["North American Industry Classification System (NAICS)"] == name: W[k][int(r["REF_DATE"])] = float(r["VALUE"])
+# TFWP permit holders on December 31 (IRCC open data; preliminary; '--' = suppressed, never zero)
+import openpyxl
+ws = openpyxl.load_workbook(ROOT / "data/raw/ircc/EN_ODP_annual-TR-work-TFW_PT_program_year_end.xlsx", read_only=True).active
+xr = [r for r in ws.iter_rows(values_only=True)]
+hdr = next(r for r in xr if r and r[0] == "Province/territory and program"); tot = next(r for r in xr if r and r[0] == "Total")
+TFW = {int(h): int(str(v).replace(",", "")) for h, v in zip(hdr[1:], tot[1:]) if h and v not in (None, "", "--")}
+assert TFW[2002] == 29220 and TFW[2024] == 236130 and max(TFW, key=TFW.get) == 2024
+peak_pre = max((y for y in TFW if y <= 2014), key=TFW.get); low_post = min((y for y in TFW if 2014 <= y <= 2019), key=TFW.get)
+print("TFW", TFW[2002], TFW[2014], "peak", peak_pre, TFW[peak_pre], "low", low_post, TFW[low_post], "2024", TFW[2024])
 Y0, Y1 = 1997, 2025
 for k in W: assert sorted(W[k]) == list(range(Y0, Y1 + 1)), k        # no gaps
 real = {k: {y: W[k][y] * cpi[Y1] / cpi[y] for y in W[k]} for k in W}
@@ -33,30 +42,32 @@ s = lambda v: f"+{v:.1f}%"
 cfg = dict(
     id="short-wages-tfw", format="9x16", fps=30, theme="broadcast", channel="The Canadian Data Project", ghost=0.35,
     title="Did temporary foreign workers hold down Canadian wages?", years=[Y0, Y1],
-    yRange=[12, 40], gridStart=15, gridStep=5, xTicks=[2000, 2010, 2020], prefix="$", decimals=2,
+    yRange=[12, 40], gridStart=15, gridStep=5, chartBottom=790,
+    panel=dict(label="Temporary foreign workers (TFWP permits, Dec. 31)", color="#E39B2D", top=852, bottom=985, values={str(y): v for y, v in TFW.items() if Y0 <= y <= Y1}), xTicks=[2000, 2010, 2020], prefix="$", decimals=2,
     kicker="Real hourly wages · 2025 dollars · Canada",
     hook=dict(seconds=3.2, question="Did temporary foreign workers <em>hold down wages</em>?"),
     yearSub="Average hourly wage, adjusted for inflation to 2025 dollars",
     series=[dict(name="all", label="All workers", color="#0E2A47", values={str(y): round(v, 2) for y, v in real["all"].items()}),
             dict(name="food", label="Food & hotels", color="#D62839", values={str(y): round(v, 2) for y, v in real["food"].items()})],
     events=[dict(year=2002, frac=0.5, label="2002: low-wage jobs opened", row=0), dict(year=2014, frac=0.47, label="2014: low-wage hiring capped", row=1),
-            dict(year=2024, frac=0.73, label="2024: capped again", row=0)],
-    between="Between cards, the year counts up and each line extends to that year's inflation-adjusted average hourly wage; dashed lines mark Temporary Foreign Worker Program changes.",
+            dict(year=2024, frac=0.73, label="2024: capped again", row=2, anchor="end")],
+    between="Between cards, the year counts up and each line extends to that year's inflation-adjusted average hourly wage; dashed lines mark Temporary Foreign Worker Program changes; bars below (separate scale) show TFWP permit holders on December 31.",
     plan=[
         dict(kind="run", to=3, s=3.2, ease="linear"),
         dict(kind="run", to=idx(2014), s=8.5, ease="linear"),
-        dict(kind="beat", s=3.4, kicker="Restaurants & hotels (food services) · 2002–2014", big=f"{s(g_exp)}/yr", line="real wage growth while the program was open to low-wage jobs", focus=["Food & hotels"], sfx="tick", cardTop=268),
+        dict(kind="beat", s=3.8, kicker="Food & hotels · 2002–2014", big=f"{s(g_exp)}/yr", line=f"real wage growth as TFW permits went from {TFW[2002]:,} to {TFW[2014]:,}", focus=["Food & hotels", "Temporary foreign workers (TFWP permits, Dec. 31)"], sfx="tick", cardTop=268),
         dict(kind="run", to=idx(2019), s=3.0, ease="inout", riser=True),
-        dict(kind="beat", s=3.6, kicker="Restaurants & hotels (food services) · 2014–2019", big=f"{s(g_lim)}/yr", line="after low-wage hiring was capped. <em>Minimum wages also rose</em>, so this alone can’t prove why", focus=["Food & hotels"], sfx="hit", cardTop=268),
+        dict(kind="beat", s=3.8, kicker="Food & hotels · 2014–2019", big=f"{s(g_lim)}/yr", line=f"after the cap; permits fell to {TFW[low_post]:,} by {low_post}. <em>Minimum wages also rose</em>, so this alone can’t prove why", focus=["Food & hotels", "Temporary foreign workers (TFWP permits, Dec. 31)"], sfx="hit", cardTop=268),
         dict(kind="run", to=idx(Y1), s=3.0, ease="out"),
+        dict(kind="beat", s=3.4, kicker="2024 · preliminary", big=f"{TFW[2024]:,}", line=f"TFWP permit holders on Dec. 31, the most since at least 2000. Food & hotel wages 2019–2025: {s(cagr('food', 2019, 2025))}/yr", focus=["Temporary foreign workers (TFWP permits, Dec. 31)", "Food & hotels"], cardTop=268),
         dict(kind="summary", s=6.0),
         dict(kind="loop", s=0.8),
     ],
     summary=dict(kicker="What a study comparing similar jobs found", big="+3.7–4.5%",
                  line="wages for low-wage Canadians in jobs hit by the 2014 limits. <em>Real, but modest.</em>",
                  sub="Chen & Fang, Journal of Ethnic and Migration Studies (2025), LFS 2005–2019. Wages: Statistics Canada 14-10-0064-01, CPI 18-10-0005-01."),
-    note="<b>Source:</b> Statistics Canada, tables 14-10-0064-01 (average hourly wage, all employees 15+) and 18-10-0005-01 (CPI, to 2025 dollars). Program dates: Government of Canada (July 2002 low-skill pilot; June 20, 2014 overhaul; Sept 26, 2024 changes). Averages change when the mix of workers changes. Lines grow between years as animation.",
-    sources=["statcan_14100064", "statcan_18100005"],
+    note="<b>Source:</b> Statistics Canada, tables 14-10-0064-01 (average hourly wage, all employees 15+) and 18-10-0005-01 (CPI, to 2025 dollars); IRCC open data, TFWP permit holders on Dec. 31 (preliminary; 2025 not yet published). Program dates: Government of Canada (July 2002 low-skill pilot; June 20, 2014 overhaul; Sept 26, 2024 changes). Averages change when the mix of workers changes. Lines grow between years as animation.",
+    sources=["statcan_14100064", "statcan_18100005", "ircc_tfwp_year_end"],
     references=[
         "Chen, W.-H. & Fang, T. (2025). Restricting temporary foreign labour: evidence on wage effects from Canada's 2014 policy reform. Journal of Ethnic and Migration Studies. IZA DP 18240: https://www.iza.org/publications/dp18240",
         "IRCC Operational Bulletin 113 (2009): July 2002 Pilot Project for Occupations Requiring Lower Levels of Formal Training",
@@ -65,7 +76,7 @@ cfg = dict(
         "Champagne, J. (2025). The Shift in Canadian Immigration Composition and its Effect on Wages. Bank of Canada Staff Discussion Paper 2025-8",
     ],
     method="Average hourly wages (current dollars) multiplied by CPI(2025)/CPI(year). Growth rates are compound annual rates between the named years. The chart is descriptive; the causal estimate is quoted from the cited difference-in-differences study, not computed here.",
-    figures=dict(real_wage={k: {"1997": round(real[k][Y0], 2), "2025": round(real[k][Y1], 2)} for k in real}, food_cagr={"2002-2014": round(g_exp, 3), "2014-2019": round(g_lim, 3), "2019-2025": round(cagr("food", 2019, 2025), 3)},
+    figures=dict(tfwp_dec31={str(y): v for y, v in TFW.items()}, tfwp_low_post=[low_post, TFW[low_post]], real_wage={k: {"1997": round(real[k][Y0], 2), "2025": round(real[k][Y1], 2)} for k in real}, food_cagr={"2002-2014": round(g_exp, 3), "2014-2019": round(g_lim, 3), "2019-2025": round(cagr("food", 2019, 2025), 3)},
                  all_cagr={"2002-2014": round(cagr("all", 2002, 2014), 3), "2014-2019": round(cagr("all", 2014, 2019), 3)}),
 )
 dst = ROOT / "timelapses/short-wages-tfw.json"; dst.write_text(json.dumps(cfg, indent=1, ensure_ascii=False)); print(dst.relative_to(ROOT))
