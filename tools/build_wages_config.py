@@ -40,7 +40,7 @@ assert round(g_exp, 1) == 1.0 and round(g_lim, 1) == 1.8 and g_lim > g_exp
 idx = lambda y: y - Y0
 s = lambda v: f"+{v:.1f}%"
 cfg = dict(
-    id="short-wages-tfw", format="9x16", fps=30, theme="broadcast", channel="The Canadian Data Project", ghost=0.35,
+    id="short-wages-tfw", format="9x16", fps=30, theme="broadcast", channel="The Canadian Data Project", ghost=0.35, keepHead=True,
     title="Did temporary foreign workers hold down Canadian wages?", years=[Y0, Y1],
     yRange=[12, 40], gridStart=15, gridStep=5, chartBottom=790,
     panel=dict(label="Temporary foreign workers (TFWP permits, Dec. 31)", color="#E39B2D", top=852, bottom=985, values={str(y): v for y, v in TFW.items() if Y0 <= y <= Y1}), xTicks=[2000, 2010, 2020], prefix="$", decimals=2,
@@ -49,8 +49,8 @@ cfg = dict(
     yearSub="Average hourly wage, adjusted for inflation to 2025 dollars",
     series=[dict(name="all", label="All workers", color="#0E2A47", values={str(y): round(v, 2) for y, v in real["all"].items()}),
             dict(name="food", label="Food & hotels", color="#D62839", values={str(y): round(v, 2) for y, v in real["food"].items()})],
-    events=[dict(year=2002, frac=0.5, label="2002: low-wage jobs opened", row=0), dict(year=2014, frac=0.47, label="2014: low-wage hiring capped", row=1),
-            dict(year=2024, frac=0.73, label="2024: capped again", row=2, anchor="end")],
+    events=[dict(year=2002, frac=0.5, label="2002: lower-skill jobs opened", row=0), dict(year=2014, frac=0.47, label="2014: low-wage hiring capped", row=1),
+            dict(year=2024, frac=0.73, label="2024: cap cut to 10%", row=2, anchor="end")],
     between="Between cards, the year counts up and each line extends to that year's inflation-adjusted average hourly wage; dashed lines mark Temporary Foreign Worker Program changes; bars below (separate scale) show TFWP permit holders on December 31.",
     plan=[
         dict(kind="run", to=3, s=3.2, ease="linear"),
@@ -63,9 +63,9 @@ cfg = dict(
         dict(kind="summary", s=6.0),
         dict(kind="loop", s=0.8),
     ],
-    summary=dict(kicker="What a study comparing similar jobs found", big="+3.7–4.5%",
-                 line="wages for low-wage Canadians in jobs hit by the 2014 limits. <em>Real, but modest.</em>",
-                 sub="Chen & Fang, Journal of Ethnic and Migration Studies (2025), LFS 2005–2019. Wages: Statistics Canada 14-10-0064-01, CPI 18-10-0005-01."),
+    summary=dict(kicker="Did it hold wages down? One study’s answer: a little", big="+3.7–4.5%", chart=False,
+                 line="more pay for Canadians in low-wage jobs that used TFWs after the 2014 limits, <em>compared with similar jobs the limits didn’t touch</em>",
+                 sub=f"Rough guide: on the 2014 food &amp; hotel average of ${real['food'][2014]:.2f}/hr (2025 dollars), that’s about {real['food'][2014] * 0.037 * 100:.0f}–{real['food'][2014] * 0.045 * 100:.0f}¢ an hour. Study: Chen &amp; Fang, Journal of Ethnic and Migration Studies, 2025."),
     note="<b>Source:</b> Statistics Canada, tables 14-10-0064-01 (average hourly wage, all employees 15+) and 18-10-0005-01 (CPI, to 2025 dollars); IRCC open data, TFWP permit holders on Dec. 31 (preliminary; 2025 not yet published). Program dates: Government of Canada (July 2002 low-skill pilot; June 20, 2014 overhaul; Sept 26, 2024 changes). Averages change when the mix of workers changes. Lines grow between years as animation.",
     sources=["statcan_14100064", "statcan_18100005", "ircc_tfwp_year_end"],
     references=[

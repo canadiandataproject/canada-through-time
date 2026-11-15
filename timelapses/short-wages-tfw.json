@@ -5,6 +5,7 @@
  "theme": "broadcast",
  "channel": "The Canadian Data Project",
  "ghost": 0.35,
+ "keepHead": true,
  "title": "Did temporary foreign workers hold down Canadian wages?",
  "years": [
   1997,
@@ -141,7 +142,7 @@
   {
    "year": 2002,
    "frac": 0.5,
-   "label": "2002: low-wage jobs opened",
+   "label": "2002: lower-skill jobs opened",
    "row": 0
   },
   {
@@ -153,7 +154,7 @@
   {
    "year": 2024,
    "frac": 0.73,
-   "label": "2024: capped again",
+   "label": "2024: cap cut to 10%",
    "row": 2,
    "anchor": "end"
   }
@@ -233,10 +234,11 @@
   }
  ],
  "summary": {
-  "kicker": "What a study comparing similar jobs found",
+  "kicker": "Did it hold wages down? One study’s answer: a little",
   "big": "+3.7–4.5%",
-  "line": "wages for low-wage Canadians in jobs hit by the 2014 limits. <em>Real, but modest.</em>",
-  "sub": "Chen & Fang, Journal of Ethnic and Migration Studies (2025), LFS 2005–2019. Wages: Statistics Canada 14-10-0064-01, CPI 18-10-0005-01."
+  "chart": false,
+  "line": "more pay for Canadians in low-wage jobs that used TFWs after the 2014 limits, <em>compared with similar jobs the limits didn’t touch</em>",
+  "sub": "Rough guide: on the 2014 food &amp; hotel average of $18.30/hr (2025 dollars), that’s about 68–82¢ an hour. Study: Chen &amp; Fang, Journal of Ethnic and Migration Studies, 2025."
  },
  "note": "<b>Source:</b> Statistics Canada, tables 14-10-0064-01 (average hourly wage, all employees 15+) and 18-10-0005-01 (CPI, to 2025 dollars); IRCC open data, TFWP permit holders on Dec. 31 (preliminary; 2025 not yet published). Program dates: Government of Canada (July 2002 low-skill pilot; June 20, 2014 overhaul; Sept 26, 2024 changes). Averages change when the mix of workers changes. Lines grow between years as animation.",
  "sources": [
