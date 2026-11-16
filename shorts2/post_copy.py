@@ -1,4 +1,4 @@
-"""Post text (YouTube title + description, X text) for Shorts #12–#15. Every number is computed from the same data files the
+"""Post text (YouTube title + description, X text) for Shorts #12–#16. Every number is computed from the same data files the
 videos use; asserts keep the wording true. Writes shorts2/out/post_copy.json."""
 import json
 from pathlib import Path
@@ -136,6 +136,37 @@ Students fell most: {n['2024']['study']/1e3:,.0f}K → {n['2026']['study']/1e3:,
 Asylum claimants and workers rose.
 
 Source: Statistics Canada""")
+sp = json.loads((D / "sprawl/sprawl.json").read_text()); ed = next(c for c in sp["cities"] if c["slug"] == "edmonton"); ek = dict(zip(sp["epochs"], ed["km2"]))
+assert round(ek[1975]) == 84 and round(ek[2020]) == 166 and round(ek[2000] - ek[1975]) == 33 and round(ek[2020] - ek[2000]) == 49 and ed["half_km"] == 30
+out["16"] = dict(
+    title="Edmonton spread out: 1975 to 2020 from space",
+    desc=f"""How much of the land around Edmonton is covered by buildings, mapped from satellite images, 1975 to 2020.
+
+📊 The numbers (EU Joint Research Centre, GHS-BUILT-S R2023A, 100 m grid; a 60 km square centred on downtown)
+• 1975: {ek[1975]:.0f} km² covered by buildings
+• 2000: {ek[2000]:.0f} km²
+• 2020: {ek[2020]:.0f} km², {(ek[2020] / ek[1975] - 1) * 100:.0f}% more than 1975 (nearly double)
+• Added 2000–2020: {ek[2020] - ek[2000]:.0f} km², vs {ek[2000] - ek[1975]:.0f} km² in 1975–2000
+
+💬 Which city should we do next?
+
+How to read it: each 100 m square takes the colour of the first satellite snapshot (1975, 1985, 1990, 2000, 2010, 2020) in which buildings covered 20% of it. The square-kilometre totals add up the full building area of every square, with no threshold. This is the ground under buildings, not the city limits or the metro area. Years between snapshots are modelled by the JRC; nothing is drawn between snapshots. The opening camera move is the only animation that isn't data.
+
+Source: Pesaresi M., Politis P. (2023), GHS-BUILT-S R2023A, European Commission, Joint Research Centre (CC BY 4.0).
+Voice, music and sound: original.
+
+12 cities, free: {SITE}?s=16#cl=sprawl/2020/cedmonton
+
+#Edmonton #Canada #DataViz""",
+    x=f"""Land covered by buildings around Edmonton, from satellite images:
+
+1975: {ek[1975]:.0f} km²
+2000: {ek[2000]:.0f} km²
+2020: {ek[2020]:.0f} km², nearly double
+
+More was added after 2000 than in the 25 years before.
+
+Source: EU JRC GHS-BUILT-S""")
 for k, o in out.items(): assert len(o["x"]) <= 280 and len(o["title"]) <= 100, (k, len(o["x"]))
 (ROOT / "shorts2/out").mkdir(exist_ok=True); (ROOT / "shorts2/out/post_copy.json").write_text(json.dumps(out, indent=1, ensure_ascii=False))
 for k, o in out.items(): print(k, len(o["x"]), o["title"])

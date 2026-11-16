@@ -346,7 +346,7 @@ function cityImg(c) { if (IMG[c.slug]) return IMG[c.slug];
   const im = new Image(); IMG[c.slug] = { ready: false };
   im.onload = () => { const cv = document.createElement('canvas'); cv.width = im.width; cv.height = im.height; const x = cv.getContext('2d'); x.drawImage(im, 0, 0);
     IMG[c.slug] = { ready: true, w: im.width, h: im.height, px: x.getImageData(0, 0, im.width, im.height).data }; if (S.mode === 'sprawl') drawSprawl(); };
-  im.src = `../data/sprawl/${c.slug}.png`; return IMG[c.slug]; }
+  im.src = `${BASE}/data/sprawl/${c.slug}.png`; return IMG[c.slug]; }   // same base as J(): '..' in the explorer, '.' on the published site
 function drawSprawl() {
   const cv = el.querySelector('#cl-sprawl'), c = spCity(), im = cityImg(c); if (!im.ready) return;
   const box = cv.getBoundingClientRect(), dpr = Math.min(2, devicePixelRatio || 1); cv.width = box.width * dpr; cv.height = box.height * dpr;
