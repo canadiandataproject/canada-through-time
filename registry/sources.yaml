@@ -707,6 +707,43 @@ sources:
     limitations:
       - "Satellite estimate, not a building survey; small or low buildings and dense tree cover can be missed."
       - "The 20% 'built up' threshold on the city pictures is this project's choice; totals use the full values."
+  copernicus_dem_glo30_n53w114:
+    title: "Copernicus DEM GLO-30, tile N53 W114"
+    publisher: "European Space Agency / Copernicus (data © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018)"
+    landing_url: "https://registry.opendata.aws/copernicus-dem/"
+    download_url: "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N53_00_W114_00_DEM/Copernicus_DSM_COG_10_N53_00_W114_00_DEM.tif"
+    raw_file: "data/raw/terrain/Copernicus_DSM_COG_10_N53_00_W114_00_DEM.tif"
+    sha256: "3a621ad56ba7e162d77eeda55742054573545f770a255ce3552cbd2d090bd6bb"
+    retrieved: "2026-11-16"
+    coverage: "53-54 N, 114-113 W (Edmonton)"
+    units: "Metres above the EGM2008 geoid; 30 m grid"
+    licence: "Copernicus DEM licence (free use with attribution)"
+    licence_url: "https://spacedata.copernicus.eu/documents/20123/121286/CSCDA_ESA_Mission-specific+Annex_31_Oct_22.pdf"
+    attribution: "Produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved."
+    quality_class: modelled_estimate
+    methodology_notes:
+      - "Used only as a shaded-relief backdrop (4x vertical exaggeration); no number is read from it."
+    limitations:
+      - "A surface model: it includes buildings and tree tops, not bare ground."
+  esa_worldcover_2021_n51w114:
+    title: "ESA WorldCover 10 m 2021 v200, tile N51 W114"
+    publisher: "European Space Agency (ESA WorldCover consortium)"
+    doi: "https://doi.org/10.5281/zenodo.7254221"
+    landing_url: "https://esa-worldcover.org/"
+    download_url: "https://esa-worldcover.s3.eu-central-1.amazonaws.com/v200/2021/map/ESA_WorldCover_10m_2021_v200_N51W114_Map.tif"
+    raw_file: "data/raw/terrain/ESA_WorldCover_10m_2021_v200_N51W114_Map.tif"
+    sha256: "1b2ac42f6bcf0a389ff387fd91050a4b4de29c5bc0da5318c7d16e74c5dc5015"
+    retrieved: "2026-11-16"
+    coverage: "51-54 N, 114-111 W"
+    units: "Land cover class; 80 = permanent water bodies"
+    licence: "Creative Commons Attribution 4.0 International (CC BY 4.0)"
+    licence_url: "https://creativecommons.org/licenses/by/4.0/"
+    attribution: "© ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data (2021) processed by ESA WorldCover consortium."
+    quality_class: modelled_estimate
+    methodology_notes:
+      - "Only class 80 (permanent water) is used, to draw rivers and lakes as a backdrop."
+    limitations:
+      - "2021 water extent drawn under every year; rivers barely move at this scale."
   statcan_35100026:
     title: "Crime severity index and weighted clearance rates, Canada, provinces, territories and Census Metropolitan Areas"
     publisher: "Statistics Canada"

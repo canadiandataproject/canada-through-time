@@ -22,7 +22,21 @@ Files: `shorts2/sprawl.py` (engine), `shorts2/cues/sprawl.json` (timings, cards,
 - Honest limits (in the description): ground under buildings, not city limits or the metro area; years between satellite snapshots
   are modelled by the JRC; nothing is drawn between snapshots; the opening camera pull-back is the only motion that isn't data.
 
-## Timing, picture and words (32.0 s, 1080×1920, 30 fps, loops)
+## Revision 2 (Tyson's notes, 2026-11-16 10:32)
+- Growth now plays as the years tick: the counter runs 1975 → 2020 one year at a time (4.6–19.6 s). At each snapshot year the picture
+  is exactly that snapshot; between snapshots, that snapshot's new squares appear outward from built land (order illustrative, said
+  in the description). The engine asserts every snapshot year matches the data.
+- Relief map with the river valley: shaded relief from Copernicus DEM GLO-30 (4× vertical exaggeration) and the North Saskatchewan
+  and lakes from ESA WorldCover 2021, built by `pipeline/ingest_terrain.py` into `web/data/sprawl/edmonton_relief.png` and `_water.png`.
+- Audio "breathing" removed: no swells or whooshes; the bed is in a new steady mode (`tools/make_bed_calm.py … steady`: each note one
+  continuous tone, equal-power chord changes, slow levelling). Measured level swing 1.5 dB (old bed 12.9 dB); final scratch mix 1.8 dB.
+  Ducking under the voice is slower (0.9 s) so it won't pump.
+- Zooms kept. 2026: the satellite series is observed only to 2020 (2025/2030 are JRC projections); option to add Edmonton building
+  permits 2021–2026 as a labelled final chapter if wanted.
+- New duration 33.0 s; timings below are revision 1 except: growth 4.6–19.6, push-in and +49 card 20.0–25.0, reveal 25.4–28.8,
+  call to action 29.0–32.6. Narration cues: 0.2, 4.8, 11.0, 20.1, 25.5, 29.1 (same six lines).
+
+## Timing, picture and words (revision 1, 32.0 s, 1080×1920, 30 fps, loops)
 | Time | Picture | On-screen text | Narration (Tyson, deadpan) |
 |---|---|---|---|
 | 0.0–4.6 | Edmonton 1975 fills the frame (dark squares), camera eases back from 1.35× to the full 60 km square; year chip **1975** | **EDMONTON · 1975 TO 2020 / HOW FAR DID IT SPREAD?** | 0.2 "This is Edmonton in 1975. Every dark speck is land covered by buildings." |

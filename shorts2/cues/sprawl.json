@@ -1,34 +1,117 @@
 {
  "short": 16,
  "city": "edmonton",
- "duration": 32.0,
+ "duration": 33.0,
  "map_y": 470,
- "open_zoom": {"from": 1.35, "t1": 4.4},
- "fade": 0.7,
- "epochs": [-1.0, 5.0, 7.0, 9.5, 12.0, 14.5],
- "push": [{"t0": 17.0, "t1": 22.4, "ramp": 1.4, "zoom": 1.9, "at": [0.508, 0.642]}],
+ "open_zoom": {
+  "from": 1.35,
+  "t1": 4.4
+ },
+ "push": [
+  {
+   "t0": 20.0,
+   "t1": 25.2,
+   "ramp": 1.4,
+   "zoom": 1.9,
+   "at": [
+    0.508,
+    0.642
+   ]
+  }
+ ],
  "loop": true,
- "credit": "Buildings: EU JRC GHS-BUILT-S R2023A (CC BY 4.0) · The Canadian Data Project",
+ "credit": "Buildings: EU JRC GHS-BUILT-S · Relief: Copernicus DEM · Water: ESA WorldCover",
  "checks": [
-  {"epoch": 1975, "value": 84},
-  {"epoch": 2020, "value": 166},
-  {"a": 1975, "b": 2000, "value": 33},
-  {"a": 2000, "b": 2020, "value": 49}
+  {
+   "epoch": 1975,
+   "value": 84
+  },
+  {
+   "epoch": 2020,
+   "value": 166
+  },
+  {
+   "a": 1975,
+   "b": 2000,
+   "value": 33
+  },
+  {
+   "a": 2000,
+   "b": 2020,
+   "value": 49
+  }
  ],
  "cards": [
-  {"t0": 0.0, "t1": 4.6, "y": 260, "kick": "EDMONTON · 1975 TO 2020", "big": "HOW FAR DID IT SPREAD?"},
-  {"t0": 4.8, "t1": 16.6, "y": 250, "kick": "LAND COVERED BY BUILDINGS", "big": "WATCH IT GROW OUT", "sub": "each colour = first year built up"},
-  {"t0": 17.0, "t1": 22.2, "y": 260, "kick": "SINCE 2000", "big": "+49 km²", "sub": "vs +33 km² in the 25 years before"},
-  {"t0": 22.5, "t1": 27.0, "y": 260, "kick": "LAND COVERED BY BUILDINGS", "big": "84 TO 166 km²", "sub": "nearly double since 1975"},
-  {"t0": 27.2, "t1": 31.6, "y": 260, "kick": "12 CITIES · FREE EXPLORER", "big": "WHAT ABOUT YOURS?", "sub": "link in the description"}
+  {
+   "t0": 0.0,
+   "t1": 4.6,
+   "y": 260,
+   "kick": "EDMONTON · 1975 TO 2020",
+   "big": "HOW FAR DID IT SPREAD?"
+  },
+  {
+   "t0": 4.8,
+   "t1": 19.8,
+   "y": 250,
+   "kick": "LAND COVERED BY BUILDINGS",
+   "big": "WATCH IT GROW OUT",
+   "sub": "each colour = satellite snapshot"
+  },
+  {
+   "t0": 20.0,
+   "t1": 25.0,
+   "y": 260,
+   "kick": "SINCE 2000",
+   "big": "+49 km²",
+   "sub": "vs +33 km² in the 25 years before"
+  },
+  {
+   "t0": 25.4,
+   "t1": 28.8,
+   "y": 260,
+   "kick": "LAND COVERED BY BUILDINGS",
+   "big": "84 TO 166 km²",
+   "sub": "nearly double since 1975"
+  },
+  {
+   "t0": 29.0,
+   "t1": 32.6,
+   "y": 260,
+   "kick": "12 CITIES · FREE EXPLORER",
+   "big": "WHAT ABOUT YOURS?",
+   "sub": "link in the description"
+  }
  ],
  "voice": "short-16-edmonton.wav",
  "script": [
-  {"t": 0.2, "say": "This is Edmonton in 1975. Every dark speck is land covered by buildings."},
-  {"t": 5.0, "say": "Then the satellites kept watching."},
-  {"t": 9.6, "say": "Edmonton didn't really grow up. It grew out."},
-  {"t": 17.1, "say": "And it sped up: more was built after 2000 than in the twenty-five years before."},
-  {"t": 22.6, "say": "Eighty-four square kilometres of buildings in 1975. A hundred and sixty-six in 2020. Nearly double."},
-  {"t": 27.3, "say": "Every big city's in the free explorer. Link's below. Yes, even Saskatoon."}
- ]
+  {
+   "t": 0.2,
+   "say": "This is Edmonton in 1975. Every dark speck is land covered by buildings."
+  },
+  {
+   "t": 4.8,
+   "say": "Then the satellites kept watching."
+  },
+  {
+   "t": 11.0,
+   "say": "Edmonton didn't really grow up. It grew out."
+  },
+  {
+   "t": 20.1,
+   "say": "And it sped up: more was built after 2000 than in the twenty-five years before."
+  },
+  {
+   "t": 25.5,
+   "say": "Eighty-four square kilometres of buildings in 1975. A hundred and sixty-six in 2020. Nearly double."
+  },
+  {
+   "t": 29.1,
+   "say": "Every big city's in the free explorer. Link's below. Yes, even Saskatoon."
+  }
+ ],
+ "tick": {
+  "t0": 4.6,
+  "t1": 19.6
+ },
+ "bed": "steady"
 }

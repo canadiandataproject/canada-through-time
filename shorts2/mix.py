@@ -28,7 +28,7 @@ if "--scratch" in sys.argv or not vp.exists():
 else:
     voice = load(vp); voice = voice / max(1e-9, np.abs(voice).max()) * 0.9
 bedf = Path("/tmp") / f"bed_{eng}.wav"
-subprocess.run(["python3", str(ROOT / "tools/make_bed_calm.py"), f"{dur:.3f}", str(bedf)], check=True)
+subprocess.run(["python3", str(ROOT / "tools/make_bed_calm.py"), f"{dur:.3f}", str(bedf)] + (["steady"] if cues.get("bed") == "steady" else []), check=True)
 bed = load(bedf); bed = bed / max(1e-9, np.abs(bed).max()) * 0.30
 fx = np.zeros((N, 2), np.float32)
 t_ = np.arange(int(0.6 * SR)) / SR
@@ -62,13 +62,7 @@ elif eng == "zoom":
             w = lp(rng.normal(0, 1, len(tt)), 30) * np.sin(np.pi * tt / d) ** 2 * 0.22
             place(fx, w, a["t"])
 elif eng == "sprawl":
-    for te in cues["epochs"][1:]:                 # a soft low swell as each satellite snapshot's new squares appear
-        d = 1.4; tt = np.arange(int(d * SR)) / SR
-        sw = (np.sin(2 * np.pi * 98 * tt) + 0.5 * np.sin(2 * np.pi * 147 * tt)) * 0.05 * np.sin(np.pi * tt / d) ** 2
-        place(fx, sw + lp(rng.normal(0, 1, len(tt)), 40) * 0.05 * np.sin(np.pi * tt / d) ** 2, te - 0.1)
-    for p in cues.get("push", []):
-        d = p["ramp"]; tt = np.arange(int(d * SR)) / SR
-        place(fx, lp(rng.normal(0, 1, len(tt)), 30) * np.sin(np.pi * tt / d) ** 2 * 0.2, p["t0"])
+    pass                                          # no effects: a steady bed under the voice (Tyson, 2026-11-16: no "breathing")
 elif eng == "swarm":
     for p in cues["phases"]:
         d = 1.6; tt = np.arange(int(d * SR)) / SR
@@ -76,7 +70,7 @@ elif eng == "swarm":
         place(fx, sh + lp(rng.normal(0, 1, len(tt)), 4) * 0.02 * np.exp(-tt * 3), p["t"])
 
 # duck bed and effects under the voice
-env = lp(np.abs(voice).mean(1), int(0.25 * SR)); talk = np.clip(env / max(1e-9, np.percentile(env[env > 0], 60) if (env > 0).any() else 1), 0, 1)[:, None]
+env = lp(np.abs(voice).mean(1), int((0.9 if cues.get("bed") == "steady" else 0.25) * SR)); talk = np.clip(env / max(1e-9, np.percentile(env[env > 0], 60) if (env > 0).any() else 1), 0, 1)[:, None]
 mix = bed * (0.45 - 0.27 * talk) + fx * (1 - 0.35 * talk) + voice
 k = int(0.25 * SR); mix[-k:] *= np.linspace(1, 0.3, k)[:, None]
 raw = Path("/tmp") / f"mix_{eng}.f32"; raw.write_bytes(mix.astype(np.float32).tobytes())

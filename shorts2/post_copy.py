@@ -150,9 +150,9 @@ out["16"] = dict(
 
 💬 Which city should we do next?
 
-How to read it: each 100 m square takes the colour of the first satellite snapshot (1975, 1985, 1990, 2000, 2010, 2020) in which buildings covered 20% of it. The square-kilometre totals add up the full building area of every square, with no threshold. This is the ground under buildings, not the city limits or the metro area. Years between snapshots are modelled by the JRC; nothing is drawn between snapshots. The opening camera move is the only animation that isn't data.
+How to read it: each 100 m square takes the colour of the first satellite snapshot (1975, 1985, 1990, 2000, 2010, 2020) in which buildings covered 20% of it. The square-kilometre totals add up the full building area of every square, with no threshold. This is the ground under buildings, not the city limits or the metro area. The counter ticks one year at a time and the picture matches each snapshot exactly; between snapshots, that snapshot's new squares appear outward from built land, an illustration of the order, since the year each square was built isn't known.
 
-Source: Pesaresi M., Politis P. (2023), GHS-BUILT-S R2023A, European Commission, Joint Research Centre (CC BY 4.0).
+Sources: Pesaresi M., Politis P. (2023), GHS-BUILT-S R2023A, European Commission, Joint Research Centre (CC BY 4.0). Relief: Copernicus DEM GLO-30 (© DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018, provided under COPERNICUS by the EU and ESA). River and lakes: ESA WorldCover 2021 (CC BY 4.0).
 Voice, music and sound: original.
 
 12 cities, free: {SITE}?s=16#cl=sprawl/2020/cedmonton
