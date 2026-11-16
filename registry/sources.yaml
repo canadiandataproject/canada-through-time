@@ -730,6 +730,50 @@ sources:
     limitations:
       - "Covers ISC-supported public systems only: not private wells or cisterns, not British Columbia's First Nations Health Authority advisories in the same way, not self-governing nations or the territories."
       - "Only advisories lifted since November 2015 are in the file, so earlier history is not shown."
+  nrcan_canlad_year:
+    title: "Canada Landsat Disturbance (CanLaD) 1984–2015: year of the latest forest disturbance"
+    publisher: "Natural Resources Canada, Canadian Forest Service"
+    landing_url: "https://open.canada.ca/data/en/dataset/add1346b-f632-4eb9-a83d-a662b38655ad"
+    download_url: "https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/landsat_disturbance/1984_2015/CanLaD_20151984_latest_YRT2.tif"
+    raw_file: "data/raw/nrcan/CanLaD_20151984_latest_YRT2.tif"
+    sha256: "83bc7a911e9b1e5ff2155502519c0aa3db465d1fe66b6dbced3da4b21a8e1c4e"
+    retrieved: "2026-11-16"
+    release_in_file: "GeoTIFF, 30 m, NAD83 Canada Lambert; 576 MB"
+    reporting_period: "Calendar year of disturbance, 1985–2015"
+    coverage: "Canada's forested area (Landsat-derived)"
+    units: "Year"
+    licence: "Open Government Licence – Canada"
+    licence_url: "https://open.canada.ca/en/open-government-licence-canada"
+    attribution: "Contains information licensed under the Open Government Licence – Canada. Natural Resources Canada, CanLaD 1984–2015."
+    quality_class: research_dataset
+    methodology_notes:
+      - "Guindon et al. (Landsat time series); stand-replacing fire and harvest at 30 m. Only the latest disturbance per pixel is kept."
+      - "Aggregated to a 9 km grid by year and type; hectares = pixels x 0.09."
+    limitations:
+      - "Repeat disturbance on the same pixel is counted once, in its later year. Partial (non-stand-replacing) disturbance, insects and drought are not included."
+      - "Classification errors exist (NRCan reports accuracy by type); small fires and cuts near 30 m may be missed."
+  nrcan_canlad_type:
+    title: "Canada Landsat Disturbance (CanLaD) 1984–2015: type of the latest forest disturbance"
+    publisher: "Natural Resources Canada, Canadian Forest Service"
+    landing_url: "https://open.canada.ca/data/en/dataset/add1346b-f632-4eb9-a83d-a662b38655ad"
+    download_url: "https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/landsat_disturbance/1984_2015/CanLaD_20151984_latest_type.tif"
+    raw_file: "data/raw/nrcan/CanLaD_20151984_latest_type.tif"
+    sha256: "8e3879397d30c505f65937962f8004793b1c0a4b03ac2e9ffe1d7f6fdecbd283"
+    retrieved: "2026-11-16"
+    release_in_file: "GeoTIFF, 30 m, NAD83 Canada Lambert; 277 MB"
+    reporting_period: "Calendar year of disturbance, 1985–2015"
+    coverage: "Canada's forested area (Landsat-derived)"
+    units: "Type code (1 fire, 2 harvesting, per NRCan map legend)"
+    licence: "Open Government Licence – Canada"
+    licence_url: "https://open.canada.ca/en/open-government-licence-canada"
+    attribution: "Contains information licensed under the Open Government Licence – Canada. Natural Resources Canada, CanLaD 1984–2015."
+    quality_class: research_dataset
+    methodology_notes:
+      - "Guindon et al. (Landsat time series); stand-replacing fire and harvest at 30 m. Only the latest disturbance per pixel is kept."
+      - "Aggregated to a 9 km grid by year and type; hectares = pixels x 0.09."
+    limitations:
+      - "Repeat disturbance on the same pixel is counted once, in its later year. Partial (non-stand-replacing) disturbance, insects and drought are not included."
+      - "Classification errors exist (NRCan reports accuracy by type); small fires and cuts near 30 m may be missed."
   statcan_14100327:
     title: "Labour force characteristics by gender and detailed age group, annual"
     publisher: "Statistics Canada"

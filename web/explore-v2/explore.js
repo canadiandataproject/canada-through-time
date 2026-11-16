@@ -1530,24 +1530,52 @@ const HOME_CARDS = [
   { sec: 'Economy', q: 'How fast are homes being built?', m: 'starts', big: () => { const y = lastYear(M.starts), b = best(M.starts, y); return [NAMES[b[0]], `most starts per 1,000 residents in ${y}`]; }, spark: () => sparkOf(M.starts) },
 ];
 const homeEl = document.createElement('div'); homeEl.id = 'home'; homeEl.hidden = true; document.getElementById('app').appendChild(homeEl);
+
+// "Your life in Canada": the same published values as the map, read at the year someone was born and now. Kept in memory only.
+const LIFE = ['pop', 'age', 'o65', 'u15', 'ur', 'inc', 'starts', 'imm', 'csi', 'fr'];
+function lifeRows(by, g) {
+  const out = [];
+  for (const id of LIFE) { const m = M[id]; if (!m) continue;
+    const geo = y => (g === 'NT' || g === 'NU') && !m.split(y) ? 'NT+NU' : g;
+    const ys = m.only || Array.from({ length: m.years[1] - m.years[0] + 1 }, (_, i) => m.years[0] + i);
+    const have = ys.filter(y => m.value(geo(y), y) != null); if (!have.length) continue;
+    const y0 = have.find(y => y >= by) ?? null, y1 = have.at(-1); if (y0 == null || y0 === y1) continue;
+    out.push({ m, y0, y1, v0: m.value(geo(y0), y0), v1: m.value(geo(y1), y1), late: y0 !== by }); }
+  return out;
+}
+function drawLife() {
+  const yEl = document.getElementById('life-y'), gEl = document.getElementById('life-g'), box = document.getElementById('life-out'); if (!box) return;
+  const by = +yEl.value, g = gEl.value;
+  if (!(by >= 1971 && by < YMAX)) { box.innerHTML = by ? `<p class="hlq">${T('Choose a year from 1971: most series start then.', 'Choisissez une année à partir de 1971 : la plupart des séries commencent alors.')}</p>` : ''; return; }
+  const rows = lifeRows(by, g);
+  box.innerHTML = `<div class="hlrows">${rows.map(r => { const up = r.v1 > r.v0;
+    return `<button class="hlrow" data-life-m="${r.m.id}" data-life-y="${r.y0}"><span class="hll">${r.m.label}</span><span class="hlv"><i>${r.y0}${r.late ? '*' : ''}</i>${r.m.fmt(r.v0)}</span><span class="hla">${up ? '↗' : r.v1 < r.v0 ? '↘' : '→'}</span><span class="hlv"><i>${r.y1}</i><b>${r.m.fmt(r.v1)}</b></span></button>`; }).join('')}</div>
+    <p class="hlq">${T(`${NAMES[g]}. * the series starts after ${by}, so its first year is shown. Tap a row to see it on the map. Income is in 2024 dollars; the rest are as published.`, `${NAMES[g]}. * la série commence après ${by}; sa première année est affichée. Touchez une ligne pour la voir sur la carte. Le revenu est en dollars de 2024; le reste tel que publié.`)}</p>`;
+}
 function openHome(focusSearch = false) {
   const cards = HOME_CARDS.filter(c => M[c.m]).map((c, i) => { let big = ['', ''], sp = ''; try { big = c.big(); sp = sparkSvg(c.spark()); } catch (e) { console.warn('home card', c.q, e); }
     return `<button class="hcard" data-card="${i}"><span class="hsec">${c.sec}</span><span class="hq">${c.q}</span><span class="hbig">${big[0]}</span><span class="hsub">${big[1]}</span>${sp}</button>`; }).join('');
   const popNow = (() => { try { const y = lastYear(M.pop); return [(M.pop.value('CAN', y) / 1e6).toFixed(1) + 'M', y]; } catch (e) { return null; } })();
-  const W = [['map', 'Canada over time', `${YMAX - 1971} years of provinces and territories: people, jobs, housing, government money and elections, on one timeline.`, popNow ? `${popNow[0]} people on July 1, ${popNow[1]}` : '', 'map'],
-    ['nb', 'Neighbourhoods', `Every census tract in ${Object.keys(CMA_IDX).length} cities: income, rent, age, where people were born, language.`, '2021 Census', 'nb'],
-    ['cl', 'Climate', 'Weather stations back to the 1800s, warming at each one, and the glaciers measured every year.', 'Environment Canada · WGMS', 'cl'],
-    ['mn', 'Follow the dollar', 'Where federal money goes, who gets grants and contributions, and who wins contracts.', 'Public Accounts · proactive disclosure', 'mn']];
+  const W = [['map', T('Canada over time', 'Le Canada au fil du temps'), T(`${YMAX - 1971} years of provinces and territories: people, jobs, housing, government money and elections, on one timeline.`, `${YMAX - 1971} ans de provinces et territoires : population, emploi, logement, finances publiques et élections, sur une même ligne du temps.`), popNow ? T(`${popNow[0]} people on July 1, ${popNow[1]}`, `${popNow[0].replace('.', ',')} M d’habitants au 1er juillet ${popNow[1]}`) : '', 'map'],
+    ['nb', T('Neighbourhoods', 'Quartiers'), T(`Every census tract in ${Object.keys(CMA_IDX).length} cities: income, rent, age, where people were born, language.`, `Chaque secteur de recensement de ${Object.keys(CMA_IDX).length} villes : revenu, loyer, âge, lieu de naissance, langue.`), T('2021 Census', 'Recensement de 2021'), 'nb'],
+    ['cl', T('Climate and land', 'Climat et territoire'), T('Weather stations back to the 1800s, warming at each one, glaciers measured every year, and forests cut and burned.', 'Des stations météo depuis les années 1800, le réchauffement à chacune, les glaciers mesurés chaque année, et les forêts coupées et brûlées.'), T('Environment Canada · WGMS · NRCan', 'Environnement Canada · WGMS · RNCan'), 'cl'],
+    ['mn', T('Follow the dollar', 'Suivre l’argent'), T('Where federal money goes, who gets grants and contributions, and who wins contracts.', 'Où va l’argent fédéral, qui reçoit des subventions et contributions, et qui obtient des contrats.'), T('Public Accounts · proactive disclosure', 'Comptes publics · divulgation proactive'), 'mn']];
   const ICON = { map: '<path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z M9 4v14 M15 6v14"/>', nb: '<path d="M3 21V9l5-3 5 3v12 M13 21V5l4-2 4 2v16 M6 12h4 M6 16h4 M16 9h2 M16 13h2 M16 17h2"/>', cl: '<path d="M12 3a2 2 0 0 0-2 2v9.3a4 4 0 1 0 4 0V5a2 2 0 0 0-2-2z M12 10v7"/>', mn: '<path d="M12 2v20 M17 6.5c-1-1.5-2.8-2.5-5-2.5-2.8 0-5 1.6-5 3.8 0 5 10 2.6 10 7.8 0 2.2-2.2 3.9-5 3.9-2.4 0-4.4-1.1-5.3-2.8"/>' };
-  homeEl.innerHTML = `<div class="hin"><div class="hhead"><div class="hkick">Canada Through Time</div><h1>Canada, measured.</h1>
-    <p>People, places, money and climate from ${YMAX - 1971} years of official data. Every number links back to the table it came from.</p></div>
-    <div class="hsearch"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input id="q-search" type="search" placeholder="${isPhone() ? "Search a place, topic or year" : "Try “Alberta unemployment 2010”, “toronto rent”, “glaciers”"}" autocomplete="off" aria-label="Search"><div id="q-results" role="listbox"></div></div>
-    <div class="hworlds">${W.map(([k, t, d, f, ic]) => `<button class="hworld w-${k}" data-goworld="${k}"><svg viewBox="0 0 24 24" aria-hidden="true">${ICON[ic]}</svg><span class="wt">${t}</span><span class="wd">${d}</span><span class="wf">${f}</span><span class="wgo">Open →</span></button>`).join('')}</div>
-    <button class="hgap" data-goworld="wa"><span class="gk">Gaps worth fixing · 1</span><span class="gt">Drinking water advisories still in place</span><span class="gd">Long-term advisories on First Nations public water systems: which remain, for how long, and what fixed the ones that were lifted.</span><span class="wgo">Open →</span></button>
-    <h2 class="hq2">Questions to start with</h2>
+  homeEl.innerHTML = `<div class="hin"><div class="hhead"><div class="hkick">${T("Canada Through Time · Le Canada au fil du temps", "Le Canada au fil du temps · Canada Through Time")}</div><h1>${T("Canada, measured.", "Le Canada, en chiffres.")}</h1>
+    <p>${T(`People, places, money and climate from ${YMAX - 1971} years of official data. Every number links back to the table it came from.`, `Population, lieux, argent et climat : ${YMAX - 1971} ans de données officielles. Chaque chiffre renvoie au tableau d’où il vient.`)}</p>${LANG === "fr" ? '<p class="hnote">Certaines sections sont pour l’instant en anglais seulement; la traduction est en cours.</p>' : ""}</div>
+    <div class="hsearch"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input id="q-search" type="search" placeholder="${isPhone() ? T("Search a place, topic or year", "Chercher un lieu, un sujet, une année") : T("Try “Alberta unemployment 2010”, “toronto rent”, “glaciers”", "Essayez « Alberta unemployment 2010 », « toronto rent », « glaciers »")}" autocomplete="off" aria-label="Search"><div id="q-results" role="listbox"></div></div>
+    <div class="hworlds">${W.map(([k, t, d, f, ic]) => `<button class="hworld w-${k}" data-goworld="${k}"><svg viewBox="0 0 24 24" aria-hidden="true">${ICON[ic]}</svg><span class="wt">${t}</span><span class="wd">${d}</span><span class="wf">${f}</span><span class="wgo">${T("Open →", "Ouvrir →")}</span></button>`).join('')}</div>
+    <button class="hgap" data-goworld="wa"><span class="gk">${T("Gaps worth fixing · 1", "Écarts à combler · 1")}</span><span class="gt">${T("Drinking water advisories still in place", "Les avis sur la qualité de l’eau potable toujours en vigueur")}</span><span class="gd">${T("Long-term advisories on First Nations public water systems: which remain, for how long, and what fixed the ones that were lifted.", "Avis à long terme sur les réseaux publics d’eau des Premières Nations : ceux qui restent, depuis combien de temps, et ce qui a réglé ceux qui ont été levés.")}</span><span class="wgo">${T("Open →", "Ouvrir →")}</span></button>
+    <section class="hlife" aria-labelledby="hlife-h"><h2 id="hlife-h" class="hq2">${T("Your life in Canada", "Votre vie au Canada")}</h2>
+      <p class="hlq">${T("Enter the year you were born and where you live. Nothing leaves this device.", "Entrez votre année de naissance et où vous vivez. Rien ne quitte cet appareil.")}</p>
+      <div class="hlin"><label>${T("Born in", "Né·e en")} <input id="life-y" type="number" inputmode="numeric" min="1971" max="${YMAX - 1}" placeholder="1990"></label>
+      <label>${T("Living in", "Vivant en/au")} <select id="life-g">${PT13.map(g => `<option value="${g}" ${g === 'ON' ? 'selected' : ''}>${NAMES[g]}</option>`).join('')}</select></label></div>
+      <div id="life-out" class="hlout"></div></section>
+    <h2 class="hq2">${T("Questions to start with", "Des questions pour commencer")}</h2>
     <div class="hgrid">${cards}</div>
-    <div class="hfoot"><button class="hgo" data-close>Explore the map freely →</button><button class="linkish" data-story="0">Or read the story: ${STORY.title}</button><button class="linkish" data-goworld="ab">About and sources</button></div></div>`;
+    <div class="hfoot"><button class="hgo" data-close>${T("Explore the map freely →", "Explorer la carte librement →")}</button><button class="linkish" data-story="0">Or read the story: ${STORY.title}</button><button class="linkish" data-goworld="ab">${T("About and sources", "À propos et sources")}</button></div></div>`;
   homeEl.hidden = false; document.body.classList.add('home-on');
+  ['life-y', 'life-g'].forEach(id => document.getElementById(id)?.addEventListener('input', drawLife));
   const inp = document.getElementById('q-search'); inp.addEventListener('input', () => drawResults(inp.value)); inp.addEventListener('keydown', e => { if (e.key === 'Enter') { const r = searchAll(inp.value)[0]; if (r) { r.go(); closeHome(); } } if (e.key === 'Escape') closeHome(); });
   if (focusSearch) setTimeout(() => inp.focus(), 30);
 }
@@ -1558,6 +1586,7 @@ homeEl.addEventListener('click', e => {
   const gw = e.target.closest('[data-goworld]'); if (gw) { closeHome(); window.SHELL?.go(gw.dataset.goworld); return; }
   if (e.target.closest('[data-nbhome]')) { closeHome(); window.CITIES?.open(); return; }
   if (e.target.closest('[data-clhome]')) { closeHome(); window.CLIMATE?.open(); return; }
+  const lf = e.target.closest('[data-life-m]'); if (lf) { state.navQ = false; state.story = null; state.q = null; state.m = lf.dataset.lifeM; state.y = clampYear(M[state.m], +lf.dataset.lifeY); state.p = document.getElementById('life-g')?.value || null; state.city = null; state.cmp = null; closeHome(); update(); return; }
   const c = e.target.closest('[data-card]'); if (c) { const d = HOME_CARDS[+c.dataset.card]; state.navQ = false; state.story = null; state.q = null; state.m = d.m; state.y = clampYear(M[d.m], lastYear(M[d.m])); state.p = d.place && d.place !== 'CAN' ? d.place : null; state.city = null; state.cmp = null; closeHome(); update();
     if (d.open) setTimeout(() => { const det = [...document.querySelectorAll('details.path')].find(x => x.querySelector('summary').textContent.includes(d.open)); if (det) { det.open = true; } }, 50); return; }
   const r = e.target.closest('[data-res]'); if (r) { LAST_RESULTS[+r.dataset.res].go(); closeHome(); } });
