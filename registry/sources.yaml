@@ -744,6 +744,135 @@ sources:
       - "Only class 80 (permanent water) is used, to draw rivers and lakes as a backdrop."
     limitations:
       - "2021 water extent drawn under every year; rivers barely move at this scale."
+  copernicus_dem_glo30_n50w115:
+    title: "Copernicus DEM GLO-30, tile N50 W115"
+    publisher: "European Space Agency / Copernicus (data © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018)"
+    landing_url: "https://registry.opendata.aws/copernicus-dem/"
+    download_url: "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N50_00_W115_00_DEM/Copernicus_DSM_COG_10_N50_00_W115_00_DEM.tif"
+    raw_file: "data/raw/terrain/Copernicus_DSM_COG_10_N50_00_W115_00_DEM.tif"
+    sha256: "b9d2b78bf7bfd22a9a7ba9e1dc45a190f0d9b0bfe5cc568940e5ba793794dfaf"
+    retrieved: "2026-11-16"
+    coverage: "50-51 N, 115-114 W (Calgary)"
+    units: "Metres above the EGM2008 geoid; 30 m grid"
+    licence: "Copernicus DEM licence (free use with attribution)"
+    licence_url: "https://spacedata.copernicus.eu/documents/20123/121286/CSCDA_ESA_Mission-specific+Annex_31_Oct_22.pdf"
+    attribution: "Produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved."
+    quality_class: modelled_estimate
+    methodology_notes:
+      - "Used only as a shaded-relief backdrop (4x vertical exaggeration); no number is read from it."
+    limitations:
+      - "A surface model: it includes buildings and tree tops, not bare ground."
+  copernicus_dem_glo30_n50w114:
+    title: "Copernicus DEM GLO-30, tile N50 W114"
+    publisher: "European Space Agency / Copernicus (data © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018)"
+    landing_url: "https://registry.opendata.aws/copernicus-dem/"
+    download_url: "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N50_00_W114_00_DEM/Copernicus_DSM_COG_10_N50_00_W114_00_DEM.tif"
+    raw_file: "data/raw/terrain/Copernicus_DSM_COG_10_N50_00_W114_00_DEM.tif"
+    sha256: "dc47dc997e3ad7ffe834c33751eb8b7f5be32be617a015aa9430f79b2d6c7aff"
+    retrieved: "2026-11-16"
+    coverage: "50-51 N, 114-113 W (Calgary)"
+    units: "Metres above the EGM2008 geoid; 30 m grid"
+    licence: "Copernicus DEM licence (free use with attribution)"
+    licence_url: "https://spacedata.copernicus.eu/documents/20123/121286/CSCDA_ESA_Mission-specific+Annex_31_Oct_22.pdf"
+    attribution: "Produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved."
+    quality_class: modelled_estimate
+    methodology_notes:
+      - "Used only as a shaded-relief backdrop (4x vertical exaggeration); no number is read from it."
+    limitations:
+      - "A surface model: it includes buildings and tree tops, not bare ground."
+  copernicus_dem_glo30_n51w115:
+    title: "Copernicus DEM GLO-30, tile N51 W115"
+    publisher: "European Space Agency / Copernicus (data © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018)"
+    landing_url: "https://registry.opendata.aws/copernicus-dem/"
+    download_url: "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N51_00_W115_00_DEM/Copernicus_DSM_COG_10_N51_00_W115_00_DEM.tif"
+    raw_file: "data/raw/terrain/Copernicus_DSM_COG_10_N51_00_W115_00_DEM.tif"
+    sha256: "cf944654228c8479f7296cd19aa92c06a44d3562519237d8b7f6cdb3c4b50764"
+    retrieved: "2026-11-16"
+    coverage: "51-52 N, 115-114 W (Calgary)"
+    units: "Metres above the EGM2008 geoid; 30 m grid"
+    licence: "Copernicus DEM licence (free use with attribution)"
+    licence_url: "https://spacedata.copernicus.eu/documents/20123/121286/CSCDA_ESA_Mission-specific+Annex_31_Oct_22.pdf"
+    attribution: "Produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved."
+    quality_class: modelled_estimate
+    methodology_notes:
+      - "Used only as a shaded-relief backdrop (4x vertical exaggeration); no number is read from it."
+    limitations:
+      - "A surface model: it includes buildings and tree tops, not bare ground."
+  copernicus_dem_glo30_n51w114:
+    title: "Copernicus DEM GLO-30, tile N51 W114"
+    publisher: "European Space Agency / Copernicus (data © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018)"
+    landing_url: "https://registry.opendata.aws/copernicus-dem/"
+    download_url: "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N51_00_W114_00_DEM/Copernicus_DSM_COG_10_N51_00_W114_00_DEM.tif"
+    raw_file: "data/raw/terrain/Copernicus_DSM_COG_10_N51_00_W114_00_DEM.tif"
+    sha256: "74f940790e9bb782fc12049a67c17a87a788bd4484fcd9e0a8c0e591115e90ba"
+    retrieved: "2026-11-16"
+    coverage: "51-52 N, 114-113 W (Calgary)"
+    units: "Metres above the EGM2008 geoid; 30 m grid"
+    licence: "Copernicus DEM licence (free use with attribution)"
+    licence_url: "https://spacedata.copernicus.eu/documents/20123/121286/CSCDA_ESA_Mission-specific+Annex_31_Oct_22.pdf"
+    attribution: "Produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved."
+    quality_class: modelled_estimate
+    methodology_notes:
+      - "Used only as a shaded-relief backdrop (4x vertical exaggeration); no number is read from it."
+    limitations:
+      - "A surface model: it includes buildings and tree tops, not bare ground."
+  esa_worldcover_2021_n48w117:
+    title: "ESA WorldCover 10 m 2021 v200, tile N48 W117"
+    publisher: "European Space Agency (ESA WorldCover consortium)"
+    doi: "https://doi.org/10.5281/zenodo.7254221"
+    landing_url: "https://esa-worldcover.org/"
+    download_url: "https://esa-worldcover.s3.eu-central-1.amazonaws.com/v200/2021/map/ESA_WorldCover_10m_2021_v200_N48W117_Map.tif"
+    raw_file: "data/raw/terrain/ESA_WorldCover_10m_2021_v200_N48W117_Map.tif"
+    sha256: "f37e959415df150fa7cf6502604b4939b8ae91b157061b1fc4c16a6fdf6148fe"
+    retrieved: "2026-11-16"
+    coverage: "48-51 N, 117-114 W"
+    units: "Land cover class; 80 = permanent water bodies"
+    licence: "Creative Commons Attribution 4.0 International (CC BY 4.0)"
+    licence_url: "https://creativecommons.org/licenses/by/4.0/"
+    attribution: "© ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data (2021) processed by ESA WorldCover consortium."
+    quality_class: modelled_estimate
+    methodology_notes:
+      - "Only class 80 (permanent water) is used, to draw rivers and lakes as a backdrop."
+    limitations:
+      - "2021 water extent drawn under every year; rivers barely move at this scale."
+  esa_worldcover_2021_n48w114:
+    title: "ESA WorldCover 10 m 2021 v200, tile N48 W114"
+    publisher: "European Space Agency (ESA WorldCover consortium)"
+    doi: "https://doi.org/10.5281/zenodo.7254221"
+    landing_url: "https://esa-worldcover.org/"
+    download_url: "https://esa-worldcover.s3.eu-central-1.amazonaws.com/v200/2021/map/ESA_WorldCover_10m_2021_v200_N48W114_Map.tif"
+    raw_file: "data/raw/terrain/ESA_WorldCover_10m_2021_v200_N48W114_Map.tif"
+    sha256: "475e5da7ab3f930d24217aa35f029d021c944857d25c8856b3bda7602f44174c"
+    retrieved: "2026-11-16"
+    coverage: "48-51 N, 114-111 W"
+    units: "Land cover class; 80 = permanent water bodies"
+    licence: "Creative Commons Attribution 4.0 International (CC BY 4.0)"
+    licence_url: "https://creativecommons.org/licenses/by/4.0/"
+    attribution: "© ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data (2021) processed by ESA WorldCover consortium."
+    quality_class: modelled_estimate
+    methodology_notes:
+      - "Only class 80 (permanent water) is used, to draw rivers and lakes as a backdrop."
+    limitations:
+      - "2021 water extent drawn under every year; rivers barely move at this scale."
+  esa_worldcover_2021_n51w117:
+    title: "ESA WorldCover 10 m 2021 v200, tile N51 W117"
+    publisher: "European Space Agency (ESA WorldCover consortium)"
+    doi: "https://doi.org/10.5281/zenodo.7254221"
+    landing_url: "https://esa-worldcover.org/"
+    download_url: "https://esa-worldcover.s3.eu-central-1.amazonaws.com/v200/2021/map/ESA_WorldCover_10m_2021_v200_N51W117_Map.tif"
+    raw_file: "data/raw/terrain/ESA_WorldCover_10m_2021_v200_N51W117_Map.tif"
+    sha256: "00cb2bbb803aba2c3f9b155fc7c8a99053147d987507370c99ef76698860a896"
+    retrieved: "2026-11-16"
+    coverage: "51-54 N, 117-114 W"
+    units: "Land cover class; 80 = permanent water bodies"
+    licence: "Creative Commons Attribution 4.0 International (CC BY 4.0)"
+    licence_url: "https://creativecommons.org/licenses/by/4.0/"
+    attribution: "© ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data (2021) processed by ESA WorldCover consortium."
+    quality_class: modelled_estimate
+    methodology_notes:
+      - "Only class 80 (permanent water) is used, to draw rivers and lakes as a backdrop."
+    limitations:
+      - "2021 water extent drawn under every year; rivers barely move at this scale."
   statcan_35100026:
     title: "Crime severity index and weighted clearance rates, Canada, provinces, territories and Census Metropolitan Areas"
     publisher: "Statistics Canada"

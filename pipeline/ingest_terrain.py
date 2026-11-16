@@ -18,13 +18,18 @@ import numpy as np
 import rasterio
 from PIL import Image
 from rasterio.transform import from_origin
+import rasterio.windows
 from rasterio.warp import Resampling, reproject
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from common import ROOT, load_registry, verify_raw  # noqa: E402
 
 N = 1080
-CITIES = {"edmonton": dict(dem="copernicus_dem_glo30_n53w114", water="esa_worldcover_2021_n51w114")}
+CITIES = {   # tiles covering each city's square; elev = plausible median ground height (m) as a sanity check
+    "edmonton": dict(dem=["copernicus_dem_glo30_n53w114"], water=["esa_worldcover_2021_n51w114"], elev=(550, 800)),
+    "calgary": dict(dem=["copernicus_dem_glo30_n50w115", "copernicus_dem_glo30_n50w114", "copernicus_dem_glo30_n51w115", "copernicus_dem_glo30_n51w114"],
+                    water=["esa_worldcover_2021_n48w117", "esa_worldcover_2021_n48w114", "esa_worldcover_2021_n51w117", "esa_worldcover_2021_n51w114"], elev=(950, 1300)),
+}
 
 
 def main():
@@ -33,12 +38,14 @@ def main():
     for slug, src in CITIES.items():
         c = next(x for x in meta["cities"] if x["slug"] == slug); h = c["half_km"] * 1000; px = 2 * h / N
         crs = f"+proj=laea +lat_0={c['lat']} +lon_0={c['lon']} +datum=WGS84 +units=m +no_defs"; tf = from_origin(-h, h, px, px)
-        dem_p = verify_raw(reg[src["dem"]]["raw_file"], reg[src["dem"]]["sha256"])
-        wat_p = verify_raw(reg[src["water"]]["raw_file"], reg[src["water"]]["sha256"])
         z = np.full((N, N), np.nan, np.float32)
-        with rasterio.open(dem_p) as d:
-            reproject(rasterio.band(d, 1), z, dst_transform=tf, dst_crs=crs, resampling=Resampling.bilinear, dst_nodata=np.nan)
-        assert np.isfinite(z).mean() > 0.999 and 550 < np.nanmedian(z) < 800, np.nanmedian(z)   # Edmonton sits ~600-700 m
+        for k in src["dem"]:                     # each tile fills the part of the square it covers
+            part = np.full((N, N), np.nan, np.float32)
+            with rasterio.open(verify_raw(reg[k]["raw_file"], reg[k]["sha256"])) as d:
+                reproject(rasterio.band(d, 1), part, dst_transform=tf, dst_crs=crs, resampling=Resampling.bilinear, dst_nodata=np.nan)
+            z = np.where(np.isfinite(part) & ~np.isfinite(z), part, z)
+        lo, hi = src["elev"]
+        assert np.isfinite(z).mean() > 0.999 and lo < np.nanmedian(z) < hi, (slug, np.nanmedian(z))
         # hillshade: light from 315° azimuth, 40° altitude; 4x vertical exaggeration
         gy, gx = np.gradient(z * 4.0, px)
         slope = np.arctan(np.hypot(gx, gy)); aspect = np.arctan2(-gx, gy)
@@ -47,10 +54,14 @@ def main():
         hs = np.clip((hs - hs.min()) / (np.percentile(hs, 99.5) - hs.min()), 0, 1)
         Image.fromarray((hs * 255).astype(np.uint8), "L").save(ROOT / f"web/data/sprawl/{slug}_relief.png", optimize=True)
         w = np.zeros((N, N), np.float32)
-        with rasterio.open(wat_p) as d:
-            src_a = (d.read(1, window=d.window(*rasterio.warp.transform_bounds(crs, d.crs, -h, -h, h, h))) == 80).astype(np.float32)
-            win_tf = d.window_transform(d.window(*rasterio.warp.transform_bounds(crs, d.crs, -h, -h, h, h)))
-            reproject(src_a, w, src_transform=win_tf, src_crs=d.crs, dst_transform=tf, dst_crs=crs, resampling=Resampling.average)
+        for k in src["water"]:
+            with rasterio.open(verify_raw(reg[k]["raw_file"], reg[k]["sha256"])) as d:
+                win = d.window(*rasterio.warp.transform_bounds(crs, d.crs, -h, -h, h, h)).intersection(rasterio.windows.Window(0, 0, d.width, d.height))
+                if win.width < 1 or win.height < 1: continue
+                src_a = (d.read(1, window=win) == 80).astype(np.float32)
+                part = np.full((N, N), np.nan, np.float32)
+                reproject(src_a, part, src_transform=d.window_transform(win), src_crs=d.crs, dst_transform=tf, dst_crs=crs, resampling=Resampling.average, dst_nodata=np.nan)
+            w = np.where(np.isfinite(part), np.maximum(w, part), w)
         wm = (w >= 0.4).astype(np.uint8) * 255
         assert 0.002 < (wm > 0).mean() < 0.05, (wm > 0).mean()     # a river and some lakes, not a flood
         Image.fromarray(wm, "L").save(ROOT / f"web/data/sprawl/{slug}_water.png", optimize=True)
