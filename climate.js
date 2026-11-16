@@ -9,9 +9,9 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 const nf = (v, dp = 0) => v.toLocaleString('en-CA', { minimumFractionDigits: dp, maximumFractionDigits: dp });
 const sgn = (v, dp = 1, u = '') => (v > 0 ? '+' : v < 0 ? '−' : '±') + nf(Math.abs(v), dp) + u;
 
-let A, G, PROV, LAKES, el, deckI, ready;
+let A, G, F, PROV, LAKES, el, deckI, ready, fready;
 const S = { mode: 'temp', y: 2020, avg: true, st: null, gl: null, playing: false };
-const MODES = [['temp', 'Temperature'], ['precip', 'Precipitation'], ['trend', 'Long-term warming'], ['ice', 'Glaciers']];
+const MODES = [['temp', 'Temperature'], ['precip', 'Precipitation'], ['trend', 'Long-term warming'], ['ice', 'Glaciers'], ['forest', 'Forests']];
 const yr = (s, k) => s[k] ? s[k][0] : null;
 const at = (s, k, y) => { const p = s[k]; if (!p) return null; const i = y - p[0]; return i >= 0 && i < p[1].length ? p[1][i] : null; };
 function baseline(s, k) { const key = '_b' + k; if (key in s) return s[key]; let n = 0, sum = 0; for (let y = 1961; y <= 1990; y++) { const v = at(s, k, y); if (v != null) { n++; sum += v; } } return s[key] = n >= 25 ? sum / n : null; }
@@ -44,7 +44,7 @@ const fmtA = (mode, v) => mode === 'precip' ? sgn(v, 0, '%') : mode === 'trend' 
 function build() {
   el = document.createElement('section'); el.id = 'cl'; el.className = 'nbx'; el.hidden = true; el.setAttribute('aria-label', 'Climate');
   el.innerHTML = `<header id="cl-top" class="nbx-top"><button class="nbx-back" aria-label="Back to the national map">← Canada</button>
-    <div class="nbx-title"><span class="kick">Climate · Environment and Climate Change Canada, WGMS</span><h1>How Canada’s climate has changed</h1></div>
+    <div class="nbx-title"><span class="kick">Climate and land · Environment and Climate Change Canada, WGMS, Natural Resources Canada</span><h1>How Canada’s climate has changed</h1></div>
     <div id="cl-modes" role="tablist"></div></header>
   <aside id="cl-side" class="nbx-side"></aside>
   <div id="cl-map" class="nbx-map" aria-label="Map of climate stations"></div>
@@ -55,7 +55,7 @@ function build() {
   document.body.appendChild(el);
   el.querySelector('.nbx-back').onclick = close;
   el.addEventListener('click', e => {
-    const m = e.target.closest('[data-clm]'); if (m) { S.mode = m.dataset.clm; S.gl = null; if (S.mode === 'precip' && S.y > A.p_years[1]) S.y = A.p_years[1]; render(); return; }
+    const m = e.target.closest('[data-clm]'); if (m) { S.mode = m.dataset.clm; S.gl = null; if (S.mode === 'precip' && S.y > A.p_years[1]) S.y = A.p_years[1]; if (S.mode === 'forest') { loadForest().then(() => { S.y = Math.max(F.years[0], Math.min(F.years[1], S.y)); render(); }); return; } render(); return; }
     if (e.target.closest('[data-clavg]')) { S.avg = e.target.closest('[data-clavg]').dataset.clavg === '1'; render(); return; }
     if (e.target.closest('[data-clplay]')) { togglePlay(); return; }
     const g = e.target.closest('[data-glac]'); if (g) { S.gl = g.dataset.glac; S.gy = null; render(); return; }
@@ -69,7 +69,7 @@ let timer = null;
 function togglePlay() { S.playing = !S.playing; clearInterval(timer);
   if (S.playing) { const [y0, y1] = range(); if (S.y >= y1) S.y = Math.max(y0, 1900); timer = setInterval(() => { const [, b] = range(); if (S.y >= b) { S.playing = false; clearInterval(timer); render(); return; } S.y++; render(true); }, 160); }
   render(true); }
-const range = () => S.mode === 'precip' ? [1900, A.p_years[1]] : S.mode === 'temp' ? [1900, A.t_years[1]] : [1900, 2020];
+const range = () => S.mode === 'precip' ? [1900, A.p_years[1]] : S.mode === 'temp' ? [1900, A.t_years[1]] : S.mode === 'forest' ? F.years : [1900, 2020];
 
 function fit() { if (!deckI) return; const box = el.querySelector('#cl-map').getBoundingClientRect(), b = [3700, 300, 9100, 4900];   // km, StatCan Lambert: all of Canada
   const z = Math.log2(Math.min(box.width / (b[2] - b[0]), box.height / (b[3] - b[1])) * 0.98);
@@ -91,15 +91,16 @@ const SHARE = {};
 function render(fast) {
   pal(); writeHash();
   el.querySelector('#cl-modes').innerHTML = MODES.map(([k, l]) => `<button role="tab" data-clm="${k}" class="${S.mode === k ? 'on' : ''}" aria-selected="${S.mode === k}">${l}</button>`).join('');
-  const timed = S.mode === 'temp' || S.mode === 'precip', [y0, y1] = range();
+  const timed = S.mode === 'temp' || S.mode === 'precip' || S.mode === 'forest', [y0, y1] = range();
   el.querySelector('#cl-time').hidden = !timed;
   if (timed) { const t = el.querySelector('#cl-time'); if (!t.querySelector('#cl-year') || !fast) t.innerHTML = `<button data-clplay class="play" aria-label="Play">${S.playing ? '❚❚' : '▶'}</button><b id="cl-y"></b><input id="cl-year" type="range" min="${y0}" max="${y1}" step="1" aria-label="Year"><span class="smooth"><button data-clavg="1" class="${S.avg ? 'on' : ''}">10-year average</button><button data-clavg="0" class="${S.avg ? '' : 'on'}">Single year</button></span>`;
-    t.querySelector('#cl-year').value = S.y; t.querySelector('#cl-y').textContent = S.avg ? `${S.y - 9}–${S.y}` : S.y; t.querySelector('[data-clplay]').textContent = S.playing ? '❚❚' : '▶'; }
+    t.querySelector('#cl-year').value = S.y; t.querySelector('#cl-y').textContent = S.mode === 'forest' ? S.y : S.avg ? `${S.y - 9}–${S.y}` : S.y; const sm = t.querySelector('.smooth'); if (sm) sm.style.display = S.mode === 'forest' ? 'none' : ''; t.querySelector('[data-clplay]').textContent = S.playing ? '❚❚' : '▶'; }
   side(); detail(); legend(); drawMap();
 }
 function side() {
   const box = el.querySelector('#cl-side');
   if (S.mode === 'ice') { box.innerHTML = iceSide(); return; }
+  if (S.mode === 'forest') { box.innerHTML = forestSide(); return; }
   const rows = stationRows().filter(r => r[1] != null), up = rows.filter(r => r[1] > 0).length, mode = S.mode;
   const share = SHARE[mode] ||= warmerShare(mode === 'trend' ? 'temp' : mode);
   const what = mode === 'temp' ? 'warmer' : mode === 'precip' ? 'wetter' : 'warmer';
@@ -153,6 +154,7 @@ function cumChart(gs) {
 }
 function legend() {
   const box = el.querySelector('#cl-legend');
+  if (S.mode === 'forest') { box.innerHTML = `<div class="lg-t">Forest disturbed, each ${F.cell_km} km square</div><div class="lg2"><span><i style="background:rgb(${FIRE()})"></i>Burned in ${S.y}</span><span><i style="background:rgb(${CUT()})"></i>Harvested in ${S.y}</span></div><div class="lg2"><span><i style="background:rgb(${PAL.seq[1]})"></i>Earlier years since 1985, paler with time</span></div><div class="lg-miss">Bigger dot: more hectares. Under 50 ha in a year (earlier years: under 1% of the square) not drawn, still counted.</div>`; return; }
   if (S.mode === 'ice') { box.innerHTML = `<div class="lg-t">Glaciers with 10+ years of mass balance</div><div class="lg2"><span><i style="background:rgb(${PAL.seq[3]})"></i>Western mountains</span><span><i style="background:rgb(${PAL.dec[2]})"></i>Arctic</span></div><div class="lg-miss">Bigger circle: more years measured</div>`; return; }
   const d = DOM[S.mode], st = Array.from({ length: 11 }, (_, i) => { const v = -d + i / 10 * 2 * d; return `rgb(${col(S.mode, v)}) ${i * 10}%`; });
   const lo = S.mode === 'precip' ? 'drier' : 'colder', hi = S.mode === 'precip' ? 'wetter' : 'warmer';
@@ -206,6 +208,7 @@ function bindXs(box, g) {
 }
 function detail() {
   const box = el.querySelector('#cl-detail');
+  if (S.mode === 'forest') { box.innerHTML = forestDetail(); return; }
   if (S.mode === 'ice') {
     const g = G.glaciers.find(x => x.id === S.gl);
     if (!g) { box.innerHTML = `<h3>Click a glacier</h3><p class="hint">Mass balance is measured with stakes and snow pits across the glacier every year. Only a handful of Canadian glaciers have long records; these are all of them in the WGMS database with 10 or more years.</p>`; return; }
@@ -244,7 +247,8 @@ function drawMap() {
   const land = new GeoJsonLayer({ id: 'land', data: PROV, filled: true, stroked: true, getFillColor: [...PAL.land, 255], getLineColor: [...PAL.line, 120], lineWidthUnits: 'pixels', getLineWidth: 0.8, updateTriggers: { getFillColor: key, getLineColor: key } });
   const lakes = new GeoJsonLayer({ id: 'lakes', data: LAKES, filled: true, stroked: false, getFillColor: [...PAL.water, 255], updateTriggers: { getFillColor: key } });
   let marks;
-  if (S.mode === 'ice') {
+  if (S.mode === 'forest') marks = forestMarks(key);
+  else if (S.mode === 'ice') {
     marks = [new ScatterplotLayer({ id: 'gl', data: G.glaciers, pickable: true, getPosition: g => g.xy, radiusUnits: 'pixels', getRadius: g => 4 + Math.sqrt(g.n) * 1.1, stroked: true, lineWidthUnits: 'pixels',
         getLineWidth: g => g.id === S.gl ? 3 : 1.2, getFillColor: g => [...regionCol(g), 230], getLineColor: g => g.id === S.gl ? [...PAL.sel, 255] : [...PAL.ink, 200], updateTriggers: { getLineWidth: key, getLineColor: key, getFillColor: key } }),
       new TextLayer({ id: 'gl-lab', data: G.glaciers.filter(g => g.n >= 40 || g.id === S.gl), getPosition: g => g.xy, getText: g => g.name.replace(' Ice Cap', ''), getSize: 12, getColor: [...PAL.ink, 255], getPixelOffset: g => ({ Helm: [-10, 8], White: [10, 9], Meighen: [10, -7] })[g.name.replace(' Ice Cap', '')] || [10, 0], getTextAnchor: g => g.name === 'Helm' ? 'end' : 'start', getAlignmentBaseline: 'center',
@@ -265,10 +269,50 @@ function tip({ object, x, y }) {
   t.style.display = 'block'; t.style.left = x + 14 + 'px'; t.style.top = y + 14 + 'px';
 }
 
+
+// ---------------------------------------------------------------- forests (NRCan CanLaD 1984–2015, aggregated to 9 km squares)
+const FIRE = () => hex(css('--accent')), CUT = () => PAL.dec[2];
+const loadForest = () => fready ||= J('../data/forest/disturbance.json').then(f => { F = f; });
+const MIN_NOW = 50, MIN_PAST = 324;   // drawing only: squares below these hectares are not drawn but stay in every total
+const haF = v => v >= 1e6 ? nf(v / 1e6, 2) + ' million ha' : nf(v) + ' ha';
+function forestMarks(key) {
+  const y = S.y, data = [];
+  for (const c of F.cells) { let f = 0, h = 0, past = 0, last = 0;
+    for (const [yy, a, b] of c[2]) { if (yy === y) { f = a; h = b; } else if (yy < y) { past += a + b; last = Math.max(last, yy); } }
+    if (f + h >= MIN_NOW || past >= MIN_PAST) data.push({ c, f, h, past, last }); }
+  const km = F.cell_km, side = d => Math.sqrt(d / (km * km * 100)) * km;   // a fully disturbed square is drawn its own width
+  return [new ScatterplotLayer({ id: 'fo-past', data: data.filter(d => d.past >= MIN_PAST), getPosition: d => [d.c[0], d.c[1]], radiusUnits: 'common', getRadius: d => side(d.past) / 2,
+      getFillColor: d => [...PAL.seq[2], Math.round(150 - Math.min(110, (y - d.last) * 5))], stroked: false, updateTriggers: { getFillColor: key, getRadius: key } }),
+    new ScatterplotLayer({ id: 'fo-now', data: data.filter(d => d.f + d.h >= MIN_NOW), getPosition: d => [d.c[0], d.c[1]], radiusUnits: 'common', radiusMinPixels: 1.5, getRadius: d => side(d.f + d.h) / 2 * 1.4,
+      getFillColor: d => [...(d.f >= d.h ? FIRE() : CUT()), 240], stroked: false, updateTriggers: { getFillColor: key, getRadius: key }, transitions: { getRadius: 120 } })];
+}
+function forestChart(g) {
+  const T = F.totals[g], n = T.fire.length, Wd = 290, H = 110, mx = Math.max(...T.fire.map((v, i) => v + T.harvest[i])), X = i => i / n * Wd, bw = Wd / n - 1.2, Y = v => v / mx * H;
+  const bars = T.fire.map((v, i) => { const hv = T.harvest[i], yr = F.years[0] + i;
+    return `<rect x="${X(i)}" y="${H - Y(hv)}" width="${bw}" height="${Y(hv)}" fill="rgb(${CUT()})"><title>${yr}: ${haF(hv)} harvested</title></rect><rect x="${X(i)}" y="${H - Y(hv) - Y(v)}" width="${bw}" height="${Y(v)}" fill="rgb(${FIRE()})"><title>${yr}: ${haF(v)} burned</title></rect>`; }).join('');
+  const k = S.y - F.years[0];
+  return `<svg class="cl-share" viewBox="0 0 ${Wd} ${H + 16}" role="img" aria-label="Hectares burned and harvested each year">${bars}<line x1="${X(k) + bw / 2}" x2="${X(k) + bw / 2}" y1="0" y2="${H}" class="cur"/>
+    <text x="0" y="${H + 12}">${F.years[0]}</text><text x="${Wd}" y="${H + 12}" text-anchor="end">${F.years[1]}</text><text x="${Wd}" y="10" text-anchor="end" class="ax">${haF(mx)}</text></svg>`;
+}
+function forestSide() {
+  const T = F.totals.CAN, i = S.y - F.years[0], sum = a => a.reduce((x, y) => x + y, 0);
+  return `<h2>Forests cut and burned, and growing back</h2><p class="q">Each year’s stand-replacing disturbance, mapped from Landsat satellite images at 30 m: forest that burned or was harvested.</p>
+    <div class="big"><b>${haF(T.fire[i] + T.harvest[i])}</b><span>disturbed in ${S.y}: ${haF(T.fire[i])} burned, ${haF(T.harvest[i])} harvested</span></div>
+    <p class="rng">1985–2015 together: <b>${haF(sum(T.fire))}</b> burned and <b>${haF(sum(T.harvest))}</b> harvested.</p>
+    <h4>Each year <small><i class="sw" style="background:rgb(${FIRE()})"></i>burned <i class="sw" style="background:rgb(${CUT()})"></i>harvested</small></h4>${forestChart('CAN')}
+    <p class="def">Fire swings hugely from year to year; harvest is steadier. Natural Resources Canada does not count harvest or fire as deforestation: the land stays forest and is expected to regrow. Pale squares show earlier disturbance, fading with the years since.</p>
+    <p class="def">${F.notes.slice(1).map(esc).join(' ')}</p>
+    <p class="src">Source: Natural Resources Canada, Canada Landsat Disturbance (CanLaD) 1984–2015, Open Government Licence – Canada. Totals add the 30 m pixels (0.09 ha each).</p>`;
+}
+function forestDetail() {
+  const rows = Object.entries(F.totals).filter(([g]) => g !== 'CAN').map(([g, t]) => [g, t.fire.reduce((a, b) => a + b, 0), t.harvest.reduce((a, b) => a + b, 0)]).sort((a, b) => b[1] + b[2] - a[1] - a[2]);
+  return `<h3>By province and territory</h3><p class="hint">Hectares disturbed, 1985–2015 together.</p><div class="nb-list">${rows.map(([g, f, h]) => `<div class="fo-row"><b>${g}</b><span>${haF(f)} burned</span><span>${haF(h)} harvested</span></div>`).join('')}</div>`;
+}
+
 // ---------------------------------------------------------------- open / close / hash
 function writeHash() { const h = `#cl=${S.mode}/${S.y}${S.avg ? '' : '/y'}${S.st ? '/s' + S.st : ''}${S.gl ? '/g' + S.gl : ''}`; if (location.hash !== h) history.replaceState(null, '', h); }
-function readHash() { const h = decodeURIComponent(location.hash); if (!h.startsWith('#cl=')) return; const [m, y, ...rest] = h.slice(4).split('/');
-  if (MODES.some(x => x[0] === m)) S.mode = m; if (+y >= 1900 && +y <= 2025) S.y = +y;
+async function readHash() { const h = decodeURIComponent(location.hash); if (!h.startsWith('#cl=')) return; const [m, y, ...rest] = h.slice(4).split('/');
+  if (MODES.some(x => x[0] === m)) S.mode = m; if (+y >= 1900 && +y <= 2025) S.y = +y; if (S.mode === 'forest') { await loadForest(); S.y = Math.max(F.years[0], Math.min(F.years[1], S.y)); }
   for (const r of rest) { if (r === 'y') S.avg = false; else if (r[0] === 's') S.st = r.slice(1); else if (r[0] === 'g') S.gl = r.slice(1); } }
 let prevHash = '';
 async function open(opts = {}) {
@@ -278,7 +322,7 @@ async function open(opts = {}) {
   if (!ready) ready = Promise.all([J('../data/climate/ahccd.json'), J('../data/climate/glaciers.json'), J('../data/provinces.geojson'), J('../data/lakes.geojson')]).then(([a, g, p, l]) => {
     A = a; G = g; const km = fc => { const c = x => typeof x[0] === 'number' ? [x[0] / 1e3, x[1] / 1e3] : x.map(c); return { ...fc, features: fc.features.map(f => ({ ...f, geometry: { ...f.geometry, coordinates: c(f.geometry.coordinates) } })) }; };
     PROV = km(p); LAKES = km(l); S.y = A.t_years[1]; });
-  await ready; readHash();
+  await ready; await readHash();
   if (opts.mode) S.mode = opts.mode;
   if (!deckI) deckI = new Deck({ parent: el.querySelector('#cl-map'), views: new OrthographicView({ flipY: false }), controller: { doubleClickZoom: true }, initialViewState: { target: [6400, 2400, 0], zoom: -3 },
     getCursor: ({ isHovering }) => isHovering ? 'pointer' : 'grab', onHover: tip,
