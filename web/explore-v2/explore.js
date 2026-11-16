@@ -771,6 +771,49 @@ playBtns.forEach(b => b.onclick = toggle);
 document.getElementById('tl-speed').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; state.speed = +b.dataset.s;
   document.querySelectorAll('#tl-speed button').forEach(x => x.classList.toggle('on', x === b)); });
 
+// ---------------------------------------------------------------- drag the map through time
+// At the whole-Canada view, a sideways drag anywhere on the map travels through the years (the year grows under your finger)
+// and an up/down swipe moves to the next or previous layer in the same section. Zoomed in, or with Shift held, drag moves the
+// map as before; two fingers always pinch and move it. Keyboard and the timeline slider still work everywhere.
+{ const hud = document.createElement('div'); hud.id = 'scrub-hud'; hud.hidden = true; hud.innerHTML = '<div class="sh-ticks"></div><b class="sh-y"></b><span class="sh-m"></span>'; mapEl.appendChild(hud);
+  const hint = document.createElement('div'); hint.id = 'scrub-hint'; mapEl.appendChild(hint);
+  const pts = new Map(); let g = null, raf = 0;
+  const atFit = () => view.zoom <= fitView().zoom + 0.35;
+  const sibs = () => { const sec = SEC_OF[M[state.m].group]; return MEASURES.filter(m => SEC_OF[m.group] === sec); };
+  const showHint = () => { try { if (localStorage.getItem('ct.scrubHint') || STUDIO) return; } catch (e) {}
+    hint.textContent = isPhone() ? T('Drag sideways on the map to travel through time · swipe up or down to change layer', 'Glissez de côté sur la carte pour voyager dans le temps · vers le haut ou le bas pour changer de couche')
+      : T('Drag sideways on the map to travel through time · swipe up or down to change layer · Shift-drag moves the map', 'Glissez de côté pour voyager dans le temps · vers le haut ou le bas pour changer de couche · Maj-glisser déplace la carte');
+    hint.classList.add('on'); setTimeout(() => hint.classList.remove('on'), 6500); };
+  setTimeout(showHint, 2500);
+  const ticks = (m, y) => { const [a, b] = m.years, n = b - a; let h = '';
+    for (let k = -8; k <= 8; k++) { const yy = y + k; if (yy < a || yy > b) continue; const big = yy % 10 === 0;
+      h += `<i class="${big ? 'big' : ''}${k === 0 ? ' now' : ''}" style="left:calc(50% + ${k * 14}px)"></i>${big && Math.abs(k) > 1 ? `<em style="left:calc(50% + ${k * 14}px)">${yy}</em>` : ''}`; }
+    return h; };
+  const place = () => { const w = mapEl.clientWidth; hud.style.left = Math.max(130, Math.min(w - 130, g.x)) + 'px'; hud.style.top = Math.max(70, g.y - 110) + 'px'; };
+  const paint = () => { raf = 0; if (!g) return; const m = M[state.m]; place();
+    if (g.mode === 'time') { hud.querySelector('.sh-y').textContent = state.y; hud.querySelector('.sh-ticks').innerHTML = ticks(m, state.y); hud.querySelector('.sh-m').textContent = m.label; }
+    else { const list = sibs(), i = list.findIndex(x => x.id === state.m), j = Math.max(0, Math.min(list.length - 1, i + (g.dy < -40 ? 1 : g.dy > 40 ? -1 : 0)));
+      hud.querySelector('.sh-ticks').innerHTML = '';
+      hud.querySelector('.sh-y').textContent = j === i ? '↕' : (g.dy < 0 ? '↑ ' : '↓ ') + list[j].label; hud.querySelector('.sh-m').textContent = j === i ? T('Swipe further to change layer', 'Glissez plus loin pour changer de couche') : T('Release to switch', 'Relâchez pour changer'); g.target = list[j].id; } };
+  const kill = e => { e.stopPropagation(); e.preventDefault(); };
+  mapEl.addEventListener('pointerdown', e => { pts.set(e.pointerId, e);
+    if (pts.size > 1 || e.shiftKey || e.button !== 0 || !atFit() || state.story || document.body.classList.contains('home-on')) { g = null; hud.hidden = true; return; }
+    g = { id: e.pointerId, x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY, yr0: state.y, mode: null }; }, true);
+  mapEl.addEventListener('pointermove', e => { if (pts.has(e.pointerId)) pts.set(e.pointerId, e);
+    if (!g || e.pointerId !== g.id) return; if (pts.size > 1) { g = null; hud.hidden = true; return; }
+    const dx = e.clientX - g.x0, dy = e.clientY - g.y0, r = mapEl.getBoundingClientRect(); g.x = e.clientX - r.left; g.y = e.clientY - r.top; g.dy = dy;
+    if (!g.mode) { if (Math.abs(dx) > 9 && Math.abs(dx) > Math.abs(dy) * 1.2) g.mode = 'time'; else if (Math.abs(dy) > 14 && Math.abs(dy) > Math.abs(dx) * 1.6) g.mode = 'layer'; else return;
+      stop(); hud.hidden = false; hud.className = 'sh-' + g.mode; try { mapEl.setPointerCapture(e.pointerId); } catch (e3) {} try { localStorage.setItem('ct.scrubHint', '1'); } catch (e2) {} hint.classList.remove('on'); }
+    kill(e);
+    if (g.mode === 'time') { const m = M[state.m], span = m.years[1] - m.years[0], per = Math.max(10, Math.min(28, r.width * 0.8 / Math.max(1, span)));
+      const y = clampYear(m, Math.round(g.yr0 + dx / per)); if (y !== state.y) { state.y = y; if (navigator.vibrate && isPhone()) navigator.vibrate(4); update(); } }
+    if (!raf) raf = requestAnimationFrame(paint); }, true);
+  const end = e => { pts.delete(e.pointerId); if (!g || e.pointerId !== g.id) return; const was = g; g = null;
+    if (was.mode === 'layer') { const list = sibs(), i = list.findIndex(x => x.id === state.m); was.target = list[Math.max(0, Math.min(list.length - 1, i + (was.dy < -40 ? 1 : was.dy > 40 ? -1 : 0)))].id; }
+    if (was.mode) { kill(e); hud.hidden = true; if (was.mode === 'layer' && was.target && was.target !== state.m) { state.navQ = false; state.m = was.target; state.y = clampYear(M[state.m], state.y); update(); } } };
+  mapEl.addEventListener('pointerup', end, true); mapEl.addEventListener('pointercancel', end, true);
+  mapEl.addEventListener('click', e => { if (hud.dataset.justDragged) { kill(e); delete hud.dataset.justDragged; } }, true); }
+
 // ---------------------------------------------------------------- colours and map surface
 { const pp = document.getElementById('palpop');
   pp.innerHTML = `<h3>Colours · proposed themes</h3>${PALETTES.map(([id, name, mode], i) => `${i === RELEASE ? '<h3>Review only · for comparison</h3>' : ''}<button data-pal="${id}" class="${id === PAL ? 'on' : ''}" aria-pressed="${id === PAL}"><span class="sws">${PAL_SW[id].map(c => `<i style="background:${c}"></i>`).join('')}</span><span>${name}</span><small>${mode}</small></button>`).join('')}
