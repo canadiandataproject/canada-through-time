@@ -9,6 +9,7 @@ const SHORTS = {
   12: { t: "Ottawa's $493 billion receipt", say: 'Federal spending in 2025–26. Tap a department to see its own receipt.', next: ['Federal spending per person, by province', '#fedexp-2025'] },
   13: { t: "Who got Ottawa's biggest contracts?", say: 'Every disclosed federal contract: by department, vendor and province.', next: ["Ottawa's $493B receipt", '#mn=spend/2026'] },
   14: { t: 'Toronto: one city, 1,227 neighbourhoods', say: 'Tap any neighbourhood, then "Share card" to compare it with the city.', next: ['Now try Edmonton', '#nb=835/hhinc'] },
+  16: { t: 'Edmonton spread out: 1975 to 2020', say: 'Each colour is the first year a 100 m square was built up. Drag sideways to travel through time.', next: ['Now try Calgary', '#cl=sprawl/2020/ccalgary'] },
   15: { t: "Canada's temporary residents: 1.3M → 2.9M → 2.8M", say: 'Temporary residents as a share of each province. Drag the year.', next: ['Where do new permanent residents settle?', '#prdest-2025'] },
 };
 const n = +new URLSearchParams(location.search).get('s');
