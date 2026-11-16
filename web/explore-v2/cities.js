@@ -150,6 +150,7 @@ function onClick(e) {
   const t = e.target.closest('[data-nbt]'); if (t) { S.tract = t.dataset.nbt; render(); flyTo(t.dataset.nbt); return; }
   const s = e.target.closest('[data-scale]'); if (s) { S.scale = s.dataset.scale; render(); return; }
   if (e.target.closest('[data-nbclear]')) { S.tract = null; render(); }
+  if (e.target.closest('[data-nbcard]')) { shareCard(S.tract).catch(err => console.warn('share card', err)); }
 }
 function setCity(id) { S.cma = id; S.tract = null; render(); fit(); }
 
@@ -233,7 +234,7 @@ function detail(m) {
   const vms = VM_SUB.slice(1).map(([k, n]) => [n, val(a, k)]).filter(r => r[1] > 0).sort((x, y) => y[1] - x[1]).slice(0, 6);
   const bar = (n, v, mx, f) => `<div class="hb"><span>${esc(n)}</span><em style="--w:${v / mx * 100}%"></em><b>${f}</b></div>`;
   const lf = a.tnr?.[1];
-  box.innerHTML = `<div class="dt-h"><div><span class="kick">${esc(cityName(city))}</span><h3>Tract ${esc(a.name)}</h3></div><button data-nbclear aria-label="Close">×</button></div>
+  box.innerHTML = `<div class="dt-h"><div><span class="kick">${esc(cityName(city))}</span><h3>Tract ${esc(a.name)}</h3></div><div class="dt-act"><button data-nbcard class="nb-cardbtn" aria-label="Make a share card for this neighbourhood">Share card</button><button data-nbclear aria-label="Close">×</button></div></div>
     <div class="dt-pop"><b>${val(a, 'pop') == null ? '—' : nf(val(a, 'pop'))}</b> people in 2021${val(a, 'area') ? ` · ${nf(val(a, 'area'), 2)} km²` : ''}</div>
     <table class="dt"><thead><tr><th></th><th>Tract</th><th>City</th></tr></thead><tbody>${rows}</tbody></table>
     ${pobs.length && ph ? `<h4>Immigrants by place of birth <small>share of residents</small></h4>${pobs.map(([k, n]) => bar(P.pob_names[k], n, pobs[0][1], pc1(n / ph * 100))).join('')}` : ''}
@@ -296,3 +297,59 @@ async function open(opts = {}) {
 function close() { el.hidden = true; document.body.classList.remove('nb-on'); history.replaceState(null, '', prevHash || location.pathname + location.search); dispatchEvent(new Event('nb-close')); }
 window.CITIES = { open, close, _render: () => render(), get state() { return S; }, get ready() { return ready; }, MS, VM_SUB, CITY_NAMES: () => CITIES.map(c => [c.code, cityName(c)]) };
 if (location.hash.startsWith('#nb=')) open();
+
+
+// ---------------------------------------------------------------- share card
+// A phone-sized picture of one neighbourhood against its city (1080 × 1350), saved or shared through the phone's share sheet.
+function nearestPlace(f) {
+  let sx = 0, sy = 0, n = 0; const walk = c => typeof c[0] === 'number' ? (sx += c[0], sy += c[1], n++) : c.forEach(walk); walk(f.geometry.coordinates);
+  const x = sx / n, y = sy / n; let best = null, bd = 1e9;       // shapes are already in km here
+  for (const [name, px, py] of PLACES[S.cma] || []) { const d = Math.hypot(px - x, py - y); if (d < bd) { bd = d; best = name; } }
+  return best && bd < 4 ? best : null;
+}
+async function shareCard(id) {
+  const a = P.areas[id], c = P.areas[S.cma], city = cityName(CITIES.find(x => x.id === S.cma)), f = (FEATS[S.cma] || []).find(x => x.properties.DGUID === id);
+  if (!a || !f) return;
+  const near = nearestPlace(f);
+  const ROWS = [['hhinc', 'Median household income'], ['age', 'Median age'], ['imm', 'Born outside Canada'], ['rent', 'Renters'], ['degree', "Bachelor's degree or higher"], ['homeval', 'Median home value']];
+  const rows = ROWS.map(([k, l]) => { const mm = MK[k]; if (!mm) return null; const tv = mm.get(a, null), cv = mm.get(c, null); return tv == null || cv == null ? null : [l, tv, cv, mm.f]; }).filter(Boolean).slice(0, 5);
+  const W = 1080, H = 1350, cv = document.createElement('canvas'); cv.width = W; cv.height = H; const g = cv.getContext('2d');
+  const C = n => getComputedStyle(document.body).getPropertyValue(n).trim();
+  const page = C('--page') || '#F3EEE3', ink = C('--ink-1') || '#1D2326', ink3 = C('--ink-3') || '#62686A', acc = C('--accent') || '#C2402A', land = C('--land') || '#FBF8F1';
+  const seq = [1, 2, 3, 4, 5].map(i => C('--seq-' + i));
+  await document.fonts.ready;
+  const serif = getComputedStyle(document.body).fontFamily || 'serif';
+  g.fillStyle = page; g.fillRect(0, 0, W, H);
+  g.fillStyle = acc; g.font = `600 30px ${serif}`; g.fillText('MY NEIGHBOURHOOD VS ' + city.toUpperCase(), 70, 110);
+  const code = a.name.length > 7 ? a.name.slice(3) : a.name;
+  g.fillStyle = ink; g.font = `700 72px ${serif}`; g.fillText(near ? `Near ${near}` : `Tract ${code}`, 70, 200, 680);
+  g.fillStyle = ink3; g.font = `400 30px ${serif}`; g.fillText(`Census tract ${code} · ${val(a, 'pop') == null ? '' : nf(val(a, 'pop')) + ' people · '}2021 Census`, 70, 250, 680);
+  // silhouette of the tract
+  let b = [1e12, 1e12, -1e12, -1e12]; const walk = q => typeof q[0] === 'number' ? (b = [Math.min(b[0], q[0]), Math.min(b[1], q[1]), Math.max(b[2], q[0]), Math.max(b[3], q[1])]) : q.forEach(walk); walk(f.geometry.coordinates);
+  const bx = 800, by = 70, bw = 210, bh = 190, k = Math.min(bw / (b[2] - b[0]), bh / (b[3] - b[1]));
+  const P2 = ([x, y]) => [bx + (x - b[0]) * k + (bw - (b[2] - b[0]) * k) / 2, by + bh - (y - b[1]) * k - (bh - (b[3] - b[1]) * k) / 2];
+  const polys = f.geometry.type === 'Polygon' ? [f.geometry.coordinates] : f.geometry.coordinates;
+  g.fillStyle = seq[2] || acc; g.strokeStyle = ink; g.lineWidth = 3;
+  for (const poly of polys) { g.beginPath(); for (const ring of poly) ring.forEach((pt, i) => { const [x, y] = P2(pt); i ? g.lineTo(x, y) : g.moveTo(x, y); }); g.closePath(); g.fill('evenodd'); g.stroke(); }
+  // rows: tract value, city value, a bar each
+  let y = 350;
+  g.fillStyle = ink3; g.font = `600 26px ${serif}`; g.fillText('THIS NEIGHBOURHOOD', 70, y - 30); g.fillText(city.toUpperCase(), 420, y - 30);
+  for (const [l, tv, cvv, fmt] of rows) {
+    g.fillStyle = ink; g.font = `600 32px ${serif}`; g.fillText(l, 70, y + 40);
+    g.font = `700 64px ${serif}`; g.fillStyle = acc; g.fillText(fmt(tv), 70, y + 115);
+    g.font = `500 40px ${serif}`; g.fillStyle = ink3; g.fillText(fmt(cvv), 420, y + 112);
+    const mx = Math.max(tv, cvv) || 1; g.fillStyle = acc; g.fillRect(70, y + 140, 940 * tv / mx, 10); g.fillStyle = ink3; g.globalAlpha = 0.45; g.fillRect(70, y + 156, 940 * cvv / mx, 10); g.globalAlpha = 1;
+    y += 164;
+    if (y > H - 330) break;
+  }
+  g.fillStyle = ink3; g.font = `400 24px ${serif}`;
+  g.fillText('Statistics Canada, 2021 Census of Population (income for 2020).', 70, H - 128); g.fillText('A census tract is an area of about 2,500–8,000 people.', 70, H - 96);
+  g.fillStyle = ink; g.font = `700 30px ${serif}`; g.fillText('Find yours: Canada Through Time · every neighbourhood in 50 cities', 70, H - 60);
+  const blob = await new Promise(r => cv.toBlob(r, 'image/png'));
+  const name = `neighbourhood-${city.toLowerCase().replace(/[^a-z]+/g, '-')}-${a.name}.png`;
+  const file = new File([blob], name, { type: 'image/png' });
+  const url = location.href;
+  if (navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: `My neighbourhood vs ${city}`, text: url }); return; } catch (e) { if (e.name === 'AbortError') return; } }
+  const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = name; link.click(); setTimeout(() => URL.revokeObjectURL(link.href), 4000);
+}
+window.CITIES_SHARECARD = shareCard;
