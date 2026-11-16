@@ -4,10 +4,11 @@ const WORLDS = [
   ['map', T('Canada over time', 'Le Canada au fil du temps'), T('Map', 'Carte'), '<path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z M9 4v14 M15 6v14"/>'],
   ['nb', T('Neighbourhoods', 'Quartiers'), T('Cities', 'Villes'), '<path d="M3 21V9l5-3 5 3v12 M13 21V5l4-2 4 2v16 M6 12h4 M6 16h4 M16 9h2 M16 13h2 M16 17h2"/>'],
   ['cl', T('Climate', 'Climat'), T('Climate', 'Climat'), '<path d="M12 3a2 2 0 0 0-2 2v9.3a4 4 0 1 0 4 0V5a2 2 0 0 0-2-2z M12 10v7"/>'],
+  ['rc', T('Report card', 'Bulletin'), T('Grades', 'Notes'), '<path d="M6 3h9l4 4v14H6z M14 3v5h5 M9 12h6 M9 16h4"/>'],
   ['mn', T('Follow the dollar', 'Suivre l’argent'), T('Money', 'Argent'), '<path d="M12 2v20 M17 6.5c-1-1.5-2.8-2.5-5-2.5-2.8 0-5 1.6-5 3.8 0 5 10 2.6 10 7.8 0 2.2-2.2 3.9-5 3.9-2.4 0-4.4-1.1-5.3-2.8"/>'],
 ];
-const API = { nb: () => window.CITIES, cl: () => window.CLIMATE, mn: () => window.MONEY, wa: () => window.WATER, ab: () => window.ABOUT };
-const kindOf = h => h.startsWith('#nb=') ? 'nb' : h.startsWith('#cl=') ? 'cl' : h.startsWith('#mn=') ? 'mn' : h.startsWith('#wa=') ? 'wa' : h === '#about' ? 'ab' : 'map';
+const API = { nb: () => window.CITIES, cl: () => window.CLIMATE, mn: () => window.MONEY, wa: () => window.WATER, rc: () => window.REPORT, ab: () => window.ABOUT };
+const kindOf = h => h.startsWith('#nb=') ? 'nb' : h.startsWith('#cl=') ? 'cl' : h.startsWith('#mn=') ? 'mn' : h.startsWith('#wa=') ? 'wa' : h.startsWith('#rc=') ? 'rc' : h === '#about' ? 'ab' : 'map';
 const bar = document.createElement('header');
 bar.id = 'shell';
 bar.innerHTML = `<button class="brand" data-shell-home aria-label="Home"><span class="glyph" aria-hidden="true"><i></i><i></i><i></i></span><span class="bt">Canada <em>Through Time</em></span></button>
@@ -40,14 +41,14 @@ bar.addEventListener('click', e => {
 const syncFromHash = () => mark(kindOf(location.hash));
 // following a link inside the page (or Back/Forward) switches section cleanly: close whatever else is open
 addEventListener('hashchange', async () => { const h = location.hash, k = kindOf(h);
-  const openNow = ['nb', 'cl', 'mn', 'wa', 'ab'].filter(x => { const e = document.getElementById(x); return e && !e.hidden; });
+  const openNow = ['nb', 'cl', 'mn', 'wa', 'rc', 'ab'].filter(x => { const e = document.getElementById(x); return e && !e.hidden; });
   closeAll(k);                                                     // closing a section puts back the address it came from…
   if (location.hash !== h) history.replaceState(null, '', h);      // …so restore the one the person asked for
   mark(k);
   if (k !== 'map') await API[k]()?.open();   // (re)reads the address, so Back/Forward inside a section works too
   if (k === 'map') dispatchEvent(new Event('shell-map')); });
 addEventListener('nb-close', () => setTimeout(syncFromHash, 0));
-new MutationObserver(() => { const open = ['nb', 'cl', 'mn', 'wa', 'ab'].find(k => { const x = document.getElementById(k); return x && !x.hidden; }); if ((open || 'map') !== current) mark(open || 'map'); })
+new MutationObserver(() => { const open = ['nb', 'cl', 'mn', 'wa', 'rc', 'ab'].find(k => { const x = document.getElementById(k); return x && !x.hidden; }); if ((open || 'map') !== current) mark(open || 'map'); })
   .observe(document.body, { subtree: true, attributes: true, attributeFilter: ['hidden'], childList: true });
 syncFromHash();
 // first visit straight to a page (a shared link): offer the tour for that page once it has drawn

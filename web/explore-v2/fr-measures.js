@@ -1,0 +1,113 @@
+// French text for the map layers: descriptions, units, coverage notes, legend captions and dates. Applied by explore.js when
+// French is on. Statistics Canada's own French terms are used where it has them (e.g. « mises en chantier », « besoins impérieux
+// de logement », « Indice de gravité de la criminalité »). Numbers and data are never touched here, only words.
+const FR_Q = {
+  pop: 'Combien de personnes vivent dans chaque province et territoire.',
+  chg: 'De combien chaque population a augmenté ou diminué depuis juillet 1971.',
+  rate: 'À quelle vitesse chaque population a changé au cours des douze mois précédant le 1er juillet.',
+  dens: 'Combien de personnes il y a pour chaque kilomètre carré de terre (échelle logarithmique).',
+  share: 'La part de toute la population du Canada qui vit dans chaque province et territoire.',
+  nat: 'Naissances moins décès au cours de l’année, pour 1 000 habitants.',
+  imm: 'Nouveaux résidents permanents qui se sont établis ici, pour 1 000 habitants.',
+  npr: 'Variation nette des titulaires de permis et des demandeurs d’asile, pour 1 000 habitants.',
+  emi: 'Personnes qui quittent le Canada, moins celles qui reviennent, pour 1 000 habitants.',
+  ipm: 'Arrivées nettes du reste du Canada, pour 1 000 habitants.',
+  flow: 'Où les gens ont déménagé d’une province à l’autre. Choisissez une province pour voir tous ses flux.',
+  fed: 'Quel parti a remporté le plus de sièges à la Chambre des communes dans chaque province.',
+  starts: 'Logements mis en chantier chaque année, pour 1 000 habitants. Provinces seulement : ce tableau de la SCHL n’a pas de données territoriales.',
+  comp: 'Logements achevés chaque année, pour 1 000 habitants. Ce tableau s’arrête en 2022; il n’est pas prolongé. Provinces seulement.',
+  hhg: 'Variation du nombre de ménages privés depuis juillet 2006, début de cette série.',
+  vac: 'Part des appartements locatifs d’initiative privée inoccupés chaque octobre. Un taux bas signale un marché serré. Villes seulement.',
+  rent: 'Loyer mensuel moyen d’un deux chambres dans les immeubles locatifs d’initiative privée, en dollars courants. Villes seulement.',
+  rentrel: 'Hausse de l’indice des loyers de l’IPC par rapport à l’ensemble des prix à la consommation depuis 2019, année où Statistique Canada a adopté sa méthode actuelle. Zéro : les loyers ont suivi.',
+  chn: 'Part des personnes vivant dans un ménage dont le logement est inabordable, surpeuplé ou nécessite des réparations majeures, et qui ne pourraient pas se payer un autre logement acceptable dans la région. Recensements de 2016 et 2021 seulement.',
+  inc: 'Revenu médian après impôt de toutes les unités familiales, corrigé de l’inflation en dollars de 2024. Propriétaires et locataires ensemble.',
+  age: 'L’âge qui partage la population en deux : la moitié est plus âgée, la moitié plus jeune.',
+  o65: 'Part des habitants âgés de 65 ans et plus.',
+  u15: 'Part des habitants âgés de 14 ans et moins.',
+  metro: 'Part des habitants vivant dans une région métropolitaine de recensement : une ville de 100 000 habitants ou plus et les municipalités qui l’entourent. Les limites actuelles servent pour toutes les années.',
+  urb: 'Part des personnes recensées dans une région urbaine à chaque recensement de 1971 à 2006 : un lieu bâti de 1 000 personnes ou plus. La série s’arrête en 2006.',
+  gdppc: 'La valeur de tout ce qui est produit en un an, divisée par le nombre d’habitants, en dollars de l’année (non corrigés de l’inflation).',
+  gdpg: 'De combien l’économie a crû ou reculé par rapport à l’année précédente, une fois les variations de prix retirées (dollars enchaînés de 2017).',
+  ur: 'Part des personnes de la population active qui cherchaient du travail, en moyenne sur l’année. Provinces seulement : les territoires ne figurent pas dans ce tableau.',
+  er: 'Part des personnes de 15 ans et plus qui avaient un emploi, en moyenne sur l’année. Provinces seulement.',
+  fedbal: 'Ce que le gouvernement fédéral a perçu dans chaque province moins ce qu’il y a dépensé, par habitant. Positif : plus perçu que dépensé. Négatif : plus dépensé que perçu.',
+  fedexp: 'Toutes les dépenses fédérales attribuées à chaque province par Statistique Canada (programmes, transferts aux personnes et aux gouvernements, intérêts), par habitant.',
+  cht: 'Transfert canadien en matière de santé inscrit pour chaque province ou territoire, par habitant.',
+  provbal: 'Excédent (positif) ou déficit (négatif) du gouvernement provincial ou territorial, par habitant, selon la comptabilité nationale de Statistique Canada.',
+  provint: 'Intérêts versés par le gouvernement provincial ou territorial sur sa dette, par habitant.',
+  prdest: 'Personnes admises comme résidents permanents qui ont déclaré se rendre dans cette province ou ce territoire, pour 1 000 habitants (IRCC).',
+  nprsh: 'Titulaires de permis de travail et d’études, demandeurs d’asile et leurs familles vivant ici le 1er juillet, en part de tous les habitants.',
+  bornout: 'Personnes vivant ici en 2021 qui ont déjà été admises comme immigrants, en part de toutes les personnes recensées. Une seule année de recensement.',
+  fr: 'Part des personnes dont la première langue apprise à la maison était le français, à chaque recensement depuis 1951.',
+  nonoff: 'Part des personnes dont la première langue n’était ni l’anglais ni le français (langues autochtones comprises), à chaque recensement depuis 1951.',
+  nodoc: 'Part des personnes de 12 ans et plus qui disent ne pas avoir de prestataire de soins régulier : ni médecin de famille, ni infirmière praticienne, ni autre prestataire régulier. Estimation d’enquête; l’intervalle est la marge à 95 %.',
+  hpr: 'Logements mis en chantier sur cinq ans, divisés par le nombre de personnes ajoutées par la province au cours des mêmes cinq ans. Sous environ 0,4 (à peu près un logement pour 2,5 nouvelles personnes, proche de la taille moyenne des ménages), les logements prennent du retard.',
+  foodh: 'Combien d’heures au salaire horaire médian il faut pour acheter la même épicerie, par rapport à 1997 (1,00). Au-dessus de 1,00 : les prix des aliments ont dépassé les salaires.',
+  renth: 'Heures de travail au salaire horaire médian de la province pour payer un mois du loyer moyen d’un deux chambres dans chaque ville mesurée. Appartements locatifs d’initiative privée, locataires existants inclus : les nouveaux baux sont souvent plus chers.',
+  homeh: 'Combien d’heures au salaire horaire médian il faut pour acheter la même maison neuve (maison et terrain), par rapport à 1997 (1,00). Maisons unifamiliales neuves seulement : les reventes et les copropriétés ne sont pas dans cet indice.',
+  gash: 'Combien d’heures au salaire horaire médian il faut pour acheter la même essence, par rapport à 1997 (1,00). Au-dessus de 1,00 : les prix à la pompe ont dépassé les salaires.',
+  lp: 'Productivité du travail du secteur des entreprises : la valeur produite pour chaque heure travaillée, une fois les variations de prix retirées (dollars enchaînés de 2017). Les valeurs élevées des provinces productrices de ressources et des territoires reflètent le pétrole, le gaz et les mines.',
+  comph: 'Ce que les entreprises ont payé pour chaque heure travaillée (salaires, traitements et cotisations de l’employeur), en dollars de l’année (non corrigés de l’inflation).',
+  csi: 'Crimes déclarés par la police, chaque infraction pondérée selon la sévérité des peines imposées par les tribunaux. Canada en 2006 = 100. Ce n’est pas une mesure de la sécurité globale : les crimes non signalés à la police n’y sont pas.',
+  vcsi: 'Le même indice pour les seules infractions avec violence (homicide, voies de fait, agression sexuelle, vol qualifié, menaces et autres). Canada en 2006 = 100.',
+  wcr: 'Taux de classement pondéré : la part des affaires déclarées que la police a résolues (une accusation a été portée ou l’affaire a été classée autrement), les crimes graves comptant davantage.',
+  csicity: 'Indice de gravité de la criminalité de chaque région métropolitaine, selon les territoires des services de police (qui ne correspondent pas toujours aux limites du recensement). Canada en 2006 = 100.',
+};
+const FR_UNIT = {
+  'people': 'personnes', 'change in population': 'variation de la population', 'change over one year': 'variation sur un an', 'people per km²': 'habitants par km²',
+  'of Canada’s population': 'de la population du Canada', 'per 1,000 people': 'pour 1 000 habitants', 'net arrivals per 1,000 people': 'arrivées nettes pour 1 000 habitants', 'seats': 'sièges',
+  'starts per 1,000 residents': 'mises en chantier pour 1 000 habitants', 'completions per 1,000 residents': 'achèvements pour 1 000 habitants', 'change in private households': 'variation des ménages privés',
+  'of rental apartments vacant': 'des appartements locatifs inoccupés', 'per month (current dollars)': 'par mois (dollars courants)', 'rent index relative to all-items CPI': 'indice des loyers par rapport à l’IPC d’ensemble',
+  'of people examined': 'des personnes examinées', '2024 dollars': 'dollars de 2024', 'years': 'ans', 'of residents': 'des habitants', 'of people counted': 'des personnes recensées',
+  'per person, current dollars': 'par habitant, dollars courants', 'from the year before': 'par rapport à l’année précédente', 'of the labour force': 'de la population active',
+  'of people 15 and over': 'des personnes de 15 ans et plus', 'per resident, current dollars': 'par habitant, dollars courants', 'per 1,000 residents': 'pour 1 000 habitants',
+  'of people in private households': 'des personnes dans les ménages privés', 'of people 12+ without a regular provider': 'des 12 ans et plus sans prestataire régulier',
+  'homes started per person added (5 years)': 'logement mis en chantier par personne ajoutée (5 ans)', 'hours of work for the same groceries, 1997 = 1.00': 'heures de travail pour la même épicerie, 1997 = 1,00',
+  'of work a month at the median wage': 'de travail par mois au salaire médian', 'hours of work for the same new house, 1997 = 1.00': 'heures de travail pour la même maison neuve, 1997 = 1,00',
+  'hours of work for the same gasoline, 1997 = 1.00': 'heures de travail pour la même essence, 1997 = 1,00', 'per hour worked, chained 2017 dollars': 'par heure travaillée, dollars enchaînés de 2017',
+  'per hour worked, current dollars': 'par heure travaillée, dollars courants', 'index (Canada 2006 = 100)': 'indice (Canada 2006 = 100)', 'weighted share of incidents solved': 'part pondérée des affaires résolues',
+};
+const FR_COVER = {
+  'Territories not in this table': 'Territoires absents de ce tableau', 'Ends 2022 · no territories': 'S’arrête en 2022 · sans les territoires', 'Current dollars · cities only': 'Dollars courants · villes seulement',
+  'Since 2019 method change · provinces only': 'Depuis le changement de méthode de 2019 · provinces seulement', 'Census years only · 2021 income includes pandemic supports': 'Années de recensement seulement · le revenu de 2021 inclut les aides liées à la pandémie',
+  'Territories from 2018 only': 'Territoires à partir de 2018 seulement', 'From 2001 · 2021 boundaries': 'Depuis 2001 · limites de 2021', 'Census years 1971–2006 only · small towns count as urban': 'Recensements de 1971 à 2006 seulement · les petites villes comptent comme urbaines',
+  'Current dollars · GDP ÷ July 1 population': 'Dollars courants · PIB ÷ population au 1er juillet', 'Provinces only · survey estimate': 'Provinces seulement · estimation d’enquête', 'National-accounts basis · calendar years': 'Comptabilité nationale · années civiles',
+  'As recorded by Statistics Canada': 'Tel qu’inscrit par Statistique Canada', 'National-accounts basis, not budget documents': 'Comptabilité nationale, pas les documents budgétaires', 'National-accounts basis': 'Comptabilité nationale',
+  'From July 2021 (method change)': 'Depuis juillet 2021 (changement de méthode)', '2021 Census only': 'Recensement de 2021 seulement', 'Census years only': 'Années de recensement seulement', 'Provinces only · survey': 'Provinces seulement · enquête',
+  'Provinces only · shrinking or flat population: no value': 'Provinces seulement · population en baisse ou stable : aucune valeur', 'Provinces only · each against its own 1997': 'Provinces seulement · chacune par rapport à son propre 1997',
+  'Cities only · CMHC October survey': 'Villes seulement · enquête d’octobre de la SCHL', 'Business sector': 'Secteur des entreprises', 'Business sector · current dollars': 'Secteur des entreprises · dollars courants',
+  'Police-reported · log scale': 'Déclarés par la police · échelle logarithmique', 'Police-reported': 'Déclarés par la police', 'Police-reported · cities only': 'Déclarés par la police · villes seulement',
+};
+const FR_CAP = {
+  'People per km² · log scale · 2021 land area': 'Habitants par km² · échelle logarithmique · superficie de 2021', 'Colour: change in share since 1971': 'Couleur : variation de la part depuis 1971',
+  'Immigrants per 1,000 people': 'Immigrants pour 1 000 habitants', 'Net emigrants per 1,000 people': 'Émigrants nets pour 1 000 habitants', 'Housing starts per 1,000 residents (calendar year)': 'Mises en chantier pour 1 000 habitants (année civile)',
+  'Housing completions per 1,000 residents (calendar year)': 'Achèvements pour 1 000 habitants (année civile)', 'Vacancy rate, apartments of 6+ units, October': 'Taux d’inoccupation, immeubles de 6 logements et plus, octobre',
+  'Average rent, two-bedroom, current dollars, October': 'Loyer moyen, deux chambres, dollars courants, octobre', 'Persons in core housing need, % of those examined (census)': 'Personnes ayant des besoins impérieux de logement, % des personnes examinées (recensement)',
+  'Median after-tax income, 2024 dollars': 'Revenu médian après impôt, dollars de 2024', 'Median age in years': 'Âge médian en années', 'Residents aged 65 and over, % of all residents': 'Habitants de 65 ans et plus, % de tous les habitants',
+  'Residents under 15, % of all residents': 'Habitants de moins de 15 ans, % de tous les habitants', 'Residents in census metropolitan areas, % of all residents': 'Habitants des régions métropolitaines de recensement, % de tous les habitants',
+  'Urban population, % of total (census definition to 2006)': 'Population urbaine, % du total (définition du recensement jusqu’en 2006)', 'GDP per person, current dollars (log scale)': 'PIB par habitant, dollars courants (échelle logarithmique)',
+  'Unemployment rate, annual average, people 15+': 'Taux de chômage, moyenne annuelle, 15 ans et plus', 'Employment rate, annual average, people 15+': 'Taux d’emploi, moyenne annuelle, 15 ans et plus',
+  'Federal spending per resident (log scale)': 'Dépenses fédérales par habitant (échelle logarithmique)', 'Canada Health Transfer per resident': 'Transfert canadien en matière de santé par habitant',
+  'Provincial/territorial interest on debt per resident': 'Intérêts provinciaux et territoriaux sur la dette par habitant', 'New permanent residents per 1,000 residents (intended destination)': 'Nouveaux résidents permanents pour 1 000 habitants (destination prévue)',
+  'Non-permanent residents, % of residents, July 1': 'Résidents non permanents, % des habitants, 1er juillet', 'Immigrants, % of population in private households (2021)': 'Immigrants, % de la population des ménages privés (2021)',
+  'French mother tongue, % (log scale)': 'Langue maternelle française, % (échelle logarithmique)', 'Neither English nor French as mother tongue, %': 'Langue maternelle ni anglaise ni française, %',
+  'No regular health care provider, % of people 12+': 'Sans prestataire de soins régulier, % des 12 ans et plus', 'Homes started per person added, 5 years to this one · log scale': 'Logements mis en chantier par personne ajoutée, 5 ans jusqu’à cette année · échelle logarithmique',
+  'Hours of work for one month of 2-bedroom rent, median hourly wage': 'Heures de travail pour un mois de loyer d’un deux chambres, salaire horaire médian', 'Real output per hour worked, business sector (log scale)': 'Production réelle par heure travaillée, secteur des entreprises (échelle logarithmique)',
+  'Total compensation per hour worked, business sector (log scale)': 'Rémunération totale par heure travaillée, secteur des entreprises (échelle logarithmique)', 'Crime Severity Index · Canada 2006 = 100 · log scale': 'Indice de gravité de la criminalité · Canada 2006 = 100 · échelle logarithmique',
+  'Violent Crime Severity Index · Canada 2006 = 100 · log scale': 'Indice de gravité des crimes violents · Canada 2006 = 100 · échelle logarithmique', 'Weighted clearance rate, %': 'Taux de classement pondéré, %',
+  'Crime Severity Index by metropolitan area · log scale': 'Indice de gravité de la criminalité par région métropolitaine · échelle logarithmique',
+};
+// Dates and periods, rewritten word by word (the numbers stay as they are).
+const frWhen = s => String(s)
+  .replace(/\bJuly 1, (\d{4})/g, '1er juillet $1').replace(/\bJuly (\d{4})/g, 'juillet $1').replace(/\bJune 30, (\d{4})/g, '30 juin $1')
+  .replace(/\bCalendar year (\d{4})/g, 'année civile $1').replace(/\bOctober (\d{4})/g, 'octobre $1')
+  .replace(/(\d{4}) Census \(income year (\d{4})\)/g, 'recensement de $1 (revenus de $2)').replace(/(\d{4}) Census/g, 'recensement de $1')
+  .replace(/(\d{4}) survey/g, 'enquête de $1').replace(/(\d{4}) average/g, 'moyenne de $1').replace(/annual averages/g, 'moyennes annuelles');
+// Generic sentences of the reading panel.
+const FR_FIND = {
+  rank: (i, n, w) => `, ${i === 1 ? (w === 'fastest' ? 'la croissance la plus rapide' : 'la valeur la plus élevée') : `au ${i}e rang`} sur ${n} ${n === 10 ? 'provinces' : 'provinces et territoires'}`,
+  noValue: (name, when, why) => `Aucune valeur publiée pour ${name}, ${when} (${why}).`,
+  value: (name, v, p, unit, when, rank) => `${name} : <em>${v}</em>${p} ${unit} · ${when}${rank}.`,
+};
+window.FRM = { FR_Q, FR_UNIT, FR_COVER, FR_CAP, frWhen, FR_FIND };

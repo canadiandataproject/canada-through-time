@@ -26,3 +26,5 @@ data/raw/ghsl/*.zip
 
 # Terrain backdrops (Copernicus DEM 25 MB, ESA WorldCover 74 MB). Re-download from the registry URLs; the pipeline checks SHA-256.
 data/raw/terrain/*.tif
+# Labour productivity table (35 MB). Re-download from the registry URL; the pipeline checks its SHA-256.
+data/raw/statcan/36100480-eng.zip

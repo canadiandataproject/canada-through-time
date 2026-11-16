@@ -2,7 +2,7 @@
 // Station values are published annual figures. The only computations here are: each station's 1961–1990 average (needs 25 of
 // the 30 years), differences from it, 10-year averages (need 8 of 10 years), counts of stations, and running sums of
 // glacier balances. Every one is stated in the panel. Missing years stay missing.
-const { Deck, OrthographicView, GeoJsonLayer, ScatterplotLayer, TextLayer } = window.deck;
+const { Deck, OrthographicView, GeoJsonLayer, ScatterplotLayer, TextLayer, PathLayer } = window.deck;
 const BASE = document.documentElement.dataset.base || '..';
 const J = u => window.__DATA?.[u] ? Promise.resolve(window.__DATA[u]) : fetch(u.replace(/^\.\.\//, BASE + '/')).then(r => { if (!r.ok) throw new Error(u); return r.json(); });
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
@@ -12,7 +12,7 @@ const sgn = (v, dp = 1, u = '') => (v > 0 ? '+' : v < 0 ? '−' : '±') + nf(Mat
 let A, G, F, SP, PROV, LAKES, el, deckI, ready, fready;
 const S = { mode: 'temp', y: 2020, avg: true, st: null, gl: null, playing: false };
 const TT = (en, fr) => window.T ? window.T(en, fr) : en;
-const MODES = [['temp', TT('Temperature', 'Température')], ['precip', TT('Precipitation', 'Précipitations')], ['trend', TT('Long-term warming', 'Réchauffement à long terme')], ['ice', TT('Glaciers', 'Glaciers')], ['forest', TT('Forests', 'Forêts')], ['sprawl', TT('Cities spreading', 'Villes qui s’étalent')]];
+const MODES = [['temp', TT('Temperature', 'Température')], ['precip', TT('Precipitation', 'Précipitations')], ['trend', TT('Long-term warming', 'Réchauffement à long terme')], ['ice', TT('Glaciers', 'Glaciers')], ['forest', TT('Forests', 'Forêts')], ['sprawl', TT('Cities spreading', 'Villes qui s’étalent')], ['move', TT('Animals on the move', 'Faune en mouvement')]];
 const yr = (s, k) => s[k] ? s[k][0] : null;
 const at = (s, k, y) => { const p = s[k]; if (!p) return null; const i = y - p[0]; return i >= 0 && i < p[1].length ? p[1][i] : null; };
 function baseline(s, k) { const key = '_b' + k; if (key in s) return s[key]; let n = 0, sum = 0; for (let y = 1961; y <= 1990; y++) { const v = at(s, k, y); if (v != null) { n++; sum += v; } } return s[key] = n >= 25 ? sum / n : null; }
@@ -57,14 +57,15 @@ function build() {
   document.body.appendChild(el);
   el.querySelector('.nbx-back').onclick = close;
   el.addEventListener('click', e => {
-    const m = e.target.closest('[data-clm]'); if (m) { S.mode = m.dataset.clm; S.gl = null; if (S.mode === 'precip' && S.y > A.p_years[1]) S.y = A.p_years[1]; if (S.mode === 'forest') { loadForest().then(() => { S.y = Math.max(F.years[0], Math.min(F.years[1], S.y)); render(); }); return; } if (S.mode === 'sprawl') { loadSprawl().then(() => { S.y = Math.max(1975, Math.min(2020, S.y)); render(); }); return; } render(); return; }
+    const m = e.target.closest('[data-clm]'); if (m) { const wasMove = S.mode === 'move'; S.mode = m.dataset.clm; if (wasMove) requestAnimationFrame(fit); S.gl = null; if (S.mode === 'precip' && S.y > A.p_years[1]) S.y = A.p_years[1]; if (S.mode === 'forest') { loadForest().then(() => { S.y = Math.max(F.years[0], Math.min(F.years[1], S.y)); render(); }); return; } if (S.mode === 'sprawl') { loadSprawl().then(() => { S.y = Math.max(1975, Math.min(2020, S.y)); render(); }); return; } if (S.mode === 'move') { loadWild().then(() => { render(); fit(); }); return; } render(); return; }
     if (e.target.closest('[data-clavg]')) { S.avg = e.target.closest('[data-clavg]').dataset.clavg === '1'; render(); return; }
     if (e.target.closest('[data-clplay]')) { togglePlay(); return; }
     const spc = e.target.closest('[data-spc]'); if (spc) { S.sc = spc.dataset.spc; render(); return; }
+    const wb = e.target.closest('[data-wb]'); if (wb) { S.wb = S.wb === wb.dataset.wb ? null : wb.dataset.wb; const b = WL.birds.find(x => x.id === S.wb); if (b && (S.wd < b.first || S.wd > b.last)) S.wd = b.first; render(); return; }
     const g = e.target.closest('[data-glac]'); if (g) { S.gl = g.dataset.glac; S.gy = null; render(); return; }
     if (e.target.closest('[data-clclear]')) { S.st = null; S.gl = null; render(); }
   });
-  el.addEventListener('input', e => { if (e.target.id === 'cl-year') { S.y = +e.target.value; render(true); } });
+  el.addEventListener('input', e => { if (e.target.id === 'cl-year') { if (S.mode === 'move') S.wd = +e.target.value; else S.y = +e.target.value; render(true); } });
   addEventListener('keydown', e => { if (e.key === 'Escape' && !el.hidden) { if (S.st || S.gl) { S.st = S.gl = null; render(); } else close(); } });
   addEventListener('resize', () => { if (!el.hidden) fit(); });
 }
@@ -88,11 +89,12 @@ function bindScrub(mapBox) {
   mapBox.addEventListener('pointerup', end, true); mapBox.addEventListener('pointercancel', end, true);
 }
 function togglePlay() { S.playing = !S.playing; clearInterval(timer);
-  if (S.playing) { const [y0, y1] = range(); if (S.y >= y1) S.y = Math.max(y0, 1900); timer = setInterval(() => { const [, b] = range(); if (S.y >= b) { S.playing = false; clearInterval(timer); render(); return; } S.y++; render(true); }, 160); }
+  if (S.playing && S.mode === 'move') { const last = WL.birds.reduce((m, b) => Math.max(m, b.last), 0); if (S.wd >= last) S.wd = 0; timer = setInterval(() => { if (S.mode !== 'move' || S.wd >= last) { S.playing = false; clearInterval(timer); render(); return; } S.wd = Math.min(last, S.wd + 2); render(true); }, 70); }
+  else if (S.playing) { const [y0, y1] = range(); if (S.y >= y1) S.y = Math.max(y0, 1900); timer = setInterval(() => { const [, b] = range(); if (S.y >= b) { S.playing = false; clearInterval(timer); render(); return; } S.y++; render(true); }, 160); }
   render(true); }
 const range = () => S.mode === 'precip' ? [1900, A.p_years[1]] : S.mode === 'temp' ? [1900, A.t_years[1]] : S.mode === 'forest' ? F.years : S.mode === 'sprawl' ? [1975, 2020] : [1900, 2020];
 
-function fit() { if (!deckI) return; const box = el.querySelector('#cl-map').getBoundingClientRect(), b = [3700, 300, 9100, 4900];   // km, StatCan Lambert: all of Canada
+function fit() { if (!deckI) return; const box = el.querySelector('#cl-map').getBoundingClientRect(), b = S.mode === 'move' ? [4900, 2100, 9300, 5300] : [3700, 300, 9100, 4900];   // km, StatCan Lambert: all of Canada
   const z = Math.log2(Math.min(box.width / (b[2] - b[0]), box.height / (b[3] - b[1])) * 0.98);
   deckI.setProps({ initialViewState: { target: [(b[0] + b[2]) / 2, (b[1] + b[3]) / 2 - 150, 0], zoom: z, minZoom: z - 0.5, maxZoom: z + 5 } }); }
 
@@ -112,10 +114,10 @@ const SHARE = {};
 function render(fast) {
   pal(); writeHash();
   el.querySelector('#cl-modes').innerHTML = MODES.map(([k, l]) => `<button role="tab" data-clm="${k}" class="${S.mode === k ? 'on' : ''}" aria-selected="${S.mode === k}">${l}</button>`).join('');
-  const timed = S.mode === 'temp' || S.mode === 'precip' || S.mode === 'forest' || S.mode === 'sprawl', [y0, y1] = range();
+  const timed = S.mode === 'temp' || S.mode === 'precip' || S.mode === 'forest' || S.mode === 'sprawl' || S.mode === 'move', [y0, y1] = S.mode === 'move' ? [0, WL.birds.reduce((m, b) => Math.max(m, b.last), 0)] : range();
   el.querySelector('#cl-time').hidden = !timed;
   if (timed) { const t = el.querySelector('#cl-time'); if (!t.querySelector('#cl-year') || !fast) t.innerHTML = `<button data-clplay class="play" aria-label="Play">${S.playing ? '❚❚' : '▶'}</button><b id="cl-y"></b><input id="cl-year" type="range" min="${y0}" max="${y1}" step="1" aria-label="Year"><span class="smooth"><button data-clavg="1" class="${S.avg ? 'on' : ''}">10-year average</button><button data-clavg="0" class="${S.avg ? '' : 'on'}">Single year</button></span>`;
-    t.querySelector('#cl-year').value = S.y; t.querySelector('#cl-y').textContent = S.mode === 'sprawl' ? spEpoch() : S.mode === 'forest' ? S.y : S.avg ? `${S.y - 9}–${S.y}` : S.y; const sm = t.querySelector('.smooth'); if (sm) sm.style.display = S.mode === 'forest' || S.mode === 'sprawl' ? 'none' : ''; t.querySelector('[data-clplay]').textContent = S.playing ? '❚❚' : '▶'; }
+    if (S.mode === 'move' && +t.querySelector('#cl-year').max !== y1) { t.querySelector('#cl-year').min = y0; t.querySelector('#cl-year').max = y1; } t.querySelector('#cl-year').value = S.mode === 'move' ? S.wd : S.y; t.querySelector('#cl-y').textContent = S.mode === 'move' ? wDate(S.wd) : S.mode === 'sprawl' ? spEpoch() : S.mode === 'forest' ? S.y : S.avg ? `${S.y - 9}–${S.y}` : S.y; const sm = t.querySelector('.smooth'); if (sm) sm.style.display = S.mode === 'forest' || S.mode === 'sprawl' || S.mode === 'move' ? 'none' : ''; t.querySelector('[data-clplay]').textContent = S.playing ? '❚❚' : '▶'; }
   side(); detail(); legend(); drawMap();
 }
 function side() {
@@ -123,21 +125,22 @@ function side() {
   if (S.mode === 'ice') { box.innerHTML = iceSide(); return; }
   if (S.mode === 'forest') { box.innerHTML = forestSide(); return; }
   if (S.mode === 'sprawl') { box.innerHTML = sprawlSide(); return; }
+  if (S.mode === 'move') { box.innerHTML = moveSide(); return; }
   const rows = stationRows().filter(r => r[1] != null), up = rows.filter(r => r[1] > 0).length, mode = S.mode;
   const share = SHARE[mode] ||= warmerShare(mode === 'trend' ? 'temp' : mode);
-  const what = mode === 'temp' ? 'warmer' : mode === 'precip' ? 'wetter' : 'warmer';
-  const head = mode === 'trend' ? `<h2>Long-term warming at each station</h2><p class="q">How much each station’s annual mean temperature changed per decade over its whole record (records of 50 years or more).</p>
-      <div class="big"><b>${up} of ${rows.length}</b><span>stations warmed over their record</span></div>`
-    : `<h2>${mode === 'temp' ? 'Temperature vs. 1961–1990' : 'Precipitation vs. 1961–1990'}</h2><p class="q">${mode === 'temp' ? 'How much warmer or colder each station was than its own 1961–1990 average.' : 'How much wetter or drier each station was, as a percentage of its own 1961–1990 average.'}</p>
-      <div class="big"><b>${rows.length ? up + ' of ' + rows.length : '—'}</b><span>stations ${what} than their 1961–1990 average${S.avg ? ` (${S.y - 9}–${S.y} average)` : ` in ${S.y}`}</span></div>`;
+  const what = mode === 'precip' ? TT('wetter', 'plus humides') : TT('warmer', 'plus chaudes');
+  const head = mode === 'trend' ? `<h2>${TT('Long-term warming at each station', 'Le réchauffement à long terme à chaque station')}</h2><p class="q">${TT('How much each station’s annual mean temperature changed per decade over its whole record (records of 50 years or more).', 'De combien la température moyenne annuelle de chaque station a changé par décennie sur l’ensemble de son historique (historiques de 50 ans ou plus).')}</p>
+      <div class="big"><b>${up} ${TT('of', 'sur')} ${rows.length}</b><span>${TT('stations warmed over their record', 'stations se sont réchauffées sur leur historique')}</span></div>`
+    : `<h2>${mode === 'temp' ? TT('Temperature vs. 1961–1990', 'Température par rapport à 1961–1990') : TT('Precipitation vs. 1961–1990', 'Précipitations par rapport à 1961–1990')}</h2><p class="q">${mode === 'temp' ? TT('How much warmer or colder each station was than its own 1961–1990 average.', 'De combien chaque station était plus chaude ou plus froide que sa propre moyenne 1961–1990.') : TT('How much wetter or drier each station was, as a percentage of its own 1961–1990 average.', 'De combien chaque station était plus humide ou plus sèche, en pourcentage de sa propre moyenne 1961–1990.')}</p>
+      <div class="big"><b>${rows.length ? up + TT(' of ', ' sur ') + rows.length : '—'}</b><span>${TT(`stations ${what} than their 1961–1990 average`, `stations ${what} que leur moyenne 1961–1990`)}${S.avg ? TT(` (${S.y - 9}–${S.y} average)`, ` (moyenne ${S.y - 9}–${S.y})`) : TT(` in ${S.y}`, ` en ${S.y}`)}</span></div>`;
   const med = rows.length ? rows.map(r => r[1]).sort((a, b) => a - b)[Math.floor(rows.length / 2)] : null;
-  box.innerHTML = `${head}${med != null ? `<p class="rng">Middle station: <b>${fmtA(mode, med)}</b>${mode === 'trend' ? ' per decade' : ''}.</p>` : ''}
-    <h4>${mode === 'precip' ? 'Share of stations wetter than 1961–1990, each year' : 'Share of stations warmer than 1961–1990, each year'}</h4>${shareChart(share, mode === 'trend' ? null : S.y)}
-    <p class="def">${mode === 'temp' ? 'Homogenized annual mean temperature: ECCC adjusts each station’s record for moves and instrument changes so years can be compared. A station’s 1961–1990 average needs at least 25 of those 30 years; a 10-year average needs at least 8 of 10 years.'
-      : mode === 'precip' ? 'Adjusted annual total precipitation (rain plus the water in snow). ECCC’s adjusted precipitation series currently end in 2017. A station’s 1961–1990 average needs at least 25 of those 30 years.'
-      : 'ECCC’s published Theil-Sen trend over each station’s full record, divided by the record’s length to give a change per decade so stations with different records can be compared. Stations with records under 50 years are not shown.'}</p>
-    <p class="def">Each dot is a weather station, not an area: the map shows where stations are, and the north has few of them. The chart counts stations, it is not a national average.</p>
-    <p class="src">Source: Environment and Climate Change Canada, Adjusted and Homogenized Canadian Climate Data (AHCCD), via the MSC GeoMet API (temperature to ${A.t_years[1]}, precipitation to ${A.p_years[1]}).</p>`;
+  box.innerHTML = `${head}${med != null ? `<p class="rng">${TT('Middle station', 'Station médiane')}: <b>${fmtA(mode, med)}</b>${mode === 'trend' ? TT(' per decade', ' par décennie') : ''}.</p>` : ''}
+    <h4>${mode === 'precip' ? TT('Share of stations wetter than 1961–1990, each year', 'Part des stations plus humides qu’en 1961–1990, chaque année') : TT('Share of stations warmer than 1961–1990, each year', 'Part des stations plus chaudes qu’en 1961–1990, chaque année')}</h4>${shareChart(share, mode === 'trend' ? null : S.y)}
+    <p class="def">${mode === 'temp' ? TT('Homogenized annual mean temperature: ECCC adjusts each station’s record for moves and instrument changes so years can be compared. A station’s 1961–1990 average needs at least 25 of those 30 years; a 10-year average needs at least 8 of 10 years.', 'Température moyenne annuelle homogénéisée : ECCC ajuste l’historique de chaque station pour tenir compte des déplacements et des changements d’instruments, afin que les années soient comparables. La moyenne 1961–1990 d’une station exige au moins 25 de ces 30 années; une moyenne sur 10 ans exige au moins 8 années sur 10.')
+      : mode === 'precip' ? TT('Adjusted annual total precipitation (rain plus the water in snow). ECCC’s adjusted precipitation series currently end in 2017. A station’s 1961–1990 average needs at least 25 of those 30 years.', 'Précipitations annuelles totales ajustées (pluie et eau contenue dans la neige). Les séries ajustées d’ECCC s’arrêtent pour l’instant en 2017. La moyenne 1961–1990 d’une station exige au moins 25 de ces 30 années.')
+      : TT('ECCC’s published Theil-Sen trend over each station’s full record, divided by the record’s length to give a change per decade so stations with different records can be compared. Stations with records under 50 years are not shown.', 'Tendance de Theil-Sen publiée par ECCC sur tout l’historique de chaque station, divisée par sa durée pour obtenir une variation par décennie, afin de comparer des stations aux historiques différents. Les stations de moins de 50 ans ne sont pas montrées.')}</p>
+    <p class="def">${TT('Each dot is a weather station, not an area: the map shows where stations are, and the north has few of them. The chart counts stations, it is not a national average.', 'Chaque point est une station météo, pas une zone : la carte montre où sont les stations, et le Nord en compte peu. Le graphique compte des stations; ce n’est pas une moyenne nationale.')}</p>
+    <p class="src">${TT(`Source: Environment and Climate Change Canada, Adjusted and Homogenized Canadian Climate Data (AHCCD), via the MSC GeoMet API (temperature to ${A.t_years[1]}, precipitation to ${A.p_years[1]}).`, `Source : Environnement et Changement climatique Canada, Données climatiques canadiennes ajustées et homogénéisées (DCCAH), via l’API GeoMet du SMC (température jusqu’en ${A.t_years[1]}, précipitations jusqu’en ${A.p_years[1]}).`)}</p>`;
 }
 function shareChart(share, cur) {
   const W = 290, H = 90, pts = share.filter(r => r[1] != null); if (!pts.length) return '';
@@ -150,9 +153,9 @@ function shareChart(share, cur) {
 }
 function iceSide() {
   const long = G.glaciers.filter(g => g.n >= 40);
-  return `<h2>Glaciers losing ice</h2><p class="q">Each year’s glacier-wide mass balance: snow gained minus ice and snow melted, as metres of water spread over the glacier.</p>
-    <div class="big"><b>${long.filter(g => lastC(cum(g))[1] < 0).length} of ${long.length}</b><span>glaciers measured for 40+ years have a negative running total</span></div>
-    <h4>Running total since monitoring began <small>m water equivalent</small></h4>${cumChart(long)}
+  return `<h2>${TT('Glaciers losing ice', 'Des glaciers qui perdent leur glace')}</h2><p class="q">${TT('Each year’s glacier-wide mass balance: snow gained minus ice and snow melted, as metres of water spread over the glacier.', 'Le bilan de masse annuel de tout le glacier : neige accumulée moins glace et neige fondues, en mètres d’eau répartis sur le glacier.')}</p>
+    <div class="big"><b>${long.filter(g => lastC(cum(g))[1] < 0).length} of ${long.length}</b><span>${TT('glaciers measured for 40+ years have a negative running total', 'glaciers mesurés depuis 40 ans ou plus ont un cumul négatif')}</span></div>
+    <h4>${TT('Running total since monitoring began', 'Cumul depuis le début des mesures')} <small>${TT('m water equivalent', 'm d’équivalent en eau')}</small></h4>${cumChart(long)}
     <div class="gl-list">${G.glaciers.map(g => { const last = lastC(cum(g)); return `<button data-glac="${g.id}" class="${S.gl === g.id ? 'on' : ''}"><span>${esc(g.name)}</span><i>${g.b[0]}–${g.b[0] + g.b[1].length - 1}</i><b>${last ? sgn(last[1], 1, ' m') : '—'}</b></button>`; }).join('')}</div>
     <p class="def">The running total adds up the measured years; a year with no measurement is skipped (the line breaks there) and the count of missing years is shown for each glacier. A glacier with a running total of −30 m has lost the equivalent of a 30-metre-deep layer of water across its whole area since monitoring began.</p>
     <p class="src">Source: WGMS (2026), Fluctuations of Glaciers Database, doi:10.5904/wgms-fog-2026-02-10. Canadian measurements by the Geological Survey of Canada and university programs.</p>`;
@@ -177,13 +180,14 @@ function cumChart(gs) {
 function legend() {
   const box = el.querySelector('#cl-legend');
   if (S.mode === 'sprawl') { box.innerHTML = sprawlLegend(); return; }
+  if (S.mode === 'move') { box.innerHTML = moveLegend(); return; }
   if (S.mode === 'forest') { box.innerHTML = `<div class="lg-t">Forest disturbed, each ${F.cell_km} km square</div><div class="lg2"><span><i style="background:rgb(${FIRE()})"></i>Burned in ${S.y}</span><span><i style="background:rgb(${CUT()})"></i>Harvested in ${S.y}</span></div><div class="lg2"><span><i style="background:rgb(${PAL.seq[1]})"></i>Earlier years since 1985, paler with time</span></div><div class="lg-miss">Bigger dot: more hectares. Under 50 ha in a year (earlier years: under 1% of the square) not drawn, still counted.</div>`; return; }
   if (S.mode === 'ice') { box.innerHTML = `<div class="lg-t">Glaciers with 10+ years of mass balance</div><div class="lg2"><span><i style="background:rgb(${PAL.seq[3]})"></i>Western mountains</span><span><i style="background:rgb(${PAL.dec[2]})"></i>Arctic</span></div><div class="lg-miss">Bigger circle: more years measured</div>`; return; }
   const d = DOM[S.mode], st = Array.from({ length: 11 }, (_, i) => { const v = -d + i / 10 * 2 * d; return `rgb(${col(S.mode, v)}) ${i * 10}%`; });
-  const lo = S.mode === 'precip' ? 'drier' : 'colder', hi = S.mode === 'precip' ? 'wetter' : 'warmer';
-  box.innerHTML = `<div class="lg-t">${S.mode === 'trend' ? 'Change per decade' : 'Difference from 1961–1990'}</div><div class="lg-bar" style="background:linear-gradient(90deg,${st.join(',')})"></div>
-    <div class="lg-ax"><span>${fmtA(S.mode, -d)} ${S.mode === 'trend' ? 'cooling' : lo}</span><span>${fmtA(S.mode, d)} ${S.mode === 'trend' ? 'warming' : hi}</span></div>
-    <div class="lg-miss"><i class="ring"></i>No value for this period</div>`;
+  const lo = S.mode === 'precip' ? TT('drier', 'plus sec') : TT('colder', 'plus froid'), hi = S.mode === 'precip' ? TT('wetter', 'plus humide') : TT('warmer', 'plus chaud');
+  box.innerHTML = `<div class="lg-t">${S.mode === 'trend' ? TT('Change per decade', 'Variation par décennie') : TT('Difference from 1961–1990', 'Écart par rapport à 1961–1990')}</div><div class="lg-bar" style="background:linear-gradient(90deg,${st.join(',')})"></div>
+    <div class="lg-ax"><span>${fmtA(S.mode, -d)} ${S.mode === 'trend' ? TT('cooling', 'refroidissement') : lo}</span><span>${fmtA(S.mode, d)} ${S.mode === 'trend' ? TT('warming', 'réchauffement') : hi}</span></div>
+    <div class="lg-miss"><i class="ring"></i>${TT('No value for this period', 'Aucune valeur pour cette période')}</div>`;
 }
 function stationChart(s, k) {
   const p = s[k]; if (!p) return '<p class="hint">No series published for this station.</p>';
@@ -233,9 +237,10 @@ function detail() {
   const box = el.querySelector('#cl-detail');
   if (S.mode === 'forest') { box.innerHTML = forestDetail(); return; }
   if (S.mode === 'sprawl') { box.innerHTML = sprawlDetail(); return; }
+  if (S.mode === 'move') { box.innerHTML = moveDetail(); return; }
   if (S.mode === 'ice') {
     const g = G.glaciers.find(x => x.id === S.gl);
-    if (!g) { box.innerHTML = `<h3>Click a glacier</h3><p class="hint">Mass balance is measured with stakes and snow pits across the glacier every year. Only a handful of Canadian glaciers have long records; these are all of them in the WGMS database with 10 or more years.</p>`; return; }
+    if (!g) { box.innerHTML = `<h3>${TT('Click a glacier', 'Cliquez sur un glacier')}</h3><p class="hint">${TT('Mass balance is measured with stakes and snow pits across the glacier every year. Only a handful of Canadian glaciers have long records; these are all of them in the WGMS database with 10 or more years.', 'Le bilan de masse est mesuré chaque année à l’aide de balises et de puits à neige sur tout le glacier. Seuls quelques glaciers canadiens ont de longs historiques; voici tous ceux de la base du WGMS qui comptent 10 ans ou plus.')}</p>`; return; }
     const c = cum(g), lc = lastC(c), ng = gaps(g), W = 290, H = 110, vals = g.b[1].map((v, i) => [g.b[0] + i, v]).filter(r => r[1] != null), lo = Math.min(0, ...vals.map(r => r[1])), hi = Math.max(0, ...vals.map(r => r[1]));
     const X = y => (y - g.b[0]) / Math.max(1, g.b[1].length - 1) * W, Y = v => (hi - v) / (hi - lo || 1) * H, bw = Math.max(1.5, W / g.b[1].length - 1);
     const neg = vals.filter(r => r[1] < 0).length;
@@ -253,7 +258,7 @@ function detail() {
   const s = A.stations.find(x => x.id === S.st);
   if (!s) { const rows = stationRows().filter(r => r[1] != null).sort((a, b) => b[1] - a[1]);
     const row = ([st, v]) => `<button data-clst="${st.id}"><span>${esc(st.name)} <i>${st.prov}</i></span><b>${fmtA(S.mode, v)}${S.mode === 'trend' ? '/dec' : ''}</b></button>`;
-    box.innerHTML = `<h3>Click any station</h3><p class="hint">See its full record: every published year since it opened, with its 1961–1990 average and a 10-year average.</p>
+    box.innerHTML = `<h3>${TT('Click any station', 'Cliquez sur une station')}</h3><p class="hint">${TT('See its full record: every published year since it opened, with its 1961–1990 average and a 10-year average.', 'Voyez tout son historique : chaque année publiée depuis son ouverture, avec sa moyenne 1961–1990 et une moyenne sur 10 ans.')}</p>
       ${rows.length ? `<h4>${({ temp: 'Furthest above 1961–1990', precip: 'Wettest vs. 1961–1990', trend: 'Most warming per decade' })[S.mode]}</h4><div class="nb-list">${rows.slice(0, 6).map(row).join('')}</div><h4>${({ temp: 'Lowest vs. 1961–1990', precip: 'Driest vs. 1961–1990', trend: 'Least warming per decade' })[S.mode]}</h4><div class="nb-list">${rows.slice(-6).reverse().map(row).join('')}</div>` : ''}`;
     box.querySelectorAll('[data-clst]').forEach(b => b.onclick = () => { S.st = b.dataset.clst; render(); });
     return; }
@@ -268,11 +273,12 @@ function detail() {
 
 function drawMap() {
   const spc = el.querySelector('#cl-sprawl'); if (spc) spc.hidden = S.mode !== 'sprawl'; if (S.mode === 'sprawl') { drawSprawl(); deckI?.setProps({ layers: [] }); return; }
-  const key = [S.mode, S.y, S.avg, S.st, S.gl, PAL.page].join('|');
+  const key = [S.mode, S.y, S.avg, S.st, S.gl, PAL.page, S.wd, S.wb].join('|');
   const land = new GeoJsonLayer({ id: 'land', data: PROV, filled: true, stroked: true, getFillColor: [...PAL.land, 255], getLineColor: [...PAL.line, 120], lineWidthUnits: 'pixels', getLineWidth: 0.8, updateTriggers: { getFillColor: key, getLineColor: key } });
   const lakes = new GeoJsonLayer({ id: 'lakes', data: LAKES, filled: true, stroked: false, getFillColor: [...PAL.water, 255], updateTriggers: { getFillColor: key } });
   let marks;
   if (S.mode === 'forest') marks = forestMarks(key);
+  else if (S.mode === 'move') marks = moveMarks();
   else if (S.mode === 'ice') {
     marks = [new ScatterplotLayer({ id: 'gl', data: G.glaciers, pickable: true, getPosition: g => g.xy, radiusUnits: 'pixels', getRadius: g => 4 + Math.sqrt(g.n) * 1.1, stroked: true, lineWidthUnits: 'pixels',
         getLineWidth: g => g.id === S.gl ? 3 : 1.2, getFillColor: g => [...regionCol(g), 230], getLineColor: g => g.id === S.gl ? [...PAL.sel, 255] : [...PAL.ink, 200], updateTriggers: { getLineWidth: key, getLineColor: key, getFillColor: key } }),
@@ -289,6 +295,7 @@ function drawMap() {
 }
 function tip({ object, x, y }) {
   const t = el.querySelector('#cl-tip'); if (!object) { t.style.display = 'none'; return; }
+  if (object.wbird) { const b = object.wbird; t.innerHTML = `<b>${TT('Ivory gull', 'Mouette blanche')} ${b.id}</b><span>${wDate(object.d[0])} · ${nf(object.d[3], 1)}°N</span>`; t.style.display = 'block'; t.style.left = x + 14 + 'px'; t.style.top = y + 14 + 'px'; return; }
   if (object.b) { const l = lastC(cum(object)); t.innerHTML = `<b>${esc(object.name)}</b><span>${l ? `${sgn(l[1], 1, ' m')} running total, ${object.b[0]}–${l[0]}` : ''}</span>`; }
   else { const s = object.s; t.innerHTML = `<b>${esc(s.name)}, ${s.prov}</b><span>${object.v == null ? 'No value for this period' : fmtA(S.mode, object.v) + (S.mode === 'trend' ? ' per decade' : ' vs. 1961–1990')}</span>`; }
   t.style.display = 'block'; t.style.left = x + 14 + 'px'; t.style.top = y + 14 + 'px';
@@ -336,7 +343,8 @@ function forestDetail() {
 
 // ---------------------------------------------------------------- cities spreading (JRC GHS-BUILT-S, 100 m, 1975–2020)
 const IMG = {};
-const loadSprawl = () => sready ||= J('../data/sprawl/sprawl.json').then(d => { SP = d; S.sc ||= 'toronto'; });
+let SPP = null;
+const loadSprawl = () => sready ||= Promise.all([J('../data/sprawl/sprawl.json'), J('../data/sprawl/people.json').catch(() => null)]).then(([d, pp]) => { SP = d; SPP = pp; S.sc ||= 'toronto'; });
 let sready;
 const spCity = () => SP.cities.find(c => c.slug === S.sc) || SP.cities[0];
 const spIdx = () => { let k = 0; SP.epochs.forEach((e, i) => { if (e <= S.y) k = i; }); return k; };
@@ -369,6 +377,11 @@ function sprawlSide() {
   return `<h2>${T('Cities spreading out', 'Des villes qui s’étalent')}</h2><p class="q">${T('Land covered by buildings around each city, mapped from satellite images. Each colour is the year a 100 m square first became built up.', 'Le sol couvert par les bâtiments autour de chaque ville, cartographié à partir d’images satellites. Chaque couleur indique l’année où un carré de 100 m est devenu bâti.')}</p>
     <div class="big"><b>${nf(k1)} km²</b><span>${T(`of buildings within ${c.half_km} km of central ${c.name} in ${SP.epochs[i]}`, `de bâtiments à moins de ${c.half_km} km du centre de ${c.name} en ${SP.epochs[i]}`)}${i ? T(`, ${nf((k1 / k0 - 1) * 100)}% more than in 1975`, `, ${nf((k1 / k0 - 1) * 100)} % de plus qu’en 1975`) : ''}</span></div>
     ${chart}
+    ${(() => { const pp = SPP?.cities?.[c.slug]; const k00 = c.km2[SP.epochs.indexOf(2000)], k20 = c.km2[SP.epochs.indexOf(2020)]; if (!pp || !pp.pop['2001'] || !pp.pop['2020'] || !k00 || !k20) return '';
+      const pg = (pp.pop['2020'] / pp.pop['2001'] - 1) * 100, bg = (k20 / k00 - 1) * 100;
+      return `<div class="sp-people"><div><span class="k">${T('People', 'Population')}</span><b>+${nf(pg)}%</b><span>${nf(pp.pop['2001'])} → ${nf(pp.pop['2020'])}<br>${T('2001 → 2020, metro area', '2001 → 2020, région métropolitaine')}</span></div>
+        <div><span class="k">${T('Buildings', 'Bâtiments')}</span><b>+${nf(bg)}%</b><span>${nf(k00)} → ${nf(k20)} km²<br>${T('2000 → 2020, satellite square', '2000 → 2020, carré satellite')}</span></div></div>
+        <p class="def">${pg > bg ? T('People grew faster than the ground under buildings.', 'La population a crû plus vite que le sol bâti.') : T('The ground under buildings grew faster than the population.', 'Le sol bâti a crû plus vite que la population.')} ${T(`Latest population: ${nf(pp.pop.latest[1])} (July 1, ${pp.pop.latest[0]}). The metro area and the satellite square are not the same area. Statistics Canada 17-10-0148.`, `Population la plus récente : ${nf(pp.pop.latest[1])} (1er juillet ${pp.pop.latest[0]}). La région métropolitaine et le carré satellite ne couvrent pas la même zone. Statistique Canada 17-10-0148.`)}</p>`; })()}
     <div class="sp-cities">${SP.cities.map(x => `<button data-spc="${x.slug}" class="${x.slug === c.slug ? 'on' : ''}">${x.name}</button>`).join('')}</div>
     <p class="def">${SP.notes.map(esc).join(' ')}</p>
     <p class="src">${T('Source: European Commission, Joint Research Centre, GHS-BUILT-S R2023A (Pesaresi and Politis, 2023), CC BY 4.0.', 'Source : Commission européenne, Centre commun de recherche, GHS-BUILT-S R2023A (Pesaresi et Politis, 2023), CC BY 4.0.')}</p>`;
@@ -377,11 +390,58 @@ function sprawlLegend() { const cols = SPCOL(); return `<div class="lg-t">${T('F
 function sprawlDetail() { const rows = SP.cities.map(c => [c, c.km2.at(-1) / c.km2[0] - 1]).sort((a, b) => b[1] - a[1]);
   return `<h3>${T('Growth in built-up land, 1975–2020', 'Croissance du sol bâti, 1975–2020')}</h3><p class="hint">${T('Same-size squares around each centre; tap a city.', 'Carrés de même taille autour de chaque centre; touchez une ville.')}</p><div class="nb-list">${rows.map(([c, g]) => `<button class="fo-row sp-row ${c.slug === S.sc ? 'on' : ''}" data-spc="${c.slug}"><b>${c.name}</b><span>${nf(c.km2[0])} → ${nf(c.km2.at(-1))} km²</span><span>+${nf(g * 100)}%</span></button>`).join('')}</div>`; }
 
+
+// ---------------------------------------------------------------- animals on the move (ivory gulls, Seymour Island, 2010–2013)
+// One position per bird per day (median of the day's best satellite fixes), rounded to ~15–25 km; days without a good fix are empty.
+let WL = null, wready;
+let CTRY = null;
+const loadWild = () => wready ||= Promise.all([J('../data/wildlife/ivory_gulls.json'), J('../data/context_countries.geojson').catch(() => null)]).then(([d, c]) => { if (c) { const km = x => typeof x[0] === 'number' ? [x[0] / 1e3, x[1] / 1e3] : x.map(km); CTRY = { ...c, features: c.features.map(f => ({ ...f, geometry: { ...f.geometry, coordinates: km(f.geometry.coordinates) } })) }; } WL = d; WL.byDay = WL.birds.map(b => new Map(b.days.map(x => [x[0], x]))); if (S.wd == null) S.wd = 64; });
+const MONF = window.LANG === 'fr' ? ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juill.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'] : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const wDay = i => { const d = new Date(WL.start + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() + i); return d; };
+const wDate = i => { if (!WL) return ''; const d = wDay(i); return window.LANG === 'fr' ? `${d.getUTCDate()} ${MONF[d.getUTCMonth()]} ${d.getUTCFullYear()}` : `${MONF[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`; };
+const TRAIL = 45;
+const wMon = i => { const d = wDay(i); return `${MONF[d.getUTCMonth()]} ${d.getUTCFullYear()}`; };
+const wNow = (bi, day, back = 4) => { for (let k = 0; k <= back; k++) { const x = WL.byDay[bi].get(day - k); if (x) return x; } return null; };
+const wSeason = m => [11, 0, 1, 2].includes(m) ? TT('winter at the edge of the sea ice', 'l’hiver en bordure de la banquise') : [3, 4].includes(m) ? TT('spring migration north', 'migration printanière vers le nord') : [5, 6, 7].includes(m) ? TT('breeding season at the colony', 'saison de nidification à la colonie') : TT('fall migration south', 'migration automnale vers le sud');
+function moveMarks() {
+  const birdCol = b => S.wb && b.id !== S.wb ? [...PAL.ink, 50] : [...hex(css('--accent')), 235];
+  const trails = WL.birds.map((b, bi) => { const pts = b.days.filter(x => x[0] <= S.wd && x[0] > S.wd - TRAIL); return { b, path: pts.map(x => [x[1], x[2]]) }; }).filter(t => t.path.length > 1);
+  const full = S.wb ? WL.birds.filter(b => b.id === S.wb).map(b => ({ b, path: b.days.filter(x => x[0] <= S.wd).map(x => [x[1], x[2]]) })).filter(t => t.path.length > 1) : [];
+  const now = WL.birds.map((b, bi) => ({ wbird: b, d: wNow(bi, S.wd) })).filter(o => o.d);
+  const k = [S.wd, S.wb, PAL.page].join('|');
+  return [
+    ...(CTRY ? [new GeoJsonLayer({ id: 'w-ctry', data: CTRY, filled: true, stroked: true, getFillColor: [...PAL.land, 200], getLineColor: [...PAL.line, 90], lineWidthUnits: 'pixels', getLineWidth: 0.6, updateTriggers: { getFillColor: k, getLineColor: k } })] : []),
+    new PathLayer({ id: 'w-full', data: full, getPath: t => t.path, getColor: [...PAL.ink, 120], widthUnits: 'pixels', getWidth: 1.2, updateTriggers: { getColor: k } }),
+    new PathLayer({ id: 'w-trail', data: trails, getPath: t => t.path, getColor: t => { const c = birdCol(t.b); return [c[0], c[1], c[2], Math.min(c[3], 150)]; }, widthUnits: 'pixels', getWidth: 2, jointRounded: true, capRounded: true, updateTriggers: { getColor: k } }),
+    new ScatterplotLayer({ id: 'w-colony', data: [WL.colony], getPosition: d => d, radiusUnits: 'pixels', getRadius: 6, stroked: true, filled: false, lineWidthUnits: 'pixels', getLineWidth: 1.5, getLineColor: [...PAL.ink, 200], updateTriggers: { getLineColor: k } }),
+    new ScatterplotLayer({ id: 'w-now', data: now, pickable: true, getPosition: o => [o.d[1], o.d[2]], radiusUnits: 'pixels', getRadius: o => o.wbird.id === S.wb ? 7 : 5, stroked: true, lineWidthUnits: 'pixels', getLineWidth: 1.5,
+      getFillColor: o => birdCol(o.wbird), getLineColor: [...PAL.halo, 230], updateTriggers: { getFillColor: k, getRadius: k, getLineColor: k } }),
+    new TextLayer({ id: 'w-lab', data: [{ p: WL.colony, t: TT('Seymour Island colony', 'Colonie de l’île Seymour') }], getPosition: d => d.p, getText: d => d.t, getSize: 12, getColor: [...PAL.ink, 255], getPixelOffset: [10, 0], getTextAnchor: 'start', getAlignmentBaseline: 'center',
+      fontFamily: 'IBM Plex Sans, sans-serif', fontWeight: 600, outlineWidth: 4, outlineColor: [...PAL.halo, 230], fontSettings: { sdf: true }, characterSet: 'auto', updateTriggers: { getColor: k } }),
+  ];
+}
+function moveSide() {
+  const d = wDay(S.wd), live = WL.birds.filter((b, bi) => wNow(bi, S.wd)), south = live.length ? Math.min(...live.map(b => wNow(WL.birds.indexOf(b), S.wd)[3])) : null;
+  const lowAll = Math.min(...WL.birds.flatMap(b => b.days.map(x => x[3])));
+  return `<h2>${TT('Animals on the move: ivory gulls', 'Faune en mouvement : la mouette blanche')}</h2>
+    <p class="q">${TT('Twelve ivory gulls carried satellite transmitters from their nesting colony on Seymour Island, Nunavut. Follow them through the seasons: south along the sea-ice edge for winter, back north to breed.', 'Douze mouettes blanches ont porté des émetteurs satellites depuis leur colonie de l’île Seymour, au Nunavut. Suivez-les au fil des saisons : vers le sud le long de la banquise pour l’hiver, puis de retour au nord pour nicher.')}</p>
+    <div class="big"><b>${wDate(S.wd)}</b><span>${wSeason(d.getUTCMonth())} · ${TT(`${live.length} of 12 birds sending a position`, `${live.length} oiseaux sur 12 transmettent une position`)}${south != null ? TT(`, the farthest south at ${nf(south, 1)}°N`, `, le plus au sud à ${nf(south, 1)}°N`) : ''}</span></div>
+    <p class="rng">${TT(`Farthest south of any bird over the whole record: ${nf(lowAll, 1)}°N, in the Labrador Sea. The colony is at about 76.8°N.`, `Le point le plus au sud atteint par un oiseau : ${nf(lowAll, 1)}°N, dans la mer du Labrador. La colonie est à environ 76,8°N.`)}</p>
+    <p class="def">${TT('The ivory gull lives in the Arctic all year and feeds along the edge of the sea ice. It is listed as endangered in Canada; counts at Canadian colonies fell by more than 70% over three decades (study authors).', 'La mouette blanche vit dans l’Arctique toute l’année et se nourrit en bordure de la banquise. Elle est en voie de disparition au Canada; les effectifs des colonies canadiennes ont chuté de plus de 70 % en trois décennies (auteurs de l’étude).')}</p>
+    <p class="def">${WL.notes.map(esc).join(' ')}</p>
+    <p class="src">${TT('Source: Spencer, Gilchrist and Mallory (2014), PLoS ONE 9(12): e115231; data CC0 via Dryad/Zenodo (doi:10.5281/zenodo.4952182).', 'Source : Spencer, Gilchrist et Mallory (2014), PLoS ONE 9(12) : e115231; données CC0 via Dryad/Zenodo (doi:10.5281/zenodo.4952182).')}</p>`;
+}
+function moveLegend() { return `<div class="lg-t">${TT('Ivory gulls, one dot per bird per day', 'Mouettes blanches, un point par oiseau par jour')}</div><div class="lg2"><span><i style="background:var(--accent)"></i>${TT(`Today, with the last ${TRAIL} days as a trail`, `Aujourd’hui, avec les ${TRAIL} derniers jours en traîne`)}</span></div><div class="lg-miss"><i class="ring"></i>${TT('Nesting colony', 'Colonie de nidification')}</div><div class="lg-miss">${TT('Press ▶ to play the seasons. Positions rounded to about 20 km.', 'Appuyez sur ▶ pour faire défiler les saisons. Positions arrondies à environ 20 km.')}</div>`; }
+function moveDetail() {
+  return `<h3>${TT('Each bird', 'Chaque oiseau')}</h3><p class="hint">${TT('Tap a bird to draw its whole route so far. Transmitters stopped at different times.', 'Touchez un oiseau pour tracer tout son parcours jusqu’ici. Les émetteurs se sont arrêtés à des moments différents.')}</p>
+    <div class="nb-list">${WL.birds.map((b, bi) => `<button class="fo-row sp-row ${b.id === S.wb ? 'on' : ''}" data-wb="${b.id}"><b>${TT('Gull', 'Mouette')} ${b.id}</b><span>${wMon(b.first)} → ${wMon(b.last)}</span><span>${TT(`${b.n} days`, `${b.n} jours`)}${wNow(bi, S.wd) ? ' ●' : ''}</span></button>`).join('')}</div>`;
+}
 // ---------------------------------------------------------------- open / close / hash
-function writeHash() { const h = `#cl=${S.mode}/${S.y}${S.avg ? '' : '/y'}${S.st ? '/s' + S.st : ''}${S.gl ? '/g' + S.gl : ''}${S.mode === 'sprawl' && S.sc ? '/c' + S.sc : ''}`; if (location.hash !== h) history.replaceState(null, '', h); }
+function writeHash() { const h = `#cl=${S.mode}/${S.y}${S.avg ? '' : '/y'}${S.st ? '/s' + S.st : ''}${S.gl ? '/g' + S.gl : ''}${S.mode === 'sprawl' && S.sc ? '/c' + S.sc : ''}${S.mode === 'move' ? '/d' + S.wd + (S.wb ? '/b' + S.wb : '') : ''}`; if (location.hash !== h) history.replaceState(null, '', h); }
 async function readHash() { const h = decodeURIComponent(location.hash); if (!h.startsWith('#cl=')) return; const [m, y, ...rest] = h.slice(4).split('/');
   if (MODES.some(x => x[0] === m)) S.mode = m; if (+y >= 1900 && +y <= 2025) S.y = +y; if (S.mode === 'forest') { await loadForest(); S.y = Math.max(F.years[0], Math.min(F.years[1], S.y)); } if (S.mode === 'sprawl') { await loadSprawl(); S.y = Math.max(1975, Math.min(2020, S.y)); }
-  for (const r of rest) { if (r === 'y') S.avg = false; else if (r[0] === 's') S.st = r.slice(1); else if (r[0] === 'g') S.gl = r.slice(1); else if (r[0] === 'c') S.sc = r.slice(1); } }
+  if (S.mode === 'move') await loadWild();
+  for (const r of rest) { if (r === 'y') S.avg = false; else if (r[0] === 's') S.st = r.slice(1); else if (r[0] === 'g') S.gl = r.slice(1); else if (r[0] === 'c') S.sc = r.slice(1); else if (r[0] === 'd' && /^\d+$/.test(r.slice(1))) S.wd = +r.slice(1); else if (r[0] === 'b') S.wb = r.slice(1); } }
 let prevHash = '';
 async function open(opts = {}) {
   if (!el) build();
@@ -395,7 +455,7 @@ async function open(opts = {}) {
   if (!deckI) { bindScrub(el.querySelector('#cl-map')); bindScrub(el.querySelector('#cl-sprawl')); addEventListener('resize', () => S.mode === 'sprawl' && drawSprawl()); }
   if (!deckI) deckI = new Deck({ parent: el.querySelector('#cl-map'), views: new OrthographicView({ flipY: false }), controller: { doubleClickZoom: true }, onViewStateChange: ({ viewState }) => { CLZ = viewState.zoom; }, initialViewState: { target: [6400, 2400, 0], zoom: -3 },
     getCursor: ({ isHovering }) => isHovering ? 'pointer' : 'grab', onHover: tip,
-    onClick: ({ object }) => { if (!object) return; if (object.b) S.gl = object.id; else S.st = object.s.id; render(); }, style: { position: 'absolute', inset: 0 } });
+    onClick: ({ object }) => { if (!object) return; if (object.wbird) { S.wb = object.wbird.id; render(); return; } if (object.b) S.gl = object.id; else S.st = object.s.id; render(); }, style: { position: 'absolute', inset: 0 } });
   (window.__decks ||= {}).cl = deckI;
   render(); requestAnimationFrame(fit);
 }
