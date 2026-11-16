@@ -6,7 +6,8 @@ const WORLDS = [
   ['cl', 'Climate', 'Climate', '<path d="M12 3a2 2 0 0 0-2 2v9.3a4 4 0 1 0 4 0V5a2 2 0 0 0-2-2z M12 10v7"/>'],
   ['mn', 'Follow the dollar', 'Money', '<path d="M12 2v20 M17 6.5c-1-1.5-2.8-2.5-5-2.5-2.8 0-5 1.6-5 3.8 0 5 10 2.6 10 7.8 0 2.2-2.2 3.9-5 3.9-2.4 0-4.4-1.1-5.3-2.8"/>'],
 ];
-const API = { nb: () => window.CITIES, cl: () => window.CLIMATE, mn: () => window.MONEY, ab: () => window.ABOUT };
+const API = { nb: () => window.CITIES, cl: () => window.CLIMATE, mn: () => window.MONEY, wa: () => window.WATER, ab: () => window.ABOUT };
+const kindOf = h => h.startsWith('#nb=') ? 'nb' : h.startsWith('#cl=') ? 'cl' : h.startsWith('#mn=') ? 'mn' : h.startsWith('#wa=') ? 'wa' : h === '#about' ? 'ab' : 'map';
 const bar = document.createElement('header');
 bar.id = 'shell';
 bar.innerHTML = `<button class="brand" data-shell-home aria-label="Home"><span class="glyph" aria-hidden="true"><i></i><i></i><i></i></span><span class="bt">Canada <em>Through Time</em></span></button>
@@ -34,17 +35,17 @@ bar.addEventListener('click', e => {
   if (e.target.closest('[data-shell-home]')) { closeAll(); mark('map'); window.CTX2?.openHome?.(); }
 });
 // keep the highlight right when a world is opened another way (search result, home card, link)
-const syncFromHash = () => { const h = location.hash; mark(h.startsWith('#nb=') ? 'nb' : h.startsWith('#cl=') ? 'cl' : h.startsWith('#mn=') ? 'mn' : h === '#about' ? 'ab' : 'map'); };
+const syncFromHash = () => mark(kindOf(location.hash));
 // following a link inside the page (or Back/Forward) switches section cleanly: close whatever else is open
-addEventListener('hashchange', async () => { const h = location.hash, k = h.startsWith('#nb=') ? 'nb' : h.startsWith('#cl=') ? 'cl' : h.startsWith('#mn=') ? 'mn' : h === '#about' ? 'ab' : 'map';
-  const openNow = ['nb', 'cl', 'mn', 'ab'].filter(x => { const e = document.getElementById(x); return e && !e.hidden; });
+addEventListener('hashchange', async () => { const h = location.hash, k = kindOf(h);
+  const openNow = ['nb', 'cl', 'mn', 'wa', 'ab'].filter(x => { const e = document.getElementById(x); return e && !e.hidden; });
   closeAll(k);                                                     // closing a section puts back the address it came from…
   if (location.hash !== h) history.replaceState(null, '', h);      // …so restore the one the person asked for
   mark(k);
   if (k !== 'map') await API[k]()?.open();   // (re)reads the address, so Back/Forward inside a section works too
   if (k === 'map') dispatchEvent(new Event('shell-map')); });
 addEventListener('nb-close', () => setTimeout(syncFromHash, 0));
-new MutationObserver(() => { const open = ['nb', 'cl', 'mn', 'ab'].find(k => { const x = document.getElementById(k); return x && !x.hidden; }); if ((open || 'map') !== current) mark(open || 'map'); })
+new MutationObserver(() => { const open = ['nb', 'cl', 'mn', 'wa', 'ab'].find(k => { const x = document.getElementById(k); return x && !x.hidden; }); if ((open || 'map') !== current) mark(open || 'map'); })
   .observe(document.body, { subtree: true, attributes: true, attributeFilter: ['hidden'], childList: true });
 syncFromHash();
 // first visit straight to a page (a shared link): offer the tour for that page once it has drawn

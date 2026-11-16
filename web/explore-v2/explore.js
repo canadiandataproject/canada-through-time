@@ -719,7 +719,7 @@ function drawNav() { requestAnimationFrame(fitReading); const cur = state.navQ ?
     <div class="plates"><button class="opt qopt story ${state.story != null ? 'on' : ''}" data-story="0">The story: ${STORY.title}</button>${PATHS.map(p => `<button class="opt qopt ${state.q === p.id ? 'on' : ''}" data-q="${p.id}">${p.q}</button>`).join('')}</div>`; return; }
   const groups = SECTIONS.find(s => s[0] === cur)[1], g0 = M[state.m].group;
   document.getElementById('layers').innerHTML = tabs + (groups.length > 1 ? `<div class="subtabs">${groups.map(g => `<button class="sub ${g === g0 ? 'on' : ''}" data-sub="${g}">${GROUP_SHORT[g] || g}</button>`).join('')}</div>` : '')
-    + `<div class="plates">${MEASURES.filter(m => m.group === g0).map(m => `<button class="opt ${m.id === state.m ? 'on' : ''}" data-m="${m.id}">${m.label}</button>`).join('')}${cur === 'Money' ? '<button class="opt goworld" data-goworld="mn">Departments, grants and contracts →</button>' : ''}</div>`; }
+    + `<div class="plates">${MEASURES.filter(m => m.group === g0).map(m => `<button class="opt ${m.id === state.m ? 'on' : ''}" data-m="${m.id}">${m.label}</button>`).join('')}${cur === 'Money' ? '<button class="opt goworld" data-goworld="mn">Departments, grants and contracts →</button>' : cur === 'Safety' ? '<button class="opt goworld" data-goworld="wa">Drinking water advisories on reserves →</button>' : ''}</div>`; }
 document.getElementById('layers').addEventListener('click', e => {
   if (e.target.closest('[data-story]')) { openStory(0); return; }
   if (e.target.closest('[data-home]')) { openHome(); return; }
@@ -1543,6 +1543,7 @@ function openHome(focusSearch = false) {
     <p>People, places, money and climate from ${YMAX - 1971} years of official data. Every number links back to the table it came from.</p></div>
     <div class="hsearch"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input id="q-search" type="search" placeholder="${isPhone() ? "Search a place, topic or year" : "Try “Alberta unemployment 2010”, “toronto rent”, “glaciers”"}" autocomplete="off" aria-label="Search"><div id="q-results" role="listbox"></div></div>
     <div class="hworlds">${W.map(([k, t, d, f, ic]) => `<button class="hworld w-${k}" data-goworld="${k}"><svg viewBox="0 0 24 24" aria-hidden="true">${ICON[ic]}</svg><span class="wt">${t}</span><span class="wd">${d}</span><span class="wf">${f}</span><span class="wgo">Open →</span></button>`).join('')}</div>
+    <button class="hgap" data-goworld="wa"><span class="gk">Gaps worth fixing · 1</span><span class="gt">Drinking water advisories still in place</span><span class="gd">Long-term advisories on First Nations public water systems: which remain, for how long, and what fixed the ones that were lifted.</span><span class="wgo">Open →</span></button>
     <h2 class="hq2">Questions to start with</h2>
     <div class="hgrid">${cards}</div>
     <div class="hfoot"><button class="hgo" data-close>Explore the map freely →</button><button class="linkish" data-story="0">Or read the story: ${STORY.title}</button><button class="linkish" data-goworld="ab">About and sources</button></div></div>`;
@@ -1598,6 +1599,7 @@ function searchAll(raw) {
   for (const p of PATHS) if (words.some(w => norm(p.q).includes(w))) out.push({ t: p.q, s: 'Question', go: () => openPath(p.id) });
   if (nb.length) { const cityHit = !nb[0].t.endsWith('Neighbourhoods') && nb[0].t.includes(' in '); if (cityHit && !place) out.unshift(...nb); else out.push(...nb); }
   if (cl.length) out.unshift(...cl);
+  if (t.split(' ').some(w => /^(water|drinking|boil|advisory|advisories|reserve|reserves|neskantaga)$/.test(w))) out.unshift({ t: 'Drinking water advisories still in place', s: 'Gaps worth fixing · Indigenous Services Canada', go: () => window.SHELL ? window.SHELL.go('wa') : window.WATER?.open() });
   const mw = t.split(' ').find(w => /^(grant|grants|contribution|contributions|contract|contracts|contractor|vendor|vendors|spending|spend|spent|budget|dollar|dollars|subsidy|subsidies|procurement|department|departments|ministry)$/.test(w));
   if (mw) { const tab = /^contract|vendor|procure/.test(mw) ? 'contracts' : /^grant|contrib|subsid/.test(mw) ? 'grants' : 'spend';
     out.unshift({ t: { spend: 'Where Ottawa’s money goes', grants: 'Grants and contributions', contracts: 'Federal contracts' }[tab], s: 'Follow the dollar · Public Accounts and proactive disclosure', go: () => window.SHELL ? window.SHELL.go('mn', { tab }) : window.MONEY?.open({ tab }) }); }

@@ -686,6 +686,50 @@ sources:
       - "Police-reported crime only; crimes not reported to police are missing, and reporting rates differ by offence and place."
       - "Not an indicator of overall safety (note 55); places that serve many non-residents can show higher values (notes 47-48)."
       - "2025 may undercount RCMP national-security incidents (note 60)."
+  isc_ltdwa_en:
+    title: "Map of lifted and active long-term drinking water advisories: map data (English)"
+    publisher: "Indigenous Services Canada"
+    landing_url: "https://www.sac-isc.gc.ca/eng/1620925418298/1620925434679"
+    download_url: "https://www.sac-isc.gc.ca/DAM/DAM-ISC-SAC/DAM-WTR/STAGING/texte-text/lTDWA_map_data_1572010201618_eng.txt"
+    raw_file: "data/raw/isc/ltdwa_map_data_eng.txt"
+    sha256: "d565b56d329774c68164d7237e6e821660ac9fd58e1406c1c2aa863e42d71d73"
+    retrieved: "2026-11-16"
+    release_in_file: "Matches ISC's figures as of October 21, 2026: 39 active, 158 lifted since November 2015"
+    reporting_period: "Each advisory: date first set, date it became long-term, date lifted"
+    coverage: "Public water systems on reserves supported by Indigenous Services Canada, south of 60°"
+    units: "Advisories"
+    licence: "Open Government Licence – Canada (Government of Canada web content)"
+    licence_url: "https://open.canada.ca/en/open-government-licence-canada"
+    attribution: "Source: Indigenous Services Canada, long-term drinking water advisories map data."
+    quality_class: administrative_data
+    methodology_notes:
+      - "An advisory becomes long-term after 12 months. For lifted advisories the lift date is in the field DateExpected."
+      - "Monthly counts in effect are derived from start and lift dates; one active advisory has no long-term start date."
+    limitations:
+      - "Covers ISC-supported public systems only: not private wells or cisterns, not British Columbia's First Nations Health Authority advisories in the same way, not self-governing nations or the territories."
+      - "Only advisories lifted since November 2015 are in the file, so earlier history is not shown."
+  isc_ltdwa_fr:
+    title: "Map of lifted and active long-term drinking water advisories: map data (French)"
+    publisher: "Indigenous Services Canada"
+    landing_url: "https://www.sac-isc.gc.ca/fra/1620925418298/1620925434679"
+    download_url: "https://www.sac-isc.gc.ca/DAM/DAM-ISC-SAC/DAM-WTR/STAGING/texte-text/lTDWA_map_data_1572010201618_fra.txt"
+    raw_file: "data/raw/isc/ltdwa_map_data_fra.txt"
+    sha256: "e91fd0628379f715821be08529bf38643e0d17fdbab3b11b2bb9fe59e2f887af"
+    retrieved: "2026-11-16"
+    release_in_file: "Matches ISC's figures as of October 21, 2026: 39 active, 158 lifted since November 2015"
+    reporting_period: "Each advisory: date first set, date it became long-term, date lifted"
+    coverage: "Public water systems on reserves supported by Indigenous Services Canada, south of 60°"
+    units: "Advisories"
+    licence: "Open Government Licence – Canada (Government of Canada web content)"
+    licence_url: "https://open.canada.ca/en/open-government-licence-canada"
+    attribution: "Source: Indigenous Services Canada, long-term drinking water advisories map data."
+    quality_class: administrative_data
+    methodology_notes:
+      - "An advisory becomes long-term after 12 months. For lifted advisories the lift date is in the field DateExpected."
+      - "Monthly counts in effect are derived from start and lift dates; one active advisory has no long-term start date."
+    limitations:
+      - "Covers ISC-supported public systems only: not private wells or cisterns, not British Columbia's First Nations Health Authority advisories in the same way, not self-governing nations or the territories."
+      - "Only advisories lifted since November 2015 are in the file, so earlier history is not shown."
   statcan_14100327:
     title: "Labour force characteristics by gender and detailed age group, annual"
     publisher: "Statistics Canada"

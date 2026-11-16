@@ -77,7 +77,7 @@ def main():
     import build_pages
     pages = build_pages.build(OUT, SITE_URL)
     size = sum(p.stat().st_size for p in OUT.rglob("*") if p.is_file())
-    first = sum((OUT / r[3:]).stat().st_size for r in refs if not re.search(r"/(cities|climate|money)/", r))
+    first = sum((OUT / r[3:]).stat().st_size for r in refs if not re.search(r"/(cities|climate|money|gaps)/", r))
     print(f"site/: {len(refs)} data files, {size / 1e6:.1f} MB in all; national view loads about {first / 1e6:.1f} MB of data, sections load theirs when opened; {pages} search pages")
 
 
