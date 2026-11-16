@@ -18,7 +18,7 @@ ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / "web/explore-v2"
 WEB = ROOT / "web"
 OUT = ROOT / "site"
-SITE_URL = os.environ.get("SITE_URL", "https://tjreeve-ship-it.github.io/canada-through-time/")   # where the site is served (share previews, sitemap)
+SITE_URL = os.environ.get("SITE_URL", "https://canadiandataproject.github.io/canada-through-time/")   # where the site is served (share previews, sitemap)
 TITLE = "Canada Through Time"
 DESC = "People, places, money and climate: 55 years of official Canadian data on one map. Every number links back to its source."
 
@@ -40,6 +40,9 @@ def main():
     for m in re.finditer(r"\[((?:'[a-z_]+',?\s*)+)\]\.map\(n => J\(`(\.\./data/[^`$]+)\$\{n\}\.json`\)\)", "".join(code.values())):
         for n in re.findall(r"'([a-z_]+)'", m.group(1)):
             refs.add(f"{m.group(2)}{n}.json")
+    # folders whose files are named at run time (one picture per city): copy the whole folder
+    for d in ("sprawl",):
+        refs |= {f"../data/{d}/{p.name}" for p in (WEB / "data" / d).glob("*") if p.suffix in (".json", ".png")}
     missing = [r for r in refs if not (WEB / r[3:]).exists()]
     assert not missing, missing
     for r in sorted(refs):
@@ -77,7 +80,7 @@ def main():
     import build_pages
     pages = build_pages.build(OUT, SITE_URL)
     size = sum(p.stat().st_size for p in OUT.rglob("*") if p.is_file())
-    first = sum((OUT / r[3:]).stat().st_size for r in refs if not re.search(r"/(cities|climate|money)/", r))
+    first = sum((OUT / r[3:]).stat().st_size for r in refs if not re.search(r"/(cities|climate|money|gaps|forest|sprawl)/", r))
     print(f"site/: {len(refs)} data files, {size / 1e6:.1f} MB in all; national view loads about {first / 1e6:.1f} MB of data, sections load theirs when opened; {pages} search pages")
 
 

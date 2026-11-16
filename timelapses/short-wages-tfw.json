@@ -170,7 +170,7 @@
   },
   {
    "kind": "beat",
-   "s": 2.0,
+   "s": 7.3,
    "kicker": "2024 · a record (preliminary)",
    "big": "236,130",
    "line": "temporary foreign workers. <em>So what happened to wages?</em>",
@@ -183,18 +183,24 @@
   {
    "kind": "run",
    "to": 0,
-   "s": 0.9,
+   "s": 1.2,
    "ease": "inout"
   },
   {
    "kind": "run",
+   "to": 5,
+   "s": 5.5,
+   "ease": "linear"
+  },
+  {
+   "kind": "run",
    "to": 17,
-   "s": 5.0,
+   "s": 3.0,
    "ease": "linear"
   },
   {
    "kind": "beat",
-   "s": 2.9,
+   "s": 5.2,
    "kicker": "Food & hotels · 2002–2014",
    "big": "+1.0%/yr",
    "line": "real wage growth as TFW permits went from 29,220 to 93,745",
@@ -208,13 +214,13 @@
   {
    "kind": "run",
    "to": 22,
-   "s": 1.8,
+   "s": 3.6,
    "ease": "inout",
    "riser": true
   },
   {
    "kind": "beat",
-   "s": 3.3,
+   "s": 7.9,
    "kicker": "Food & hotels · 2014–2019",
    "big": "+1.8%/yr",
    "line": "after the cap; permits fell to 46,050 by 2017. <em>Minimum wages also rose</em>, so this alone can’t prove why",
@@ -228,12 +234,12 @@
   {
    "kind": "run",
    "to": 28,
-   "s": 1.6,
+   "s": 0.6,
    "ease": "out"
   },
   {
    "kind": "summary",
-   "s": 5.0
+   "s": 8.3
   },
   {
    "kind": "loop",
@@ -312,5 +318,6 @@
    "2002-2014": 1.089,
    "2014-2019": 0.698
   }
- }
+ },
+ "voice": "audio/voice/short-wages-tfw.wav"
 }

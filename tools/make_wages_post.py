@@ -27,7 +27,7 @@ A peer-reviewed study (Chen & Fang, 2025) compared low-wage jobs that relied on 
 Sources: Statistics Canada tables 14-10-0064-01 and 18-10-0005-01; IRCC open data, TFWP work permit holders on December 31 (preliminary). Chen, W.-H. & Fang, T. (2025), Journal of Ethnic and Migration Studies (IZA DP 18240). Program dates: Government of Canada (July 2002 low-skill pilot; June 20, 2014 overhaul; Sept 26, 2024 changes). Lines grow between years as animation.
 Music and sound: original.
 
-Explore wages and jobs by province: https://tjreeve-ship-it.github.io/canada-through-time/
+Explore wages and jobs by province: https://canadiandataproject.github.io/canada-through-time/
 
 #Canada #Wages #TFW #DataViz
 

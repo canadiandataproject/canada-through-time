@@ -2,6 +2,7 @@
  * Not the published version (that is web/explore). Same data contracts, registry and evidence rules.
  * State lives in the URL hash (#chg-2026-ab) so any view can be shared.
  */
+const { ClipExtension } = deck;
 const { Deck, OrbitView, GeoJsonLayer, ColumnLayer, TextLayer, ArcLayer, PathLayer, ScatterplotLayer, LineLayer, LightingEffect, AmbientLight, DirectionalLight, COORDINATE_SYSTEM } = deck;
 const CART = COORDINATE_SYSTEM.CARTESIAN;
 const Q = new URLSearchParams(location.search);
@@ -87,6 +88,10 @@ const [pop, comp, flows, area, politics, evData, provinces, ntnu, countries, lak
 const [HC, HH, HCPI, HINC, HCITY, HCHN] = await Promise.all(['construction', 'households', 'cpi', 'income', 'cities', 'core_need'].map(n => J(`../data/housing/${n}.json`)));
 const [DAGE, DMETRO, DURB] = await Promise.all([J('../data/demography/age.json'), J('../data/demography/metro.json'), J('../data/demography/urban_census.json')]);
 const [EGDP, ELFS, EGOV, ELANG, ENPR, EBIRTH, EPR] = await Promise.all(['gdp', 'lfs', 'govt', 'language', 'npr', 'birthplace'].map(n => J(`../data/more/${n}.json`)).concat(J('../data/explorer/pr_citizenship.json')));
+const ECRIME = await J('../data/more/crime.json');
+const EGAP = await J('../data/gaps/more.json');
+const gDoc = (g, y) => EGAP.doctor[g]?.[y] ?? null, gFood = (g, y) => EGAP.food[g]?.[y] ?? null;
+const crAt = (g, y) => ECRIME.data[g]?.[y] ?? null, crCity = (c, y, k) => ECRIME.cma[c.name]?.[y]?.[k] ?? null;
 await Promise.all([`600 16px "${UI_FONT}"`, `400 16px "${UI_FONT}"`, `500 16px "${UI_FONT}"`].map(f => document.fonts.load(f)));
 
 const S = pop.series, D = pop.dates;
@@ -320,11 +325,41 @@ MEASURES.push(
     years: [ELANG.years[0], ELANG.years.at(-1)], only: ELANG.years, split: y => y >= 2001, value: (g, y) => { const d = langAt(g, y); return d?.other != null && d.total ? d.other / d.total * 100 : null; },
     fmt: v => v.toFixed(1) + '%', unit: 'of residents', color: v => magnitude(v, 0, 70, false), rng: [0, 70], cover: 'Census years only',
     legend: { kind: 'mag', ticks: [[0, '0%'], [0.286, '20%'], [0.571, '40%'], [1, '70%']], cap: 'Neither English nor French as mother tongue, %' }, when: y => `${y} Census`, prelim: () => false },
+  { id: 'nodoc', group: 'Gaps worth fixing', label: 'No family doctor or nurse practitioner', q: 'Share of people 12 and over who say they have no regular health care provider: no family doctor, nurse practitioner or other regular provider. Survey estimate; the range is the 95% margin.', kind: 'fill', src: ['statcan_13100096'], tag: 'Survey estimate',
+    years: [2015, 2022], split: () => true, value: (g, y) => gDoc(g, y)?.v ?? null, fmt: v => v.toFixed(1) + '%', unit: 'of people 12+ without a regular provider', color: v => magnitude(v, 5, 25, false), rng: [5, 25],
+    cover: 'Provinces only · survey', legend: { kind: 'mag', ticks: [[0, '5%'], [0.25, '10%'], [0.5, '15%'], [0.75, '20%'], [1, '25%']], cap: 'No regular health care provider, % of people 12+', nodata: true }, when: y => `${y} survey`, prelim: () => false },
+  { id: 'hpr', group: 'Gaps worth fixing', label: 'Homes built per new resident', q: 'Homes started over five years, divided by how many people the province added over the same five years. Below about 0.4 (roughly one home for every 2.5 new people, close to the average household size) homes fall behind.', kind: 'fill', src: ['statcan_34100126', 'statcan_17100009'], tag: 'Derived',
+    years: [1976, 2025], split: y => y >= 1991, value: (g, y) => { let st = 0; for (let k = y - 4; k <= y; k++) { const v = hc(g, 'starts_total', k); if (v == null) return null; st += v; } const a = popAt(g, y), b = popAt(g, y - 5); return a && b && a - b > 0 ? st / (a - b) : null; },
+    fmt: v => v.toFixed(2), unit: 'homes started per person added (5 years)', color: v => magnitude(v, 0.1, 1.2, true), rng: [0.1, 1.2],
+    cover: 'Provinces only · shrinking or flat population: no value', legend: { kind: 'mag', ticks: [[0, '0.1'], [0.38, '0.25'], [0.66, '0.5'], [0.94, '1.0']], cap: 'Homes started per person added, 5 years to this one · log scale', nodata: true }, when: y => `${y - 4}–${y}`, prelim: () => false },
+  { id: 'foodh', group: 'Gaps worth fixing', label: 'Groceries in hours of work', q: 'How many hours at the median hourly wage it takes to buy the same groceries, compared with 1997 (1.00). Above 1.00: food prices have outrun wages.', kind: 'fill', src: ['statcan_18100005', 'statcan_14100064'], tag: 'Derived',
+    years: [1997, 2025], split: () => true, value: (g, y) => gFood(g, y)?.h ?? null, fmt: v => '×' + v.toFixed(2), unit: 'hours of work for the same groceries, 1997 = 1.00', color: v => diverging(v - 1, 0.15, 0.15, 0.01), rng: [0.85, 1.15],
+    cover: 'Provinces only · each against its own 1997', legend: { kind: 'div', neg: 0.15, pos: 0.15, dead: 0.01, decl: [[-0.15, '×0.85'], [-0.05, '×0.95']], grow: [[0.05, '×1.05'], [0.15, '×1.15']], deadLabel: 'within 1% of 1997', deadTick: '×1.00' }, when: y => `${y} average`, prelim: () => false },
+  { id: 'csi', group: 'Crime and safety', label: 'Crime severity', q: 'Police-reported crime, with each offence weighted by how seriously courts punish it. Canada in 2006 = 100. Not a measure of overall safety: crimes not reported to police are missing.', kind: 'fill', src: ['statcan_35100026'], tag: 'Official statistic',
+    years: ECRIME.years, split: y => y >= 1999, value: (g, y) => crAt(g, y)?.csi ?? null, fmt: v => v.toFixed(1), unit: 'index (Canada 2006 = 100)', color: v => magnitude(v, 40, 600, true), rng: [40, 600],
+    cover: 'Police-reported · log scale', legend: { kind: 'mag', ticks: [[0, '40'], [0.338, '100'], [0.594, '200'], [0.851, '400']], cap: 'Crime Severity Index · Canada 2006 = 100 · log scale', nodata: true }, when: y => `Calendar year ${y}`, prelim: () => false },
+  { id: 'vcsi', group: 'Crime and safety', label: 'Violent crime severity', q: 'The same index for violent offences only (homicide, assault, sexual assault, robbery, uttering threats and others). Canada in 2006 = 100.', kind: 'fill', src: ['statcan_35100026'], tag: 'Official statistic',
+    years: ECRIME.years, split: y => y >= 1999, value: (g, y) => crAt(g, y)?.vcsi ?? null, fmt: v => v.toFixed(1), unit: 'index (Canada 2006 = 100)', color: v => magnitude(v, 40, 600, true), rng: [40, 600],
+    cover: 'Police-reported · log scale', legend: { kind: 'mag', ticks: [[0, '40'], [0.338, '100'], [0.594, '200'], [0.851, '400']], cap: 'Violent Crime Severity Index · Canada 2006 = 100 · log scale', nodata: true }, when: y => `Calendar year ${y}`, prelim: () => false },
+  { id: 'wcr', group: 'Crime and safety', label: 'Crimes solved by police', q: 'Weighted clearance rate: the share of police-reported incidents that police solved (a charge was laid or the case was cleared another way), with serious crimes counting for more.', kind: 'fill', src: ['statcan_35100026'], tag: 'Official statistic',
+    years: ECRIME.years, split: y => y >= 1999, value: (g, y) => crAt(g, y)?.wcr ?? null, fmt: v => v.toFixed(1) + '%', unit: 'weighted share of incidents solved', color: v => magnitude(v, 15, 80, false), rng: [15, 80],
+    cover: 'Police-reported', legend: { kind: 'mag', ticks: [[0.077, '20%'], [0.385, '40%'], [0.692, '60%'], [1, '80%']], cap: 'Weighted clearance rate, %', nodata: true }, when: y => `Calendar year ${y}`, prelim: () => false },
+  { id: 'csicity', group: 'Crime and safety', label: 'Crime severity by city', q: 'Crime Severity Index for each metropolitan area, using police-service boundaries (these do not always match census boundaries). Canada in 2006 = 100.', kind: 'points', src: ['statcan_35100026'], tag: 'Official statistic',
+    years: ECRIME.years, split: y => y >= 1999, cityValue: (c, y) => crCity(c, y, 'csi'), value: (g, y) => g === 'CAN' ? crAt('CAN', y)?.csi ?? null : null,
+    fmt: v => v.toFixed(1), unit: 'index (Canada 2006 = 100)', color: v => magnitude(v, 40, 250, true), rng: [40, 250], cover: 'Police-reported · cities only',
+    legend: { kind: 'mag', ticks: [[0, '40'], [0.5, '100'], [0.878, '200']], cap: 'Crime Severity Index by metropolitan area · log scale', points: true }, when: y => `Calendar year ${y}`, prelim: () => false },
 );
 
+// French names (layers, groups, sections). Statistics Canada's own French terms where it has them. Longer explanations are still
+// English for now; the home page says so.
+const FR_LABEL = {"pop": "Population", "chg": "Variation depuis 1971", "rate": "Croissance de la dernière année", "dens": "Habitants par km²", "share": "Part des Canadiens", "nat": "Accroissement naturel", "imm": "Immigrants", "npr": "Résidents non permanents (net)", "emi": "Émigration (nette)", "ipm": "Migration interprovinciale", "flow": "Flux migratoires", "fed": "Sièges aux élections fédérales", "starts": "Mises en chantier", "comp": "Achèvements de logements", "hhg": "Croissance des ménages", "vac": "Taux d’inoccupation locatif", "rent": "Loyer moyen, 2 chambres", "rentrel": "Loyers par rapport à l’ensemble des prix", "chn": "Besoins impérieux de logement (recensement)", "inc": "Revenu médian après impôt", "age": "Âge médian", "o65": "65 ans et plus", "u15": "Moins de 15 ans", "metro": "Dans une région métropolitaine", "urb": "Part urbaine (recensement)", "gdppc": "PIB par habitant", "gdpg": "Croissance du PIB réel", "ur": "Taux de chômage", "er": "Taux d’emploi", "fedbal": "Argent fédéral : perçu et dépensé", "fedexp": "Dépenses fédérales par habitant", "cht": "Transfert canadien en matière de santé par habitant", "provbal": "Solde budgétaire provincial", "provint": "Intérêts provinciaux sur la dette", "prdest": "Nouveaux résidents permanents", "nprsh": "Résidents temporaires", "bornout": "Immigrants (Recensement de 2021)", "fr": "Langue maternelle française", "nonoff": "Autres langues maternelles", "nodoc": "Sans médecin de famille ni infirmière praticienne", "hpr": "Logements mis en chantier par nouveau résident", "foodh": "L’épicerie en heures de travail", "csi": "Gravité de la criminalité", "vcsi": "Gravité des crimes violents", "wcr": "Crimes résolus par la police", "csicity": "Gravité de la criminalité par ville"};
+const FR_GROUP = {"Population": "Population", "Where growth came from": "D’où vient la croissance", "Age and cities": "Âge et villes", "Immigration and language": "Immigration et langue", "Government money": "Finances publiques", "Economy and jobs": "Économie et emploi", "Housing and cost of living": "Logement et coût de la vie", "Politics": "Politique", "Gaps worth fixing": "Écarts à combler", "Crime and safety": "Criminalité et sécurité"};
+const FR_SEC = {"People": "Population", "Money": "Argent", "Economy": "Économie", "Gaps": "Écarts", "Safety": "Sécurité", "Politics": "Politique"};
+if (window.LANG === 'fr') MEASURES.forEach(m => { if (FR_LABEL[m.id]) m.label = FR_LABEL[m.id]; });
+const GNAME = g => window.LANG === 'fr' ? FR_GROUP[g] || g : g;
 const DIFF = { pop: 'level', dens: 'level', inc: 'level', rent: 'level', starts: 'abs', comp: 'abs', nat: 'abs', imm: 'abs', npr: 'abs', emi: 'abs', ipm: 'abs', flow: 'abs',
   chg: 'pp', rate: 'pp', share: 'pp', hhg: 'pp', rentrel: 'pp', vac: 'pp', chn: 'pp', fed: 'none', age: 'abs', o65: 'pp', u15: 'pp', metro: 'pp', urb: 'pp',
-  gdppc: 'level', gdpg: 'pp', ur: 'pp', er: 'pp', fedbal: 'abs', fedexp: 'level', cht: 'level', provbal: 'abs', provint: 'level', prdest: 'abs', nprsh: 'pp', bornout: 'pp', fr: 'pp', nonoff: 'pp' };
+  gdppc: 'level', gdpg: 'pp', ur: 'pp', er: 'pp', fedbal: 'abs', fedexp: 'level', cht: 'level', provbal: 'abs', provint: 'level', prdest: 'abs', nprsh: 'pp', bornout: 'pp', fr: 'pp', nonoff: 'pp', csi: 'level', vcsi: 'level', wcr: 'pp', csicity: 'level', nodoc: 'pp', hpr: 'abs', foodh: 'abs' };
 const BREAKS = { inc: [[1993, 'survey change 1993'], [2012, 'survey change 2012']] };
 MEASURES.forEach(m => { m.diff = DIFF[m.id]; m.breaks = BREAKS[m.id] || []; });
 const M = Object.fromEntries(MEASURES.map(m => [m.id, m]));
@@ -433,7 +468,7 @@ function tooltip(info) {
   let html = '';
   if (o.geo && o.xy && state.hoverCity !== o.name && !isPhone()) { state.hoverCity = o.name; theDeck.setProps({ layers: layers() }); }
   if (o.geo && o.xy) { const m = M[state.m]; const v = m.cityValue ? m.cityValue(o, state.y) : null;
-    html = `<b>${o.geo}</b><div class="m">${m.label}: ${v == null ? (o.rent2br_status?.[state.y] === 'F' ? 'too unreliable to publish' : 'not surveyed') : m.fmt(v)}</div>`; }
+    html = `<b>${o.geo}</b><div class="m">${m.label}: ${v == null ? (o.rent2br_status?.[state.y] === 'F' ? 'too unreliable to publish' : m.id === 'csicity' ? 'not published' : 'not surveyed') : m.fmt(v)}</div>`; }
   else if (o.properties?.abbr || o.k) { const g = o.properties?.abbr || o.k; const m = M[state.m]; const v = m.value(g, state.y);
     html = `<b>${NAMES[g]}</b><div class="m">${m.label}: ${v == null ? 'no data' : m.fmt(v)}</div>`; }
   else if (o.o) html = `<b>${NAMES[o.o]} → ${NAMES[o.d]}</b><div class="m">${fmtInt(o.v)} moves, July ${state.y - 1}–June ${state.y}</div>`;
@@ -508,6 +543,18 @@ function layers() { const L = layers0(); return STUDIO ? L.map(l => l.clone({ tr
 // glide between the two published values; every printed number is the published value for the year on screen.
 let TW = null;
 const tweenOf = (fn, g, cur) => { if (!TW || typeof cur !== 'number') return cur; const a = fn(g, TW.ya), b = fn(g, TW.yb); return typeof a === 'number' && typeof b === 'number' ? a + (b - a) * TW.k : cur; };
+// Then/now wipe: the left of the divider shows the first published year, the right the year on the timeline.
+// Both sides are the published values; nothing is blended.
+const thenYear = m => m.only ? m.only[0] : m.years[0];
+function wipeLayers(m, z) {
+  if (!state.wipe || m.kind !== 'fill') return [];
+  const y0 = thenYear(m), split = m.split(y0), feats = split ? featsSplit : featsCombined, val = Object.fromEntries(geosFor(split).map(g => [g, m.value(g, y0)])), dimC = C('land-dim');
+  const x = state.wipe.x;
+  return [new GeoJsonLayer({ id: 'land-then-' + Math.round(x), data: feats, coordinateSystem: CART, filled: true, stroked: true, extruded: false, pickable: false,
+      getFillColor: f => { const v = val[f.properties.abbr]; return v == null ? dimC : m.color(v); }, getLineColor: C('boundary'), lineWidthUnits: 'pixels', getLineWidth: 1,
+      extensions: [new ClipExtension()], clipBounds: [-1e9, -1e9, x, 1e9], clipByInstance: false, parameters: { depthTest: false },
+      updateTriggers: { getFillColor: [state.m, y0] } })];
+}
 function layers0() {
   const m = M[state.m], y = state.y, split = m.split(y);
   const feats = split ? featsSplit : featsCombined, geos = geosFor(split);
@@ -530,6 +577,7 @@ function layers0() {
       material: TRUE_COL ? { ambient: 0.91, diffuse: 0.285, shininess: 0, specularColor: [0, 0, 0] } : V === 's' ? { ambient: 0.5, diffuse: 0.75, shininess: 12, specularColor: [40, 34, 28] } : { ambient: 1, diffuse: 0.15, shininess: 0, specularColor: [0, 0, 0] },
       updateTriggers: { getFillColor: [state.m, y, state.p, twKey] }, transitions: { getFillColor: 450 } }),
     ...(TX === 'relief' && RELIEF.img ? [reliefLayer(m, z)] : []),
+    ...wipeLayers(m, z),
     lakeLayer,
     ...(m.kind === 'fill' ? [hatchLayer(feats.filter(f => val[f.properties.abbr] == null), split, z)] : []),
     new PathLayer({ id: 'bounds', data: split ? OUT_SPLIT : OUT_COMB, coordinateSystem: CART, getPath: d => d.path.map(p => [p[0], p[1], z + 0.6]),
@@ -607,7 +655,8 @@ function labels(pts, pos, val, m, sel, abbrOnly = false) {
   const phone = isPhone(), halo = [...C('halo'), 240], tablet = phone && innerWidth >= 700;
   const at = d => CALLOUT[d.k] ? [...CALLOUT[d.k], PLATE + 2] : pos(d);
   const showVal = d => !abbrOnly && (!phone || tablet || d.k === sel || m.kind === 'spike');   // phones: values on the people layer and the selection; all sizes stagger or drop on collision
-  const valText = d => { const v = val[d.k]; if (m.kind === 'party') return v ? (v[0] === 'TIE' ? `Tied ${v[1]}–${v[1]}` : `${partyCode(v[0])} ${v[1]}`) : ''; return v == null ? '—' : m.fmt(v) + OV[over(m, v)]; };
+  const thenV = state.wipe && m.kind === 'fill' ? (() => { const y0 = thenYear(m); return Object.fromEntries(geosFor(m.split(y0)).map(g => [g, m.value(g, y0)])); })() : null;
+  const valText = d => { const v = thenV && at(d)[0] < state.wipe.x ? thenV[d.k] : val[d.k]; if (m.kind === 'party') return v ? (v[0] === 'TIE' ? `Tied ${v[1]}–${v[1]}` : `${partyCode(v[0])} ${v[1]}`) : ''; return v == null ? '—' : m.fmt(v) + OV[over(m, v)]; };
   // Value labels that would touch (narrow provinces, long dollar values) are staggered down or up; if neither fits,
   // the value is dropped and the abbreviation stays (the value remains in the tooltip, panel and ranking).
   let vp = null; try { vp = theDeck.getViewports()[0]; } catch (e) { /* deck not initialised yet */ }
@@ -632,7 +681,7 @@ function labels(pts, pos, val, m, sel, abbrOnly = false) {
       getPixelOffset: d => off(d, showVal(d) && !hideVal.has(d.k) ? -16 : -2), updateTriggers: { getPosition: [state.m, state.y, TW && TW.k, TW && TW.ya], getColor: [sel], getSize: [sel, phone, tablet], getText: [state.m, state.y, hideVal.size, phone], getPixelOffset: [sel, phone, state.m, state.y, JSON.stringify(dy), hideVal.size] } }),
     new TextLayer({ id: 'val', data: pts.filter(d => showVal(d) && !hideVal.has(d.k)), ...common, getText: valText,
       getSize: d => d.k === sel ? 17 : 14.5, fontWeight: 600, getColor: C('ink-1'), getPixelOffset: d => off(d, 0),
-      updateTriggers: { getPosition: [state.m, state.y, TW && TW.k, TW && TW.ya], getText: [state.m, state.y], getSize: [sel], getPixelOffset: [state.m, state.y, JSON.stringify(dy)] } }),
+      updateTriggers: { getPosition: [state.m, state.y, TW && TW.k, TW && TW.ya], getText: [state.m, state.y, state.wipe && Math.round(state.wipe.x)], getSize: [sel], getPixelOffset: [state.m, state.y, JSON.stringify(dy)] } }),
   ];
 }
 // One status vocabulary everywhere (list, panel, map legend): each state has its own marker and words.
@@ -692,19 +741,19 @@ function fitReading() { const L = document.getElementById('layers'), R = documen
 addEventListener('resize', () => fitReading());
 // Sections: a handful of plain top-level tabs; each holds one or more layer groups shown as labelled rows.
 const SECTIONS = [['People', ['Population', 'Where growth came from', 'Age and cities', 'Immigration and language']], ['Money', ['Government money']],
-  ['Economy', ['Economy and jobs', 'Housing and cost of living']], ['Politics', ['Politics']]];
+  ['Economy', ['Economy and jobs', 'Housing and cost of living']], ['Gaps', ['Gaps worth fixing']], ['Safety', ['Crime and safety']], ['Politics', ['Politics']]];
 const SEC_OF = Object.fromEntries(SECTIONS.flatMap(([s, gs]) => gs.map(g => [g, s])));
 for (const m of MEASURES) if (!SEC_OF[m.group]) { SECTIONS.push([m.group, [m.group]]); SEC_OF[m.group] = m.group; }
 const GROUPS = ['Questions', ...SECTIONS.map(s => s[0])];
-const TABNAME = g => g === 'Questions' ? 'Start here' : g;
+const TABNAME = g => g === 'Questions' ? T('Start here', 'Commencer ici') : window.LANG === 'fr' ? FR_SEC[g] || FR_GROUP[g] || g : g;
 const GROUP_SHORT = { 'Where growth came from': 'Where growth came from', 'Housing and cost of living': 'Housing', 'Age and cities': 'Age & cities', 'Economy and jobs': 'Economy & jobs', 'Immigration and language': 'Immigration & language' };
 function drawNav() { requestAnimationFrame(fitReading); const cur = state.navQ ? 'Questions' : SEC_OF[M[state.m].group];
   const tabs = `<div class="tabs">${GROUPS.map(g => `<button class="tab ${g === cur ? 'on' : ''}" data-g="${g}">${TABNAME(g)}</button>`).join('')}</div>`;
   if (cur === 'Questions') { document.getElementById('layers').innerHTML = tabs + `
     <div class="plates"><button class="opt qopt story ${state.story != null ? 'on' : ''}" data-story="0">The story: ${STORY.title}</button>${PATHS.map(p => `<button class="opt qopt ${state.q === p.id ? 'on' : ''}" data-q="${p.id}">${p.q}</button>`).join('')}</div>`; return; }
   const groups = SECTIONS.find(s => s[0] === cur)[1], g0 = M[state.m].group;
-  document.getElementById('layers').innerHTML = tabs + (groups.length > 1 ? `<div class="subtabs">${groups.map(g => `<button class="sub ${g === g0 ? 'on' : ''}" data-sub="${g}">${GROUP_SHORT[g] || g}</button>`).join('')}</div>` : '')
-    + `<div class="plates">${MEASURES.filter(m => m.group === g0).map(m => `<button class="opt ${m.id === state.m ? 'on' : ''}" data-m="${m.id}">${m.label}</button>`).join('')}${cur === 'Money' ? '<button class="opt goworld" data-goworld="mn">Departments, grants and contracts →</button>' : ''}</div>`; }
+  document.getElementById('layers').innerHTML = tabs + (groups.length > 1 ? `<div class="subtabs">${groups.map(g => `<button class="sub ${g === g0 ? 'on' : ''}" data-sub="${g}">${window.LANG === 'fr' ? GNAME(g) : GROUP_SHORT[g] || g}</button>`).join('')}</div>` : '')
+    + `<div class="plates">${MEASURES.filter(m => m.group === g0).map(m => `<button class="opt ${m.id === state.m ? 'on' : ''}" data-m="${m.id}">${m.label}</button>`).join('')}${cur === 'Money' ? '<button class="opt goworld" data-goworld="mn">Departments, grants and contracts →</button>' : cur === 'Safety' ? '<button class="opt goworld" data-goworld="wa">Drinking water advisories on reserves →</button>' : ''}</div>`; }
 document.getElementById('layers').addEventListener('click', e => {
   if (e.target.closest('[data-story]')) { openStory(0); return; }
   if (e.target.closest('[data-home]')) { openHome(); return; }
@@ -756,6 +805,95 @@ playBtns.forEach(b => b.onclick = toggle);
 document.getElementById('tl-speed').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; state.speed = +b.dataset.s;
   document.querySelectorAll('#tl-speed button').forEach(x => x.classList.toggle('on', x === b)); });
 
+// ---------------------------------------------------------------- fly-through: one tap, a cinematic camera path
+// West to east across the provinces, then the North, with a lower-third for each (the published value for the year on screen),
+// then back to all of Canada. With a province selected, the camera circles that province instead. Any touch or Esc stops it.
+const lower = document.createElement('div'); lower.id = 'fly-lower'; lower.hidden = true; mapEl.appendChild(lower);
+let FLY = null;
+const ease = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+function camTo(v, ms) { view = { ...view, ...v, transitionDuration: ms, transitionEasing: ease, transitionInterpolator: new deck.LinearInterpolator(['target', 'zoom', 'rotationX', 'rotationOrbit']) }; theDeck.setProps({ viewState: view }); }
+async function flyThrough() {
+  if (FLY) { stopFly(); return; }
+  const tok = FLY = {}, m = M[state.m], y = state.y, f = fitView(), wait = ms => new Promise(r => setTimeout(r, ms)), alive = () => FLY === tok;
+  const small = new Set(['PE', 'NS', 'NB']), split = m.split(y);
+  const order = state.p ? [state.p] : ['BC', 'AB', 'SK', 'MB', 'ON', 'QC', 'NB', 'NS', 'PE', 'NL', 'YT', split ? 'NT' : 'NT+NU', ...(split ? ['NU'] : [])];
+  userMoved = true; document.body.classList.add('fly-on'); document.querySelector('[data-act=fly]')?.classList.add('on'); stop();
+  const show = g => { const gg = (g === 'NT' || g === 'NU') && !split ? 'NT+NU' : g, v = m.kind === 'party' ? null : m.value(gg, y);
+    lower.innerHTML = `<b>${NAMES[gg]}</b><span>${m.label} · ${m.when ? m.when(y) : y}</span>${v != null ? `<em>${m.fmt(v)}</em>` : ''}`; lower.hidden = false; lower.classList.remove('in'); void lower.offsetWidth; lower.classList.add('in'); };
+  camTo({ rotationX: 30, zoom: f.zoom + 0.35, rotationOrbit: -8 }, 1400); await wait(1500);
+  for (const [i, g] of order.entries()) { if (!alive()) return; const at = anchor[g === 'NT+NU' ? 'NT+NU' : g]; if (!at) continue;
+    const z = f.zoom + (small.has(g) ? 2.3 : g === 'NU' || g === 'NT+NU' ? 0.9 : 1.35), orb = -14 + i * (28 / Math.max(1, order.length - 1));
+    camTo({ target: [at[0], at[1], 0], zoom: z, rotationX: state.p ? 38 : 28, rotationOrbit: orb }, i === 0 ? 2200 : 1700); await wait(i === 0 ? 1600 : 1200); if (!alive()) return;
+    show(g); await wait(state.p ? 900 : 1500);
+    if (state.p) { camTo({ rotationOrbit: orb + 40, zoom: z + 0.3 }, 5200); await wait(5400); } }
+  if (!alive()) return; lower.hidden = true; camTo({ ...f }, 2200); await wait(2300); stopFly(true);
+}
+function stopFly(done) { FLY = null; lower.hidden = true; document.body.classList.remove('fly-on'); document.querySelector('[data-act=fly]')?.classList.remove('on');
+  if (!done) camTo({ ...fitView() }, 900); userMoved = false; }
+addEventListener('pointerdown', e => { if (FLY && !e.target.closest('[data-act=fly]')) stopFly(); }, true);
+addEventListener('keydown', e => { if (FLY && e.key === 'Escape') stopFly(); });
+
+// ---------------------------------------------------------------- then / now wipe handle
+const wipeEl = document.createElement('div'); wipeEl.id = 'wipe'; wipeEl.hidden = true; wipeEl.innerHTML = '<i></i><b class="wl"></b><b class="wr"></b><button aria-label="Move the divider">⇆</button>'; mapEl.appendChild(wipeEl);
+function wipeAt(sx) { const vp = theDeck.getViewports()[0]; if (!vp) return; const r = mapEl.getBoundingClientRect(), sy = r.height * 0.5;
+  const p = vp.unproject([sx, sy, 0]); state.wipe = { sx, x: p[0] }; wipeEl.style.left = sx + 'px'; paintWipe(); theDeck.setProps({ layers: layers() }); }
+function paintWipe() { if (!state.wipe) { wipeEl.hidden = true; return; } const m = M[state.m]; wipeEl.hidden = m.kind !== 'fill';
+  wipeEl.querySelector('.wl').textContent = whenShort(m, thenYear(m)); wipeEl.querySelector('.wr').textContent = whenShort(m, state.y); }
+const whenShort = (m, y) => String(y);
+function toggleWipe() { if (state.wipe) { state.wipe = null; if (wipeTilt != null) { view = { ...view, rotationX: wipeTilt }; theDeck.setProps({ viewState: view }); wipeTilt = null; } paintWipe(); theDeck.setProps({ layers: layers() }); document.querySelector('[data-act=wipe]')?.classList.remove('on'); return; }
+  const m = M[state.m]; if (m.kind !== 'fill') { flashNote(T('Then and now works on coloured-province layers.', 'Avant et maintenant fonctionne avec les couches de provinces colorées.')); return; }
+  state.y = m.years[1]; wipeTilt = view.rotationX; userMoved = true; view = { ...view, rotationX: Math.max(view.rotationX, 70), transitionDuration: 0 }; theDeck.setProps({ viewState: view }); update(); document.querySelector('[data-act=wipe]')?.classList.add('on'); setTimeout(() => wipeAt(mapEl.clientWidth * 0.5), 60); }
+let wipeTilt = null;
+function flashNote(t) { const h = document.getElementById('scrub-hint'); if (!h) return; h.textContent = t; h.classList.add('on'); setTimeout(() => h.classList.remove('on'), 3000); }
+{ let drag = false; const b = wipeEl.querySelector('button');
+  b.addEventListener('pointerdown', e => { drag = true; b.setPointerCapture(e.pointerId); e.stopPropagation(); e.preventDefault(); });
+  b.addEventListener('pointermove', e => { if (!drag) return; const r = mapEl.getBoundingClientRect(); wipeAt(Math.max(20, Math.min(r.width - 20, e.clientX - r.left))); e.stopPropagation(); });
+  b.addEventListener('pointerup', () => { drag = false; });
+  b.addEventListener('keydown', e => { if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { wipeAt(Math.max(20, Math.min(mapEl.clientWidth - 20, state.wipe.sx + (e.key === 'ArrowLeft' ? -24 : 24)))); e.preventDefault(); } }); }
+
+// ---------------------------------------------------------------- drag the map through time
+// At the whole-Canada view, a sideways drag anywhere on the map travels through the years (the year grows under your finger)
+// and an up/down swipe moves to the next or previous layer in the same section. Zoomed in, or with Shift held, drag moves the
+// map as before; two fingers always pinch and move it. Keyboard and the timeline slider still work everywhere.
+{ const hud = document.createElement('div'); hud.id = 'scrub-hud'; hud.hidden = true; hud.innerHTML = '<div class="sh-ticks"></div><b class="sh-y"></b><span class="sh-m"></span>'; mapEl.appendChild(hud);
+  const hint = document.createElement('div'); hint.id = 'scrub-hint'; mapEl.appendChild(hint);
+  const pts = new Map(); let g = null, raf = 0;
+  const atFit = () => view.zoom <= fitView().zoom + 0.35;
+  const sibs = () => { const sec = SEC_OF[M[state.m].group]; return MEASURES.filter(m => SEC_OF[m.group] === sec); };
+  const showHint = () => { try { if (localStorage.getItem('ct.scrubHint') || STUDIO) return; } catch (e) {}
+    hint.textContent = isPhone() ? T('Drag sideways on the map to travel through time · swipe up or down to change layer', 'Glissez de côté sur la carte pour voyager dans le temps · vers le haut ou le bas pour changer de couche')
+      : T('Drag sideways on the map to travel through time · swipe up or down to change layer · Shift-drag moves the map', 'Glissez de côté pour voyager dans le temps · vers le haut ou le bas pour changer de couche · Maj-glisser déplace la carte');
+    hint.classList.add('on'); setTimeout(() => hint.classList.remove('on'), 6500); };
+  setTimeout(showHint, 2500);
+  const ticks = (m, y) => { const [a, b] = m.years, n = b - a; let h = '';
+    for (let k = -8; k <= 8; k++) { const yy = y + k; if (yy < a || yy > b) continue; const big = yy % 10 === 0;
+      h += `<i class="${big ? 'big' : ''}${k === 0 ? ' now' : ''}" style="left:calc(50% + ${k * 14}px)"></i>${big && Math.abs(k) > 1 ? `<em style="left:calc(50% + ${k * 14}px)">${yy}</em>` : ''}`; }
+    return h; };
+  const place = () => { const w = mapEl.clientWidth; hud.style.left = Math.max(130, Math.min(w - 130, g.x)) + 'px'; hud.style.top = Math.max(70, g.y - 110) + 'px'; };
+  const paint = () => { raf = 0; if (!g) return; const m = M[state.m]; place();
+    if (g.mode === 'time') { hud.querySelector('.sh-y').textContent = state.y; hud.querySelector('.sh-ticks').innerHTML = ticks(m, state.y); hud.querySelector('.sh-m').textContent = m.label; }
+    else { const list = sibs(), i = list.findIndex(x => x.id === state.m), j = Math.max(0, Math.min(list.length - 1, i + (g.dy < -40 ? 1 : g.dy > 40 ? -1 : 0)));
+      hud.querySelector('.sh-ticks').innerHTML = '';
+      hud.querySelector('.sh-y').textContent = j === i ? '↕' : (g.dy < 0 ? '↑ ' : '↓ ') + list[j].label; hud.querySelector('.sh-m').textContent = j === i ? T('Swipe further to change layer', 'Glissez plus loin pour changer de couche') : T('Release to switch', 'Relâchez pour changer'); g.target = list[j].id; } };
+  const kill = e => { e.stopPropagation(); e.preventDefault(); };
+  mapEl.addEventListener('pointerdown', e => { pts.set(e.pointerId, e);
+    if (pts.size > 1 || e.shiftKey || e.button !== 0 || e.target.closest('#wipe') || !atFit() || state.story || document.body.classList.contains('home-on')) { g = null; hud.hidden = true; return; }
+    g = { id: e.pointerId, x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY, yr0: state.y, mode: null }; }, true);
+  mapEl.addEventListener('pointermove', e => { if (pts.has(e.pointerId)) pts.set(e.pointerId, e);
+    if (!g || e.pointerId !== g.id) return; if (pts.size > 1) { g = null; hud.hidden = true; return; }
+    const dx = e.clientX - g.x0, dy = e.clientY - g.y0, r = mapEl.getBoundingClientRect(); g.x = e.clientX - r.left; g.y = e.clientY - r.top; g.dy = dy;
+    if (!g.mode) { if (Math.abs(dx) > 9 && Math.abs(dx) > Math.abs(dy) * 1.2) g.mode = 'time'; else if (Math.abs(dy) > 14 && Math.abs(dy) > Math.abs(dx) * 1.6) g.mode = 'layer'; else return;
+      stop(); hud.hidden = false; hud.className = 'sh-' + g.mode; try { mapEl.setPointerCapture(e.pointerId); } catch (e3) {} try { localStorage.setItem('ct.scrubHint', '1'); } catch (e2) {} hint.classList.remove('on'); }
+    kill(e);
+    if (g.mode === 'time') { const m = M[state.m], span = m.years[1] - m.years[0], per = Math.max(10, Math.min(28, r.width * 0.8 / Math.max(1, span)));
+      const y = clampYear(m, Math.round(g.yr0 + dx / per)); if (y !== state.y) { state.y = y; if (navigator.vibrate && isPhone()) navigator.vibrate(4); update(); } }
+    if (!raf) raf = requestAnimationFrame(paint); }, true);
+  const end = e => { pts.delete(e.pointerId); if (!g || e.pointerId !== g.id) return; const was = g; g = null;
+    if (was.mode === 'layer') { const list = sibs(), i = list.findIndex(x => x.id === state.m); was.target = list[Math.max(0, Math.min(list.length - 1, i + (was.dy < -40 ? 1 : was.dy > 40 ? -1 : 0)))].id; }
+    if (was.mode) { kill(e); hud.hidden = true; if (was.mode === 'layer' && was.target && was.target !== state.m) { state.navQ = false; state.m = was.target; state.y = clampYear(M[state.m], state.y); update(); } } };
+  mapEl.addEventListener('pointerup', end, true); mapEl.addEventListener('pointercancel', end, true);
+  mapEl.addEventListener('click', e => { if (hud.dataset.justDragged) { kill(e); delete hud.dataset.justDragged; } }, true); }
+
 // ---------------------------------------------------------------- colours and map surface
 { const pp = document.getElementById('palpop');
   pp.innerHTML = `<h3>Colours · proposed themes</h3>${PALETTES.map(([id, name, mode], i) => `${i === RELEASE ? '<h3>Review only · for comparison</h3>' : ''}<button data-pal="${id}" class="${id === PAL ? 'on' : ''}" aria-pressed="${id === PAL}"><span class="sws">${PAL_SW[id].map(c => `<i style="background:${c}"></i>`).join('')}</span><span>${name}</span><small>${mode}</small></button>`).join('')}
@@ -772,6 +910,8 @@ document.getElementById('mapctl').addEventListener('click', e => { const a = e.t
   if (a === 'pal') { const pp = document.getElementById('palpop'); pp.hidden = !pp.hidden; e.target.closest('button').setAttribute('aria-expanded', String(!pp.hidden)); return; }
   const v = { ...view };
   if (a === 'zin') v.zoom += 0.5; if (a === 'zout') v.zoom -= 0.5;
+  if (a === 'wipe') { toggleWipe(); return; }
+  if (a === 'fly') { flyThrough(); return; }
   if (a === 'tilt') v.rotationX = isPhone() ? (Math.abs(v.rotationX - fitView().rotationX) < 3 ? (fitView().rotationX > 60 ? 40 : 70) : fitView().rotationX) : v.rotationX > 10 ? 0 : fitView().rotationX; if (a === 'reset') { Object.assign(v, fitView()); userMoved = false; } else userMoved = true;
   view = { ...boundView(v), transitionDuration: 500, transitionInterpolator: new deck.LinearInterpolator(['target', 'zoom', 'rotationX', 'rotationOrbit']) };
   theDeck.setProps({ viewState: view }); });
@@ -813,8 +953,13 @@ function finding(m, g, y) {
   if (m.kind === 'party') { const e = electionAt(y), sts = e && (g === 'CAN' ? e.seats_total : e.seats_by_province[g === 'NT+NU' ? 'NT' : g]); const top = topSeats(sts);
     if (top && top[0] === 'TIE') return `In the election of ${fmtDate(e.date)}, <em>${top[2].map(partyShort).join(' and ')}</em> tied for the most seats in ${name}: ${top[1]} each of ${Object.values(sts).reduce((a, b) => a + b, 0)}.`;
     return top ? `In the election of ${fmtDate(e.date)}, the <em>${partyShort(top[0])}</em> party won the most seats in ${name}: ${top[1]} of ${Object.values(sts).reduce((a, b) => a + b, 0)}.` : `No seats recorded for ${name}.`; }
+  if (m.group === 'Gaps worth fixing' && v != null && g === 'CAN') { const y0 = m.years[0] + (m.id === 'hpr' ? 4 : 0), better = m.id === 'nodoc' || m.id === 'foodh' ? -1 : 1;
+    const ch = PROV.filter(k => m.value(k, y0) != null && m.value(k, y) != null).map(k => [k, m.value(k, y0), m.value(k, y), (m.value(k, y) - m.value(k, y0)) * better]).sort((a, b) => b[3] - a[3]);
+    const best = ch[0], v0 = m.value('CAN', y0);
+    return `Canada: <em>${m.fmt(v)}</em> ${m.unit} · ${m.when(y)}${v0 != null && y !== y0 ? ` (${m.fmt(v0)} in ${m.when(y0)})` : ''}.${best && best[3] > 0 && y !== y0 ? ` Biggest improvement since ${m.when(y0)}: <b>${NAMES[best[0]]}</b>, ${m.fmt(best[1])} → ${m.fmt(best[2])}. Tap it to see its full record.` : ''}`; }
   if (m.kind === 'points') { const c = CITIES.find(x => x.name === state.city), cv = c && m.cityValue(c, y);
     if (c) return cv == null ? `No published value for ${c.name} in ${y}.` : `${c.name}: <em>${m.fmt(cv)}</em> ${m.unit} · ${whenOf(m, y)}.`;
+    if (m.id === 'csicity' && v != null) { const r = CITIES.map(c => [c.name, m.cityValue(c, y)]).filter(x => x[1] != null).sort((a, b) => b[1] - a[1]); return `Canada: <em>${m.fmt(v)}</em> (2006 = 100). Highest of the mapped cities in ${y}: ${r[0][0]}, ${m.fmt(r[0][1])}; lowest: ${r.at(-1)[0]}, ${m.fmt(r.at(-1)[1])}. Choose a city.`; }
     if (m.id === 'vac' && v != null) return `Across Canada's metropolitan areas, <em>${m.fmt(v)}</em> of purpose-built rental apartments were vacant in October ${y}.`;
     return `Published for cities, not for Canada as a whole. Choose a city on the map.`; }
   if (g === 'CAN' && (m.id === 'ipm' || m.id === 'flow')) return 'Moves between provinces cancel out for Canada as a whole. Choose a province.';
@@ -847,7 +992,7 @@ function reading(m) {
   document.getElementById('plate-cap').innerHTML = `<b>${m.label}</b>, ${whenOf(m, state.y)}${isPrelim(m, state.y) ? '<sup>1</sup>' : ''} · Lambert conformal conic projection · generalized boundaries`;
   { const on = overNote(m, state.y), lg = document.getElementById('legend'); lg.innerHTML = legendHTML(m) + on.html; lg.classList.toggle('has-hi', on.hi); lg.classList.toggle('has-lo', on.lo); }
   document.getElementById('pathcard').innerHTML = pathCard();
-  document.getElementById('layer-btn').textContent = 'Layers';
+  document.getElementById('layer-btn').textContent = T('Layers', 'Couches');
 }
 document.getElementById('pathcard').addEventListener('click', e => { const sb = e.target.closest('[data-storygo]'); if (sb) { sb.dataset.storygo === 'x' ? (state.story = null, update()) : openStory(+sb.dataset.storygo); return; }
   if (e.target.closest('[data-closeq]')) { state.q = null; update(); return; }
@@ -1050,7 +1195,7 @@ function cityPanel(m, y) {
     <div class="hero-sub">${v == null ? (st === 'F' ? 'Too unreliable to publish for this year (CMHC quality flag F).' : 'Not surveyed or not available for this year.') : m.unit}</div>
     ${cityTable(m, y).replace('<details open>', '<details>')}
     ${cityCompare(m, c, y)}
-    ${timeBlock(m, c.name, yy => { const v = m.cityValue(c, yy), st = m.id === 'rent' ? c.rent2br_status?.[yy] : null; return { v, why: v == null ? (st === 'F' ? 'suppressed (F)' : 'not surveyed') : '' }; }, y)}
+    ${timeBlock(m, c.name, yy => { const v = m.cityValue(c, yy), st = m.id === 'rent' ? c.rent2br_status?.[yy] : null; return { v, why: v == null ? (st === 'F' ? 'suppressed (F)' : m.id === 'csicity' ? 'not published' : 'not surveyed') : '' }; }, y)}
     <p class="step"><b>Vacancy rate</b>, apartments of 6+ units, October · ${c.name}${c2 ? ' vs ' + c2.name : ''}</p>${multiChart([{ label: c.name, c: 'var(--ink-1)', d: vs }, ...(c2 ? [{ label: c2.name, c: 'var(--cmp)', dash: '5 3', d: Object.fromEntries(Object.entries(c2.vacancy).map(([k, v]) => [+k, v])) }] : [])], { y0: 1971, y1: 2025, cur: y, unit: '%', zero: true, h: 120 })}
     <p class="step"><b>Average rent, two-bedroom</b>, current dollars · ${c.name}${c2 ? ' vs ' + c2.name : ''}</p>${multiChart([{ label: c.name, c: 'var(--ink-1)', d: rs }, ...(c2 ? [{ label: c2.name, c: 'var(--cmp)', dash: '5 3', d: Object.fromEntries(Object.entries(c2.rent2br).map(([k, v]) => [+k, v])) }] : [])], { y0: 1987, y1: 2025, cur: y, unit: '$ per month', h: 120 })}
     <p class="fine">${c.place ? `Point placed at ${c.place} (Natural Earth)` : 'Not drawn on the map (no position in the place file used)'}; the survey covers the whole metropolitan area. Rents are not adjusted for inflation.</p>
@@ -1060,7 +1205,7 @@ function cityTable(m, y) {
   const rows = CITIES.map(c => ({ c, v: m.cityValue(c, y), st: m.id === 'rent' ? c.rent2br_status?.[y] : null })).sort((a, b) => (b.v ?? -1) - (a.v ?? -1));
   return `<details open><summary>All ${CITIES.length} areas · ${y}<span class="hint wide">${MAPPED.length} on the map</span></summary><div class="in"><input class="citysearch" type="search" data-cityfilter placeholder="Find a city" aria-label="Find a city"><table>${rows.map(({ c, v, st }) =>
     `<tr class="click ${c.name === state.city ? 'cur' : ''}" data-city="${c.name}"><td>${c.name}${c.xy ? '' : ' ' + STAT.nm}</td><td>${v == null ? (st === 'F' ? STAT.sup : STAT.ns) : m.fmt(v) + (over(m, v) ? `<span class="ovm" title="${over(m, v) > 0 ? 'Above' : 'Below'} the map's colour scale">${OV[over(m, v)]}</span>` : '')}</td></tr>`).join('')}</table>
-    <div class="fine">${m.id === 'rent' ? 'Current dollars. F = too unreliable to publish (CMHC); left blank, never estimated.' : 'Purpose-built apartments of 6+ units, October survey.'}</div></div></details>`;
+    <div class="fine">${m.id === 'rent' ? 'Current dollars. F = too unreliable to publish (CMHC); left blank, never estimated.' : m.id === 'csicity' ? 'Police-reported. Canada 2006 = 100. Not a measure of overall safety.' : 'Purpose-built apartments of 6+ units, October survey.'}</div></div></details>`;
 }
 function flowTable(y) {
   const f = flowStats(y);
@@ -1089,7 +1234,7 @@ function cmpRow(m, g, y) {
 function diffText(m, a, b) {
   if (a.v == null || b.v == null || m.diff === 'none') return '';
   const d = a.v - b.v;
-  if (m.diff === 'pp') { const pp = d * ({ vac: 1, chn: 1, o65: 1, u15: 1, metro: 1, urb: 1, gdpg: 1, ur: 1, er: 1, nprsh: 1, bornout: 1, fr: 1, nonoff: 1 }[m.id] ?? 100); return `${NAMES[a.g]} is <b>${Math.abs(pp).toFixed(1)} percentage points</b> ${d >= 0 ? 'higher' : 'lower'}.`; }
+  if (m.diff === 'pp') { const pp = d * ({ vac: 1, chn: 1, o65: 1, u15: 1, metro: 1, urb: 1, gdpg: 1, ur: 1, er: 1, nprsh: 1, bornout: 1, fr: 1, nonoff: 1, wcr: 1, nodoc: 1 }[m.id] ?? 100); return `${NAMES[a.g]} is <b>${Math.abs(pp).toFixed(1)} percentage points</b> ${d >= 0 ? 'higher' : 'lower'}.`; }
   if (m.diff === 'abs') return `Difference: <b>${m.absFmt ? m.absFmt(d) : (d >= 0 ? '+' : '−') + Math.abs(d).toFixed(1)}</b> ${m.unit} (${NAMES[a.g]} minus ${NAMES[b.g]}).`;
   if (b.v === 0) return '';
   const rel = a.v / b.v - 1;
@@ -1134,7 +1279,7 @@ function timeBlock(m, label, valueAt, y, geoAt) {
   else if (brk.length) diff = `No difference shown: ${brk.map(([by, lab]) => lab.includes(String(by)) ? `the ${lab}` : `the ${lab} (${by})`).join(', ')} falls between these dates, so the two values are not directly comparable.`;
   else if (geoChange) diff = 'No difference shown: the area covered changes between these dates.';
   else if (m.diff !== 'none') { const d = B.v - A.v;
-    diff = m.diff === 'pp' ? `From ${ya} to ${yb}: <b>${d >= 0 ? '+' : '−'}${Math.abs(d * ({ vac: 1, chn: 1, o65: 1, u15: 1, metro: 1, urb: 1, gdpg: 1, ur: 1, er: 1, nprsh: 1, bornout: 1, fr: 1, nonoff: 1 }[m.id] ?? 100)).toFixed(1)} percentage points</b>.`
+    diff = m.diff === 'pp' ? `From ${ya} to ${yb}: <b>${d >= 0 ? '+' : '−'}${Math.abs(d * ({ vac: 1, chn: 1, o65: 1, u15: 1, metro: 1, urb: 1, gdpg: 1, ur: 1, er: 1, nprsh: 1, bornout: 1, fr: 1, nonoff: 1, wcr: 1, nodoc: 1 }[m.id] ?? 100)).toFixed(1)} percentage points</b>.`
       : m.diff === 'abs' ? `From ${ya} to ${yb}: <b>${m.absFmt ? m.absFmt(d) : (d >= 0 ? '+' : '−') + Math.abs(d).toFixed(1)}</b> ${m.unit}.`
       : A.v ? `From ${ya} to ${yb}: <b>${d >= 0 ? '+' : '−'}${m.fmt(Math.abs(d)).replace(/^[+−-]/, '')}</b> (${pct(B.v / A.v - 1)}).` : '';
     if (/current dollars/i.test(m.unit + ' ' + (m.q || ''))) diff += ' Current dollars: not adjusted for inflation.'; }
@@ -1149,7 +1294,7 @@ function cityCompare(m, c, y) {
   const pick = `<label class="cmppick">Compare with <select data-cmpcity><option value="">— choose a city —</option>${opts}</select></label>`;
   const c2 = CITIES.find(x => x.name === state.cmpCity && x.name !== c.name);
   if (!c2) return `<div class="cmp">${pick}</div>`;
-  const row = (x, mm) => { const v = mm.cityValue(x, y), st = mm.id === 'rent' ? x.rent2br_status?.[y] : null; return { v, why: v == null ? (st === 'F' ? 'suppressed (too unreliable to publish)' : 'not surveyed this year') : '' }; };
+  const row = (x, mm) => { const v = mm.cityValue(x, y), st = mm.id === 'rent' ? x.rent2br_status?.[y] : null; return { v, why: v == null ? (st === 'F' ? 'suppressed (too unreliable to publish)' : mm.id === 'csicity' ? 'not published this year' : 'not surveyed this year') : '' }; };
   const tr = mm => { const a = row(c, mm), b = row(c2, mm); const cell = r => `<td>${r.v == null ? `<span class="na">— ${r.why}</span>` : `<b>${mm.fmt(r.v)}</b>`}</td>`;
     const d = a.v != null && b.v != null ? (mm.id === 'vac' ? `${Math.abs(a.v - b.v).toFixed(1)} pts ${a.v >= b.v ? 'higher' : 'lower'}` : `${mm.fmt(Math.abs(a.v - b.v))} ${a.v >= b.v ? 'higher' : 'lower'} (${pct(a.v / b.v - 1)})`) : '—';
     return `<tr><td>${mm.label}</td>${cell(a)}${cell(b)}<td>${d}</td></tr>`; };
@@ -1193,7 +1338,7 @@ function renderPanel() {
     ${m.kind === 'party' || m.kind === 'points' || (g === 'CAN' && ['ipm', 'flow', 'share'].includes(m.id)) ? '' : chartSVG(g, m, state.cmp && state.cmp !== g && g !== 'CAN' ? geoFor(m, state.cmp, y) : null)}
     ${compareBlock(m, g, y)}
     ${timeBlock(m, NAMES[g], yy => cmpRow(m, g, yy), y, yy => geoFor(m, g, yy))}
-    ${m.kind === 'points' ? `<p class="fine" style="margin-top:14px">${m.id === 'vac' ? 'Canada figure: CMHC average across census metropolitan areas.' : 'No national or provincial average is published in this table.'} Choose a city on the map or in the list.</p>${cityTable(m, y)}` : ''}
+    ${m.kind === 'points' ? `<p class="fine" style="margin-top:14px">${m.id === 'vac' ? 'Canada figure: CMHC average across census metropolitan areas.' : m.id === 'csicity' ? 'Canada figure: the national index. Provinces are in the “Crime severity” layer.' : 'No national or provincial average is published in this table.'} Choose a city on the map or in the list.</p>${cityTable(m, y)}` : ''}
     ${m.kind === 'arcs' && g === 'CAN' ? flowTable(y) : ''}
     <button class="srcrow" data-why="src"><span>Source &amp; method</span><small>${src} · ${m.tag} →</small></button>
     ${evs.length ? `<details ${isPhone() || m.group === 'Housing and cost of living' ? '' : 'open'}><summary>In ${y}<span class="hint">${evs[0].title}</span></summary><div class="in">${evs.map(x => `<div class="ev"><span class="tag"><i class="m-${x.k}"></i>${{ elec: 'Election result', hist: 'Historical fact', note: 'Data note' }[x.k]}</span><b>${x.title}</b>${fmtDate(x.date)} · ${x.where}.
@@ -1282,6 +1427,10 @@ const COVER = {
   starts: 'CMHC table 34-10-0126 covers Canada and the ten provinces only. The territories are shown dimmed as “no data”, not as zero. Completions in this table end in 2022; starts continue to 2025.',
   vac: `CMHC publishes vacancy for census metropolitan areas, not provinces. ${MAPPED.length} areas are mapped at their core city; ${HCITY.unplaced.map(x => x.split(',')[0]).join(', ')} are not in the place file used for positions and are listed but not drawn. Each area enters the series in a different year.`,
   rent: `CMHC average rents are published for centres of 10,000+, not provinces. Two-bedroom units in row and apartment structures of 3+ units, current dollars. Values flagged “too unreliable to publish” (F) are left blank. ${MAPPED.length} metropolitan areas are drawn; ${CITIES.length - MAPPED.length} more are listed in the panel.`,
+  csi: 'Statistics Canada publishes the index for Canada, provinces, territories and policing-based metropolitan areas. 1998 Northwest Territories includes Nunavut, so the two are shown together that year. Reporting changes can move a series: the 2018 “founded incident” definition update, and British Columbia’s 2019 classification standards.',
+  vcsi: 'Same coverage and reporting breaks as the overall index. Violent offences only.',
+  wcr: 'Solved means a charge was laid or recommended, or police cleared the incident another way (for example, the accused died or the complainant declined to proceed). Weighted by seriousness, like the index.',
+  csicity: `Police-service metropolitan areas, which do not always match census boundaries. ${Object.keys(ECRIME.cma).length} areas are published; the ones the explorer can place on the map are drawn. Oshawa (Durham) is not in this table.`,
   rentrel: 'Statistics Canada replaced its rent method in January 2019 (matched units → a hedonic model on Labour Force Survey rents), so this layer starts from 2019. The rent index covers all tenants (new leases, renewals and mid-lease), so it rises more slowly than asking rents for vacant units. Provinces only: the territories have city indexes (Whitehorse, Yellowknife, Iqaluit).',
 };
 function openSource(m, why = 'src') {
@@ -1312,13 +1461,14 @@ function openEvent(e) {
 function timelineCtx(y) {
   const mi = ministryAt(`${y}-07-01`), evs = YEAR_EV[y] || [];
   const ev = evs.length ? `<div class="evl"><i class="m-${evs[0].k}"></i>${evs[0].title}${evs.length > 1 ? ` <span style="color:var(--ink-3)">+${evs.length - 1} more</span>` : ''}</div>` : '';
-  document.getElementById('tl-ctx').innerHTML = `${ev}<div>Prime Minister on July 1, ${y}: <b>${mi ? `${mi.pm}` : '—'}</b>${mi ? ` (${partyShort(mi.party)})` : ''}</div>`;
+  document.getElementById('tl-ctx').innerHTML = `${ev}<div>${T(`Prime Minister on July 1, ${y}`, `Premier ministre au 1er juillet ${y}`)}: <b>${mi ? `${mi.pm}` : '—'}</b>${mi ? ` (${partyShort(mi.party)})` : ''}</div>`;
   document.getElementById('mev').innerHTML = evs.length ? `<span class="evl"><i class="m-${evs[0].k}" style="display:inline-block;width:7px;height:7px;margin-right:6px"></i>${evs[0].title}</span>` : (mi ? `Prime Minister: ${mi.pm} (${partyShort(mi.party)})` : '');
   document.querySelectorAll('#tl-era span').forEach(s => { const m = ERAS[+s.dataset.i]; s.classList.toggle('now', m === mi); });
   document.querySelectorAll('#tl-ev i').forEach(i => i.classList.toggle('off', +i.dataset.y > y));
 }
 function update() {
   const m = M[state.m];
+  if (state.wipe) { if (m.kind !== 'fill') { state.wipe = null; document.querySelector('[data-act=wipe]')?.classList.remove('on'); } setTimeout(() => state.wipe && wipeAt(state.wipe.sx), 0); }
   state.y = clampYear(m, state.y);
   const p = ((state.y - YMIN) / span * 100) + '%';
   for (const r of [yr, myr]) { r.value = state.y; r.style.setProperty('--p', p); }
@@ -1506,26 +1656,79 @@ const HOME_CARDS = [
   { sec: 'People', q: 'Who moved where between provinces?', m: 'flow', big: () => { const y = lastYear(M.ipm), b = best(M.ipm, y); return [NAMES[b[0]], `most net arrivals per 1,000, ${compWhen(y)}${pre(M.ipm, y)}`]; }, spark: () => sparkOf(M.ipm, 'AB') },
   { sec: 'People', q: 'Where is Canada getting older?', m: 'age', big: () => { const y = lastYear(M.age), b = best(M.age, y); return [NAMES[b[0]], `oldest: median age ${M.age.fmt(b[1])} in ${y}${pre(M.age, y)}`]; }, spark: () => sparkOf(M.age) },
   { sec: 'Economy', q: 'Where are jobs hardest to find?', m: 'ur', big: () => { const y = lastYear(M.ur), b = best(M.ur, y); return [NAMES[b[0]], `${M.ur.fmt(b[1])} unemployment rate in ${y}`]; }, spark: () => sparkOf(M.ur) },
+  { sec: 'Safety', q: 'Is police-reported crime higher than in 1998?', m: 'csi', big: () => { const y = lastYear(M.csi), a = M.csi.value('CAN', 1998), b = M.csi.value('CAN', y); return [`${M.csi.fmt(b)} vs ${M.csi.fmt(a)}`, `Canada’s Crime Severity Index, ${y} vs 1998 (2006 = 100)`]; }, spark: () => sparkOf(M.csi) },
   { sec: 'Economy', q: 'How fast are homes being built?', m: 'starts', big: () => { const y = lastYear(M.starts), b = best(M.starts, y); return [NAMES[b[0]], `most starts per 1,000 residents in ${y}`]; }, spark: () => sparkOf(M.starts) },
 ];
 const homeEl = document.createElement('div'); homeEl.id = 'home'; homeEl.hidden = true; document.getElementById('app').appendChild(homeEl);
+
+// "Your life in Canada": the same published values as the map, read at the year someone was born and now. Kept in memory only.
+const LIFE = ['pop', 'age', 'o65', 'u15', 'ur', 'inc', 'foodh', 'starts', 'hpr', 'nodoc', 'imm', 'csi', 'fr'];
+function lifeRows(by, g) {
+  const out = [];
+  for (const id of LIFE) { const m = M[id]; if (!m) continue;
+    const geo = y => (g === 'NT' || g === 'NU') && !m.split(y) ? 'NT+NU' : g;
+    const ys = m.only || Array.from({ length: m.years[1] - m.years[0] + 1 }, (_, i) => m.years[0] + i);
+    const have = ys.filter(y => m.value(geo(y), y) != null); if (!have.length) continue;
+    const y0 = have.find(y => y >= by) ?? null, y1 = have.at(-1); if (y0 == null || y0 === y1) continue;
+    out.push({ m, y0, y1, v0: m.value(geo(y0), y0), v1: m.value(geo(y1), y1), late: y0 !== by }); }
+  return out;
+}
+function drawLife() {
+  const yEl = document.getElementById('life-y'), gEl = document.getElementById('life-g'), box = document.getElementById('life-out'); if (!box) return;
+  const by = +yEl.value, g = gEl.value;
+  if (!(by >= 1971 && by < YMAX)) { box.innerHTML = by ? `<p class="hlq">${T('Choose a year from 1971: most series start then.', 'Choisissez une année à partir de 1971 : la plupart des séries commencent alors.')}</p>` : ''; return; }
+  const rows = lifeRows(by, g);
+  box.innerHTML = `<div class="hlrows">${rows.map(r => { const up = r.v1 > r.v0;
+    return `<button class="hlrow" data-life-m="${r.m.id}" data-life-y="${r.y0}"><span class="hll">${r.m.label}</span><span class="hlv"><i>${r.y0}${r.late ? '*' : ''}</i>${r.m.fmt(r.v0)}</span><span class="hla">${up ? '↗' : r.v1 < r.v0 ? '↘' : '→'}</span><span class="hlv"><i>${r.y1}</i><b>${r.m.fmt(r.v1)}</b></span></button>`; }).join('')}</div>
+    <p class="hlq">${T(`${NAMES[g]}. * the series starts after ${by}, so its first year is shown. Tap a row to see it on the map. Income is in 2024 dollars; the rest are as published.`, `${NAMES[g]}. * la série commence après ${by}; sa première année est affichée. Touchez une ligne pour la voir sur la carte. Le revenu est en dollars de 2024; le reste tel que publié.`)}</p>`;
+}
+// Your place first: a city (any of the census metropolitan areas with neighbourhood maps) or a postal code's first letter
+// (its province). Kept on this device only; nothing is sent anywhere.
+const PC1 = { A: 'NL', B: 'NS', C: 'PE', E: 'NB', G: 'QC', H: 'QC', J: 'QC', K: 'ON', L: 'ON', M: 'ON', N: 'ON', P: 'ON', R: 'MB', S: 'SK', T: 'AB', V: 'BC', Y: 'YT' };
+const CMA_PROV = code => ['NL', 'PE', 'NS', 'NB', 'QC', 'ON', 'MB', 'SK', 'AB', 'BC'][+String(code).padStart(3, '0')[0]];
+let PLACE = {}; try { PLACE = JSON.parse(localStorage.getItem('ct.place') || '{}'); } catch (e) { PLACE = {}; }
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+function resolvePlace(q) { q = (q || '').trim(); if (!q) return null;
+  const pc = q.toUpperCase().replace(/\s/g, ''); if (/^[A-Z]\d[A-Z]/.test(pc) || /^[A-Z]\d?$/.test(pc)) { const g = pc[0] === 'X' ? null : PC1[pc[0]]; return g ? { g, label: pc.slice(0, 3), cma: null } : (pc[0] === 'X' ? { g: 'NT', label: pc.slice(0, 3), cma: null, xNote: true } : null); }
+  const n = norm(q).trim(); const hit = CITY_AL.find(c => norm(c[1]) === n) || CITY_AL.find(c => c[2].some(x => x.startsWith(n))) || CITY_AL.find(c => norm(c[1]).includes(n));
+  return hit ? { g: CMA_PROV(hit[0]), label: hit[1], cma: hit[0] } : null; }
+function drawPlace() { const out = document.getElementById('place-out'); if (!out) return; const P = PLACE; if (!P.g) { out.innerHTML = ''; return; }
+  const gsel = document.getElementById('life-g'); if (gsel && gsel.value !== P.g) { gsel.value = P.g; drawLife(); }
+  out.innerHTML = `<div class="hplace-go"><button data-place-map>${T(`${NAMES[P.g]} on the map`, `${NAMES[P.g]} sur la carte`)} →</button>${P.cma ? `<button data-place-nb="${P.cma}">${T(`${P.label}: every neighbourhood`, `${P.label} : chaque quartier`)} →</button>` : ''}${P.xNote ? `<span class="hlq">${T('X postal codes cover both the Northwest Territories and Nunavut; showing the Northwest Territories.', 'Les codes postaux en X couvrent les Territoires du Nord-Ouest et le Nunavut; affichage des Territoires du Nord-Ouest.')}</span>` : ''}</div>`; }
+function setPlace(q) { const r = resolvePlace(q); if (!r) { const o = document.getElementById('place-out'); if (o && q.trim().length > 2) o.innerHTML = `<p class="hlq">${T('Try a city name or the first three characters of a postal code.', 'Essayez un nom de ville ou les trois premiers caractères d’un code postal.')}</p>`; return; }
+  PLACE = r; try { localStorage.setItem('ct.place', JSON.stringify(r)); } catch (e) {} drawPlace(); }
 function openHome(focusSearch = false) {
   const cards = HOME_CARDS.filter(c => M[c.m]).map((c, i) => { let big = ['', ''], sp = ''; try { big = c.big(); sp = sparkSvg(c.spark()); } catch (e) { console.warn('home card', c.q, e); }
     return `<button class="hcard" data-card="${i}"><span class="hsec">${c.sec}</span><span class="hq">${c.q}</span><span class="hbig">${big[0]}</span><span class="hsub">${big[1]}</span>${sp}</button>`; }).join('');
   const popNow = (() => { try { const y = lastYear(M.pop); return [(M.pop.value('CAN', y) / 1e6).toFixed(1) + 'M', y]; } catch (e) { return null; } })();
-  const W = [['map', 'Canada over time', `${YMAX - 1971} years of provinces and territories: people, jobs, housing, government money and elections, on one timeline.`, popNow ? `${popNow[0]} people on July 1, ${popNow[1]}` : '', 'map'],
-    ['nb', 'Neighbourhoods', `Every census tract in ${Object.keys(CMA_IDX).length} cities: income, rent, age, where people were born, language.`, '2021 Census', 'nb'],
-    ['cl', 'Climate', 'Weather stations back to the 1800s, warming at each one, and the glaciers measured every year.', 'Environment Canada · WGMS', 'cl'],
-    ['mn', 'Follow the dollar', 'Where federal money goes, who gets grants and contributions, and who wins contracts.', 'Public Accounts · proactive disclosure', 'mn']];
+  const W = [['map', T('Canada over time', 'Le Canada au fil du temps'), T(`${YMAX - 1971} years of provinces and territories: people, jobs, housing, government money and elections, on one timeline.`, `${YMAX - 1971} ans de provinces et territoires : population, emploi, logement, finances publiques et élections, sur une même ligne du temps.`), popNow ? T(`${popNow[0]} people on July 1, ${popNow[1]}`, `${popNow[0].replace('.', ',')} M d’habitants au 1er juillet ${popNow[1]}`) : '', 'map'],
+    ['nb', T('Neighbourhoods', 'Quartiers'), T(`Every census tract in ${Object.keys(CMA_IDX).length} cities: income, rent, age, where people were born, language.`, `Chaque secteur de recensement de ${Object.keys(CMA_IDX).length} villes : revenu, loyer, âge, lieu de naissance, langue.`), T('2021 Census', 'Recensement de 2021'), 'nb'],
+    ['cl', T('Climate and land', 'Climat et territoire'), T('Weather stations back to the 1800s, warming at each one, glaciers measured every year, forests cut and burned, and cities spreading out.', 'Des stations météo depuis les années 1800, le réchauffement à chacune, les glaciers mesurés chaque année, les forêts coupées et brûlées, et les villes qui s’étalent.'), T('Environment Canada · WGMS · NRCan · JRC', 'Environnement Canada · WGMS · RNCan · CCR'), 'cl'],
+    ['mn', T('Follow the dollar', 'Suivre l’argent'), T('Where federal money goes, who gets grants and contributions, and who wins contracts.', 'Où va l’argent fédéral, qui reçoit des subventions et contributions, et qui obtient des contrats.'), T('Public Accounts · proactive disclosure', 'Comptes publics · divulgation proactive'), 'mn']];
   const ICON = { map: '<path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z M9 4v14 M15 6v14"/>', nb: '<path d="M3 21V9l5-3 5 3v12 M13 21V5l4-2 4 2v16 M6 12h4 M6 16h4 M16 9h2 M16 13h2 M16 17h2"/>', cl: '<path d="M12 3a2 2 0 0 0-2 2v9.3a4 4 0 1 0 4 0V5a2 2 0 0 0-2-2z M12 10v7"/>', mn: '<path d="M12 2v20 M17 6.5c-1-1.5-2.8-2.5-5-2.5-2.8 0-5 1.6-5 3.8 0 5 10 2.6 10 7.8 0 2.2-2.2 3.9-5 3.9-2.4 0-4.4-1.1-5.3-2.8"/>' };
-  homeEl.innerHTML = `<div class="hin"><div class="hhead"><div class="hkick">Canada Through Time</div><h1>Canada, measured.</h1>
-    <p>People, places, money and climate from ${YMAX - 1971} years of official data. Every number links back to the table it came from.</p></div>
-    <div class="hsearch"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input id="q-search" type="search" placeholder="${isPhone() ? "Search a place, topic or year" : "Try “Alberta unemployment 2010”, “toronto rent”, “glaciers”"}" autocomplete="off" aria-label="Search"><div id="q-results" role="listbox"></div></div>
-    <div class="hworlds">${W.map(([k, t, d, f, ic]) => `<button class="hworld w-${k}" data-goworld="${k}"><svg viewBox="0 0 24 24" aria-hidden="true">${ICON[ic]}</svg><span class="wt">${t}</span><span class="wd">${d}</span><span class="wf">${f}</span><span class="wgo">Open →</span></button>`).join('')}</div>
-    <h2 class="hq2">Questions to start with</h2>
+  homeEl.innerHTML = `<div class="hin"><div class="hhead"><div class="hkick">${T("Canada Through Time · Le Canada au fil du temps", "Le Canada au fil du temps · Canada Through Time")}</div><h1>${T("Canada, measured.", "Le Canada, en chiffres.")}</h1>
+    <p>${T(`People, places, money and climate from ${YMAX - 1971} years of official data. Every number links back to the table it came from.`, `Population, lieux, argent et climat : ${YMAX - 1971} ans de données officielles. Chaque chiffre renvoie au tableau d’où il vient.`)}</p>${LANG === "fr" ? '<p class="hnote">Certaines sections sont pour l’instant en anglais seulement; la traduction est en cours.</p>' : ""}</div>
+    <div class="hsearch"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input id="q-search" type="search" placeholder="${isPhone() ? T("Search a place, topic or year", "Chercher un lieu, un sujet, une année") : T("Try “Alberta unemployment 2010”, “toronto rent”, “glaciers”", "Essayez « Alberta unemployment 2010 », « toronto rent », « glaciers »")}" autocomplete="off" aria-label="Search"><div id="q-results" role="listbox"></div></div>
+    <div class="hworlds">${W.map(([k, t, d, f, ic]) => `<button class="hworld w-${k}" data-goworld="${k}"><svg viewBox="0 0 24 24" aria-hidden="true">${ICON[ic]}</svg><span class="wt">${t}</span><span class="wd">${d}</span><span class="wf">${f}</span><span class="wgo">${T("Open →", "Ouvrir →")}</span></button>`).join('')}</div>
+    <button class="hgap" data-goworld="wa"><span class="gk">${T("Gaps worth fixing · 1", "Écarts à combler · 1")}</span><span class="gt">${T("Drinking water advisories still in place", "Les avis sur la qualité de l’eau potable toujours en vigueur")}</span><span class="gd">${T("Long-term advisories on First Nations public water systems: which remain, for how long, and what fixed the ones that were lifted.", "Avis à long terme sur les réseaux publics d’eau des Premières Nations : ceux qui restent, depuis combien de temps, et ce qui a réglé ceux qui ont été levés.")}</span><span class="wgo">${T("Open →", "Ouvrir →")}</span></button>
+    <div class="hgaps">${[['nodoc', 2022, T('No family doctor', 'Sans médecin de famille'), T('1 in 7 people 12+ had no regular provider in 2022; in two provinces, more than 1 in 5.', 'En 2022, 1 personne de 12 ans et plus sur 7 n’avait pas de prestataire régulier; plus de 1 sur 5 dans deux provinces.')],
+      ['hpr', 2025, T('Homes vs new residents', 'Logements et nouveaux résidents'), T('Homes started for each person added, five years at a time, since 1976.', 'Logements mis en chantier pour chaque personne ajoutée, par périodes de cinq ans, depuis 1976.')],
+      ['foodh', 2025, T('Groceries in hours of work', 'L’épicerie en heures de travail'), T('The same groceries, priced in hours at the median wage, against 1997.', 'Le même panier, compté en heures au salaire médian, par rapport à 1997.')]].map(([m, y, t, d], i) => `<button class="hgap small" data-gapm="${m}" data-gapy="${y}"><span class="gk">${T('Gaps worth fixing', 'Écarts à combler')} · ${i + 2}</span><span class="gt">${t}</span><span class="gd">${d}</span></button>`).join('')}</div>
+    <button class="hjourney" data-journey><span class="jpl">▶</span><span><b>${T("Watch: Canada, measured", "Regarder : Le Canada, en chiffres")}</b><span>${T("A guided journey, about two minutes. It drives the map for you; touch anything to take over.", "Un voyage guidé d’environ deux minutes. Il conduit la carte pour vous; touchez n’importe quoi pour prendre la main.")}</span></span></button>
+    <section class="hlife" aria-labelledby="hlife-h"><h2 id="hlife-h" class="hq2">${T("Your life in Canada", "Votre vie au Canada")}</h2>
+      <p class="hlq">${T("Enter the year you were born and where you live. Nothing leaves this device.", "Entrez votre année de naissance et où vous vivez. Rien ne quitte cet appareil.")}</p>
+      <div class="hlin hplace"><label>${T("Where you live", "Où vous vivez")} <input id="place-q" list="place-list" autocomplete="off" placeholder="${T("City or postal code", "Ville ou code postal")}" value="${esc(PLACE.label || '')}"></label><datalist id="place-list">${CITY_AL.map(c => `<option value="${esc(c[1])}">`).join('')}</datalist></div>
+      <div id="place-out" class="hlout"></div>
+      <div class="hlin"><label>${T("Born in", "Né·e en")} <input id="life-y" type="number" inputmode="numeric" min="1971" max="${YMAX - 1}" placeholder="1990"></label>
+      <label>${T("Living in", "Vivant en/au")} <select id="life-g">${PT13.map(g => `<option value="${g}" ${g === 'ON' ? 'selected' : ''}>${NAMES[g]}</option>`).join('')}</select></label></div>
+      <div id="life-out" class="hlout"></div></section>
+    <h2 class="hq2">${T("Questions to start with", "Des questions pour commencer")}</h2>
     <div class="hgrid">${cards}</div>
-    <div class="hfoot"><button class="hgo" data-close>Explore the map freely →</button><button class="linkish" data-story="0">Or read the story: ${STORY.title}</button><button class="linkish" data-goworld="ab">About and sources</button></div></div>`;
+    <div class="hfoot"><button class="hgo" data-close>${T("Explore the map freely →", "Explorer la carte librement →")}</button><button class="linkish" data-story="0">Or read the story: ${STORY.title}</button><button class="linkish" data-goworld="ab">${T("About and sources", "À propos et sources")}</button></div></div>`;
   homeEl.hidden = false; document.body.classList.add('home-on');
+  ['life-y', 'life-g'].forEach(id => document.getElementById(id)?.addEventListener('input', drawLife));
+  document.getElementById('place-q')?.addEventListener('change', e => setPlace(e.target.value)); document.getElementById('place-q')?.addEventListener('input', e => { if (resolvePlace(e.target.value)?.cma || /^[A-Za-z]\d[A-Za-z]$/.test(e.target.value.trim())) setPlace(e.target.value); });
+  drawPlace();
   const inp = document.getElementById('q-search'); inp.addEventListener('input', () => drawResults(inp.value)); inp.addEventListener('keydown', e => { if (e.key === 'Enter') { const r = searchAll(inp.value)[0]; if (r) { r.go(); closeHome(); } } if (e.key === 'Escape') closeHome(); });
   if (focusSearch) setTimeout(() => inp.focus(), 30);
 }
@@ -1536,6 +1739,11 @@ homeEl.addEventListener('click', e => {
   const gw = e.target.closest('[data-goworld]'); if (gw) { closeHome(); window.SHELL?.go(gw.dataset.goworld); return; }
   if (e.target.closest('[data-nbhome]')) { closeHome(); window.CITIES?.open(); return; }
   if (e.target.closest('[data-clhome]')) { closeHome(); window.CLIMATE?.open(); return; }
+  if (e.target.closest('[data-journey]')) { window.JOURNEY?.start(); return; }
+  if (e.target.closest('[data-place-map]')) { state.navQ = false; state.story = null; state.q = null; state.p = PLACE.g; state.city = null; state.cmp = null; closeHome(); update(); return; }
+  const pn = e.target.closest('[data-place-nb]'); if (pn) { closeHome(); location.hash = `#nb=${String(pn.dataset.placeNb).padStart(3, '0').slice(-3)}/inc`; return; }
+  const gm = e.target.closest('[data-gapm]'); if (gm) { state.navQ = false; state.story = null; state.q = null; state.m = gm.dataset.gapm; state.y = clampYear(M[state.m], +gm.dataset.gapy); state.p = null; state.city = null; state.cmp = null; closeHome(); update(); return; }
+  const lf = e.target.closest('[data-life-m]'); if (lf) { state.navQ = false; state.story = null; state.q = null; state.m = lf.dataset.lifeM; state.y = clampYear(M[state.m], +lf.dataset.lifeY); state.p = document.getElementById('life-g')?.value || null; state.city = null; state.cmp = null; closeHome(); update(); return; }
   const c = e.target.closest('[data-card]'); if (c) { const d = HOME_CARDS[+c.dataset.card]; state.navQ = false; state.story = null; state.q = null; state.m = d.m; state.y = clampYear(M[d.m], lastYear(M[d.m])); state.p = d.place && d.place !== 'CAN' ? d.place : null; state.city = null; state.cmp = null; closeHome(); update();
     if (d.open) setTimeout(() => { const det = [...document.querySelectorAll('details.path')].find(x => x.querySelector('summary').textContent.includes(d.open)); if (det) { det.open = true; } }, 50); return; }
   const r = e.target.closest('[data-res]'); if (r) { LAST_RESULTS[+r.dataset.res].go(); closeHome(); } });
@@ -1577,6 +1785,7 @@ function searchAll(raw) {
   for (const p of PATHS) if (words.some(w => norm(p.q).includes(w))) out.push({ t: p.q, s: 'Question', go: () => openPath(p.id) });
   if (nb.length) { const cityHit = !nb[0].t.endsWith('Neighbourhoods') && nb[0].t.includes(' in '); if (cityHit && !place) out.unshift(...nb); else out.push(...nb); }
   if (cl.length) out.unshift(...cl);
+  if (t.split(' ').some(w => /^(water|drinking|boil|advisory|advisories|reserve|reserves|neskantaga)$/.test(w))) out.unshift({ t: 'Drinking water advisories still in place', s: 'Gaps worth fixing · Indigenous Services Canada', go: () => window.SHELL ? window.SHELL.go('wa') : window.WATER?.open() });
   const mw = t.split(' ').find(w => /^(grant|grants|contribution|contributions|contract|contracts|contractor|vendor|vendors|spending|spend|spent|budget|dollar|dollars|subsidy|subsidies|procurement|department|departments|ministry)$/.test(w));
   if (mw) { const tab = /^contract|vendor|procure/.test(mw) ? 'contracts' : /^grant|contrib|subsid/.test(mw) ? 'grants' : 'spend';
     out.unshift({ t: { spend: 'Where Ottawa’s money goes', grants: 'Grants and contributions', contracts: 'Federal contracts' }[tab], s: 'Follow the dollar · Public Accounts and proactive disclosure', go: () => window.SHELL ? window.SHELL.go('mn', { tab }) : window.MONEY?.open({ tab }) }); }
@@ -1584,12 +1793,13 @@ function searchAll(raw) {
 }
 function drawResults(v) { LAST_RESULTS = searchAll(v); document.getElementById('q-results').innerHTML = LAST_RESULTS.map((r, i) => `<button data-res="${i}" class="${i ? '' : 'first'}"><b>${r.t}</b><span>${r.s}</span></button>`).join('') || (v.trim() ? '<div class="none">No match. Try a province, a topic like “rent” or “jobs”, or a year.</div>' : ''); }
 if (!STUDIO && !FIRST_HASH && (() => { try { return !localStorage.getItem('ctt-home-seen'); } catch (e) { return true; } })()) openHome();
+else if (!STUDIO && !FIRST_HASH && PLACE.g) { state.p = PLACE.g; update(); }   // a returning visitor's own province, chosen on the home page and kept on this device
 
 
 // ================================================================ v2 views: race · scatter · trends · compare · change
 // Every view reads the same published values as the map (m.value), for the year on the timeline. Nothing is estimated:
 // a missing value is drawn as missing. Scatter plots show association only.
-const VIEWS = [['map', 'Map'], ['race', 'Ranking'], ['scatter', 'X vs Y'], ['trends', 'Trends'], ['compare', 'Compare'], ['change', 'Change']];
+const VIEWS = [['map', T('Map', 'Carte')], ['race', T('Ranking', 'Classement')], ['scatter', T('X vs Y', 'X c. Y')], ['trends', T('Trends', 'Tendances')], ['compare', T('Compare', 'Comparer')], ['change', T('Change', 'Variation')]];
 state.view = 'map'; state.y2m = 'gdppc'; state.cA = 'AB'; state.cB = 'ON'; state.y0 = null; state.trails = false;
 const numericM = m => ['fill', 'spike'].includes(m.kind) && typeof m.value === 'function';
 const vbar = document.createElement('div'); vbar.id = 'viewbar'; if (STUDIO) vbar.style.display = 'none'; vbar.setAttribute('role', 'tablist'); document.getElementById('app').appendChild(vbar);

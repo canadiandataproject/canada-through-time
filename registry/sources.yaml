@@ -660,6 +660,333 @@ sources:
     limitations:
       - "The most recent years are revised in later releases."
 
+  statcan_13100096:
+    title: "Health characteristics, annual estimates"
+    publisher: "Statistics Canada"
+    table_id: "13-10-0096-01"
+    doi: "https://doi.org/10.25318/1310009601-eng"
+    landing_url: "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1310009601"
+    download_url: "https://www150.statcan.gc.ca/n1/tbl/csv/13100096-eng.zip"
+    raw_file: "data/raw/statcan/13100096-eng.zip"
+    sha256: "b9e2a0ea95e7c7bd03b6740d0d4eccbb508099eb50021a6266412ce62d991c40"
+    retrieved: "2026-11-16"
+    release_in_file: "Covers 2015–2022 (table archived; later years use a different survey design)"
+    reporting_period: "Calendar year"
+    coverage: "Canada (excluding territories) and the ten provinces; household population aged 12 and over"
+    units: "Percent with 95% confidence interval"
+    licence: "Statistics Canada Open Licence"
+    licence_url: "https://www.statcan.gc.ca/en/reference/licence"
+    attribution: "Source: Statistics Canada. Table 13-10-0096-01 Health characteristics, annual estimates."
+    quality_class: survey_estimate
+    methodology_notes:
+      - "Canadian Community Health Survey. Excludes people living on reserves and other Indigenous settlements, full-time members of the Canadian Forces, and the institutionalized population."
+      - "2020-2022 collection was disrupted by the COVID-19 pandemic; Statistics Canada advises caution comparing with earlier years."
+    limitations:
+      - "Self-reported; a regular provider can be a family doctor or a nurse practitioner."
+      - "Survey estimates carry sampling error; 'E' values are to be used with caution."
+  jrc_ghsl_built_s:
+    title: "GHS-BUILT-S R2023A: GHS built-up surface grid, 1975-2030 (5-year epochs), 100 m"
+    publisher: "European Commission, Joint Research Centre (JRC)"
+    doi: "https://doi.org/10.2905/9F06F36F-4B11-47EC-ABB0-4F8B7B1D72EA"
+    landing_url: "https://human-settlement.emergency.copernicus.eu/download.php?ds=bu"
+    download_url: "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_BUILT_S_GLOBE_R2023A/"
+    raw_file: "data/raw/ghsl/manifest.json"
+    sha256: "8b6a3d43d5a58bc19324f53ad0393ca11673d18c59f9123410ee0382ad4ffe76"
+    retrieved: "2026-11-16"
+    release_in_file: "R2023A, version 1.0; 42 tiles (7 tiles x 6 epochs: 1975, 1985, 1990, 2000, 2010, 2020) listed with their SHA-256 in the manifest"
+    reporting_period: "Epochs (snapshot years)"
+    coverage: "Global grid; this project uses the tiles around 12 Canadian metros"
+    units: "Square metres of built-up surface per 100 m cell"
+    licence: "Creative Commons Attribution 4.0 International (CC BY 4.0)"
+    licence_url: "https://creativecommons.org/licenses/by/4.0/"
+    attribution: "Pesaresi M., Politis P. (2023): GHS-BUILT-S R2023A - GHS built-up surface grid, derived from Sentinel2 composite and Landsat, multitemporal (1975-2030). European Commission, Joint Research Centre (JRC)."
+    quality_class: modelled_estimate
+    methodology_notes:
+      - "Building footprint area per cell estimated by machine learning from Landsat (1975-2014) and Sentinel-2 (2018) imagery; epochs between observations are interpolated by the JRC."
+      - "2025 and 2030 epochs are projections and are not used."
+    limitations:
+      - "Satellite estimate, not a building survey; small or low buildings and dense tree cover can be missed."
+      - "The 20% 'built up' threshold on the city pictures is this project's choice; totals use the full values."
+  copernicus_dem_glo30_n53w114:
+    title: "Copernicus DEM GLO-30, tile N53 W114"
+    publisher: "European Space Agency / Copernicus (data © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018)"
+    landing_url: "https://registry.opendata.aws/copernicus-dem/"
+    download_url: "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N53_00_W114_00_DEM/Copernicus_DSM_COG_10_N53_00_W114_00_DEM.tif"
+    raw_file: "data/raw/terrain/Copernicus_DSM_COG_10_N53_00_W114_00_DEM.tif"
+    sha256: "3a621ad56ba7e162d77eeda55742054573545f770a255ce3552cbd2d090bd6bb"
+    retrieved: "2026-11-16"
+    coverage: "53-54 N, 114-113 W (Edmonton)"
+    units: "Metres above the EGM2008 geoid; 30 m grid"
+    licence: "Copernicus DEM licence (free use with attribution)"
+    licence_url: "https://spacedata.copernicus.eu/documents/20123/121286/CSCDA_ESA_Mission-specific+Annex_31_Oct_22.pdf"
+    attribution: "Produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved."
+    quality_class: modelled_estimate
+    methodology_notes:
+      - "Used only as a shaded-relief backdrop (4x vertical exaggeration); no number is read from it."
+    limitations:
+      - "A surface model: it includes buildings and tree tops, not bare ground."
+  esa_worldcover_2021_n51w114:
+    title: "ESA WorldCover 10 m 2021 v200, tile N51 W114"
+    publisher: "European Space Agency (ESA WorldCover consortium)"
+    doi: "https://doi.org/10.5281/zenodo.7254221"
+    landing_url: "https://esa-worldcover.org/"
+    download_url: "https://esa-worldcover.s3.eu-central-1.amazonaws.com/v200/2021/map/ESA_WorldCover_10m_2021_v200_N51W114_Map.tif"
+    raw_file: "data/raw/terrain/ESA_WorldCover_10m_2021_v200_N51W114_Map.tif"
+    sha256: "1b2ac42f6bcf0a389ff387fd91050a4b4de29c5bc0da5318c7d16e74c5dc5015"
+    retrieved: "2026-11-16"
+    coverage: "51-54 N, 114-111 W"
+    units: "Land cover class; 80 = permanent water bodies"
+    licence: "Creative Commons Attribution 4.0 International (CC BY 4.0)"
+    licence_url: "https://creativecommons.org/licenses/by/4.0/"
+    attribution: "© ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data (2021) processed by ESA WorldCover consortium."
+    quality_class: modelled_estimate
+    methodology_notes:
+      - "Only class 80 (permanent water) is used, to draw rivers and lakes as a backdrop."
+    limitations:
+      - "2021 water extent drawn under every year; rivers barely move at this scale."
+  copernicus_dem_glo30_n50w115:
+    title: "Copernicus DEM GLO-30, tile N50 W115"
+    publisher: "European Space Agency / Copernicus (data © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018)"
+    landing_url: "https://registry.opendata.aws/copernicus-dem/"
+    download_url: "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N50_00_W115_00_DEM/Copernicus_DSM_COG_10_N50_00_W115_00_DEM.tif"
+    raw_file: "data/raw/terrain/Copernicus_DSM_COG_10_N50_00_W115_00_DEM.tif"
+    sha256: "b9d2b78bf7bfd22a9a7ba9e1dc45a190f0d9b0bfe5cc568940e5ba793794dfaf"
+    retrieved: "2026-11-16"
+    coverage: "50-51 N, 115-114 W (Calgary)"
+    units: "Metres above the EGM2008 geoid; 30 m grid"
+    licence: "Copernicus DEM licence (free use with attribution)"
+    licence_url: "https://spacedata.copernicus.eu/documents/20123/121286/CSCDA_ESA_Mission-specific+Annex_31_Oct_22.pdf"
+    attribution: "Produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved."
+    quality_class: modelled_estimate
+    methodology_notes:
+      - "Used only as a shaded-relief backdrop (4x vertical exaggeration); no number is read from it."
+    limitations:
+      - "A surface model: it includes buildings and tree tops, not bare ground."
+  copernicus_dem_glo30_n50w114:
+    title: "Copernicus DEM GLO-30, tile N50 W114"
+    publisher: "European Space Agency / Copernicus (data © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018)"
+    landing_url: "https://registry.opendata.aws/copernicus-dem/"
+    download_url: "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N50_00_W114_00_DEM/Copernicus_DSM_COG_10_N50_00_W114_00_DEM.tif"
+    raw_file: "data/raw/terrain/Copernicus_DSM_COG_10_N50_00_W114_00_DEM.tif"
+    sha256: "dc47dc997e3ad7ffe834c33751eb8b7f5be32be617a015aa9430f79b2d6c7aff"
+    retrieved: "2026-11-16"
+    coverage: "50-51 N, 114-113 W (Calgary)"
+    units: "Metres above the EGM2008 geoid; 30 m grid"
+    licence: "Copernicus DEM licence (free use with attribution)"
+    licence_url: "https://spacedata.copernicus.eu/documents/20123/121286/CSCDA_ESA_Mission-specific+Annex_31_Oct_22.pdf"
+    attribution: "Produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved."
+    quality_class: modelled_estimate
+    methodology_notes:
+      - "Used only as a shaded-relief backdrop (4x vertical exaggeration); no number is read from it."
+    limitations:
+      - "A surface model: it includes buildings and tree tops, not bare ground."
+  copernicus_dem_glo30_n51w115:
+    title: "Copernicus DEM GLO-30, tile N51 W115"
+    publisher: "European Space Agency / Copernicus (data © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018)"
+    landing_url: "https://registry.opendata.aws/copernicus-dem/"
+    download_url: "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N51_00_W115_00_DEM/Copernicus_DSM_COG_10_N51_00_W115_00_DEM.tif"
+    raw_file: "data/raw/terrain/Copernicus_DSM_COG_10_N51_00_W115_00_DEM.tif"
+    sha256: "cf944654228c8479f7296cd19aa92c06a44d3562519237d8b7f6cdb3c4b50764"
+    retrieved: "2026-11-16"
+    coverage: "51-52 N, 115-114 W (Calgary)"
+    units: "Metres above the EGM2008 geoid; 30 m grid"
+    licence: "Copernicus DEM licence (free use with attribution)"
+    licence_url: "https://spacedata.copernicus.eu/documents/20123/121286/CSCDA_ESA_Mission-specific+Annex_31_Oct_22.pdf"
+    attribution: "Produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved."
+    quality_class: modelled_estimate
+    methodology_notes:
+      - "Used only as a shaded-relief backdrop (4x vertical exaggeration); no number is read from it."
+    limitations:
+      - "A surface model: it includes buildings and tree tops, not bare ground."
+  copernicus_dem_glo30_n51w114:
+    title: "Copernicus DEM GLO-30, tile N51 W114"
+    publisher: "European Space Agency / Copernicus (data © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018)"
+    landing_url: "https://registry.opendata.aws/copernicus-dem/"
+    download_url: "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N51_00_W114_00_DEM/Copernicus_DSM_COG_10_N51_00_W114_00_DEM.tif"
+    raw_file: "data/raw/terrain/Copernicus_DSM_COG_10_N51_00_W114_00_DEM.tif"
+    sha256: "74f940790e9bb782fc12049a67c17a87a788bd4484fcd9e0a8c0e591115e90ba"
+    retrieved: "2026-11-16"
+    coverage: "51-52 N, 114-113 W (Calgary)"
+    units: "Metres above the EGM2008 geoid; 30 m grid"
+    licence: "Copernicus DEM licence (free use with attribution)"
+    licence_url: "https://spacedata.copernicus.eu/documents/20123/121286/CSCDA_ESA_Mission-specific+Annex_31_Oct_22.pdf"
+    attribution: "Produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved."
+    quality_class: modelled_estimate
+    methodology_notes:
+      - "Used only as a shaded-relief backdrop (4x vertical exaggeration); no number is read from it."
+    limitations:
+      - "A surface model: it includes buildings and tree tops, not bare ground."
+  esa_worldcover_2021_n48w117:
+    title: "ESA WorldCover 10 m 2021 v200, tile N48 W117"
+    publisher: "European Space Agency (ESA WorldCover consortium)"
+    doi: "https://doi.org/10.5281/zenodo.7254221"
+    landing_url: "https://esa-worldcover.org/"
+    download_url: "https://esa-worldcover.s3.eu-central-1.amazonaws.com/v200/2021/map/ESA_WorldCover_10m_2021_v200_N48W117_Map.tif"
+    raw_file: "data/raw/terrain/ESA_WorldCover_10m_2021_v200_N48W117_Map.tif"
+    sha256: "f37e959415df150fa7cf6502604b4939b8ae91b157061b1fc4c16a6fdf6148fe"
+    retrieved: "2026-11-16"
+    coverage: "48-51 N, 117-114 W"
+    units: "Land cover class; 80 = permanent water bodies"
+    licence: "Creative Commons Attribution 4.0 International (CC BY 4.0)"
+    licence_url: "https://creativecommons.org/licenses/by/4.0/"
+    attribution: "© ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data (2021) processed by ESA WorldCover consortium."
+    quality_class: modelled_estimate
+    methodology_notes:
+      - "Only class 80 (permanent water) is used, to draw rivers and lakes as a backdrop."
+    limitations:
+      - "2021 water extent drawn under every year; rivers barely move at this scale."
+  esa_worldcover_2021_n48w114:
+    title: "ESA WorldCover 10 m 2021 v200, tile N48 W114"
+    publisher: "European Space Agency (ESA WorldCover consortium)"
+    doi: "https://doi.org/10.5281/zenodo.7254221"
+    landing_url: "https://esa-worldcover.org/"
+    download_url: "https://esa-worldcover.s3.eu-central-1.amazonaws.com/v200/2021/map/ESA_WorldCover_10m_2021_v200_N48W114_Map.tif"
+    raw_file: "data/raw/terrain/ESA_WorldCover_10m_2021_v200_N48W114_Map.tif"
+    sha256: "475e5da7ab3f930d24217aa35f029d021c944857d25c8856b3bda7602f44174c"
+    retrieved: "2026-11-16"
+    coverage: "48-51 N, 114-111 W"
+    units: "Land cover class; 80 = permanent water bodies"
+    licence: "Creative Commons Attribution 4.0 International (CC BY 4.0)"
+    licence_url: "https://creativecommons.org/licenses/by/4.0/"
+    attribution: "© ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data (2021) processed by ESA WorldCover consortium."
+    quality_class: modelled_estimate
+    methodology_notes:
+      - "Only class 80 (permanent water) is used, to draw rivers and lakes as a backdrop."
+    limitations:
+      - "2021 water extent drawn under every year; rivers barely move at this scale."
+  esa_worldcover_2021_n51w117:
+    title: "ESA WorldCover 10 m 2021 v200, tile N51 W117"
+    publisher: "European Space Agency (ESA WorldCover consortium)"
+    doi: "https://doi.org/10.5281/zenodo.7254221"
+    landing_url: "https://esa-worldcover.org/"
+    download_url: "https://esa-worldcover.s3.eu-central-1.amazonaws.com/v200/2021/map/ESA_WorldCover_10m_2021_v200_N51W117_Map.tif"
+    raw_file: "data/raw/terrain/ESA_WorldCover_10m_2021_v200_N51W117_Map.tif"
+    sha256: "00cb2bbb803aba2c3f9b155fc7c8a99053147d987507370c99ef76698860a896"
+    retrieved: "2026-11-16"
+    coverage: "51-54 N, 117-114 W"
+    units: "Land cover class; 80 = permanent water bodies"
+    licence: "Creative Commons Attribution 4.0 International (CC BY 4.0)"
+    licence_url: "https://creativecommons.org/licenses/by/4.0/"
+    attribution: "© ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data (2021) processed by ESA WorldCover consortium."
+    quality_class: modelled_estimate
+    methodology_notes:
+      - "Only class 80 (permanent water) is used, to draw rivers and lakes as a backdrop."
+    limitations:
+      - "2021 water extent drawn under every year; rivers barely move at this scale."
+  statcan_35100026:
+    title: "Crime severity index and weighted clearance rates, Canada, provinces, territories and Census Metropolitan Areas"
+    publisher: "Statistics Canada"
+    table_id: "35-10-0026-01"
+    doi: "https://doi.org/10.25318/3510002601-eng"
+    landing_url: "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3510002601"
+    download_url: "https://www150.statcan.gc.ca/n1/tbl/csv/35100026-eng.zip"
+    raw_file: "data/raw/statcan/35100026-eng.zip"
+    sha256: "f156f446e793ddafdaa0982c0f005d027d79355956bb92631b3dfee00f33020d"
+    retrieved: "2026-11-16"
+    release_in_file: "File dated 2026-07-22; covers 1998–2025"
+    reporting_period: "Calendar year"
+    coverage: "Canada, provinces, territories and policing-based census metropolitan areas"
+    units: "Index (Canada 2006 = 100) and weighted percent"
+    licence: "Statistics Canada Open Licence"
+    licence_url: "https://www.statcan.gc.ca/en/reference/licence"
+    attribution: "Source: Statistics Canada. Table 35-10-0026-01 Crime severity index and weighted clearance rates, Canada, provinces, territories and Census Metropolitan Areas."
+    quality_class: official_statistics
+    methodology_notes:
+      - "Incident-based Uniform Crime Reporting Survey; each offence weighted by sentences actually handed down (notes 1, 20)."
+      - "Policing-based CMA boundaries differ from census CMAs (notes 3, 52). 1998 Northwest Territories includes Nunavut (note 15)."
+      - "Series breaks: 2018 founded/unfounded definition change (note 44); British Columbia 2019 reporting standards (note 45); several city-specific notes (4, 9, 27, 49, 57-59)."
+    limitations:
+      - "Police-reported crime only; crimes not reported to police are missing, and reporting rates differ by offence and place."
+      - "Not an indicator of overall safety (note 55); places that serve many non-residents can show higher values (notes 47-48)."
+      - "2025 may undercount RCMP national-security incidents (note 60)."
+  isc_ltdwa_en:
+    title: "Map of lifted and active long-term drinking water advisories: map data (English)"
+    publisher: "Indigenous Services Canada"
+    landing_url: "https://www.sac-isc.gc.ca/eng/1620925418298/1620925434679"
+    download_url: "https://www.sac-isc.gc.ca/DAM/DAM-ISC-SAC/DAM-WTR/STAGING/texte-text/lTDWA_map_data_1572010201618_eng.txt"
+    raw_file: "data/raw/isc/ltdwa_map_data_eng.txt"
+    sha256: "d565b56d329774c68164d7237e6e821660ac9fd58e1406c1c2aa863e42d71d73"
+    retrieved: "2026-11-16"
+    release_in_file: "Matches ISC's figures as of October 21, 2026: 39 active, 158 lifted since November 2015"
+    reporting_period: "Each advisory: date first set, date it became long-term, date lifted"
+    coverage: "Public water systems on reserves supported by Indigenous Services Canada, south of 60°"
+    units: "Advisories"
+    licence: "Open Government Licence – Canada (Government of Canada web content)"
+    licence_url: "https://open.canada.ca/en/open-government-licence-canada"
+    attribution: "Source: Indigenous Services Canada, long-term drinking water advisories map data."
+    quality_class: administrative_data
+    methodology_notes:
+      - "An advisory becomes long-term after 12 months. For lifted advisories the lift date is in the field DateExpected."
+      - "Monthly counts in effect are derived from start and lift dates; one active advisory has no long-term start date."
+    limitations:
+      - "Covers ISC-supported public systems only: not private wells or cisterns, not British Columbia's First Nations Health Authority advisories in the same way, not self-governing nations or the territories."
+      - "Only advisories lifted since November 2015 are in the file, so earlier history is not shown."
+  isc_ltdwa_fr:
+    title: "Map of lifted and active long-term drinking water advisories: map data (French)"
+    publisher: "Indigenous Services Canada"
+    landing_url: "https://www.sac-isc.gc.ca/fra/1620925418298/1620925434679"
+    download_url: "https://www.sac-isc.gc.ca/DAM/DAM-ISC-SAC/DAM-WTR/STAGING/texte-text/lTDWA_map_data_1572010201618_fra.txt"
+    raw_file: "data/raw/isc/ltdwa_map_data_fra.txt"
+    sha256: "e91fd0628379f715821be08529bf38643e0d17fdbab3b11b2bb9fe59e2f887af"
+    retrieved: "2026-11-16"
+    release_in_file: "Matches ISC's figures as of October 21, 2026: 39 active, 158 lifted since November 2015"
+    reporting_period: "Each advisory: date first set, date it became long-term, date lifted"
+    coverage: "Public water systems on reserves supported by Indigenous Services Canada, south of 60°"
+    units: "Advisories"
+    licence: "Open Government Licence – Canada (Government of Canada web content)"
+    licence_url: "https://open.canada.ca/en/open-government-licence-canada"
+    attribution: "Source: Indigenous Services Canada, long-term drinking water advisories map data."
+    quality_class: administrative_data
+    methodology_notes:
+      - "An advisory becomes long-term after 12 months. For lifted advisories the lift date is in the field DateExpected."
+      - "Monthly counts in effect are derived from start and lift dates; one active advisory has no long-term start date."
+    limitations:
+      - "Covers ISC-supported public systems only: not private wells or cisterns, not British Columbia's First Nations Health Authority advisories in the same way, not self-governing nations or the territories."
+      - "Only advisories lifted since November 2015 are in the file, so earlier history is not shown."
+  nrcan_canlad_year:
+    title: "Canada Landsat Disturbance (CanLaD) 1984–2015: year of the latest forest disturbance"
+    publisher: "Natural Resources Canada, Canadian Forest Service"
+    landing_url: "https://open.canada.ca/data/en/dataset/add1346b-f632-4eb9-a83d-a662b38655ad"
+    download_url: "https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/landsat_disturbance/1984_2015/CanLaD_20151984_latest_YRT2.tif"
+    raw_file: "data/raw/nrcan/CanLaD_20151984_latest_YRT2.tif"
+    sha256: "83bc7a911e9b1e5ff2155502519c0aa3db465d1fe66b6dbced3da4b21a8e1c4e"
+    retrieved: "2026-11-16"
+    release_in_file: "GeoTIFF, 30 m, NAD83 Canada Lambert; 576 MB"
+    reporting_period: "Calendar year of disturbance, 1985–2015"
+    coverage: "Canada's forested area (Landsat-derived)"
+    units: "Year"
+    licence: "Open Government Licence – Canada"
+    licence_url: "https://open.canada.ca/en/open-government-licence-canada"
+    attribution: "Contains information licensed under the Open Government Licence – Canada. Natural Resources Canada, CanLaD 1984–2015."
+    quality_class: research_dataset
+    methodology_notes:
+      - "Guindon et al. (Landsat time series); stand-replacing fire and harvest at 30 m. Only the latest disturbance per pixel is kept."
+      - "Aggregated to a 9 km grid by year and type; hectares = pixels x 0.09."
+    limitations:
+      - "Repeat disturbance on the same pixel is counted once, in its later year. Partial (non-stand-replacing) disturbance, insects and drought are not included."
+      - "Classification errors exist (NRCan reports accuracy by type); small fires and cuts near 30 m may be missed."
+  nrcan_canlad_type:
+    title: "Canada Landsat Disturbance (CanLaD) 1984–2015: type of the latest forest disturbance"
+    publisher: "Natural Resources Canada, Canadian Forest Service"
+    landing_url: "https://open.canada.ca/data/en/dataset/add1346b-f632-4eb9-a83d-a662b38655ad"
+    download_url: "https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/landsat_disturbance/1984_2015/CanLaD_20151984_latest_type.tif"
+    raw_file: "data/raw/nrcan/CanLaD_20151984_latest_type.tif"
+    sha256: "8e3879397d30c505f65937962f8004793b1c0a4b03ac2e9ffe1d7f6fdecbd283"
+    retrieved: "2026-11-16"
+    release_in_file: "GeoTIFF, 30 m, NAD83 Canada Lambert; 277 MB"
+    reporting_period: "Calendar year of disturbance, 1985–2015"
+    coverage: "Canada's forested area (Landsat-derived)"
+    units: "Type code (1 fire, 2 harvesting, per NRCan map legend)"
+    licence: "Open Government Licence – Canada"
+    licence_url: "https://open.canada.ca/en/open-government-licence-canada"
+    attribution: "Contains information licensed under the Open Government Licence – Canada. Natural Resources Canada, CanLaD 1984–2015."
+    quality_class: research_dataset
+    methodology_notes:
+      - "Guindon et al. (Landsat time series); stand-replacing fire and harvest at 30 m. Only the latest disturbance per pixel is kept."
+      - "Aggregated to a 9 km grid by year and type; hectares = pixels x 0.09."
+    limitations:
+      - "Repeat disturbance on the same pixel is counted once, in its later year. Partial (non-stand-replacing) disturbance, insects and drought are not included."
+      - "Classification errors exist (NRCan reports accuracy by type); small fires and cuts near 30 m may be missed."
   statcan_14100327:
     title: "Labour force characteristics by gender and detailed age group, annual"
     publisher: "Statistics Canada"

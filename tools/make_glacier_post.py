@@ -28,7 +28,7 @@ How to read it: "metres of water equivalent" is the ice lost, expressed as a dep
 Source: World Glacier Monitoring Service, Fluctuations of Glaciers database (2026-02-10 release).
 Music and sound: original.
 
-Explore Peyto and every measured glacier: https://tjreeve-ship-it.github.io/canada-through-time/#cl=ice/2025/g57
+Explore Peyto and every measured glacier: https://canadiandataproject.github.io/canada-through-time/#cl=ice/2025/g57
 
 #Canada #Glaciers #DataViz
 

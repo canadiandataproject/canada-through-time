@@ -13,7 +13,7 @@ D = ROOT / "web/data"
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--url", default="https://tjreeve-ship-it.github.io/canada-through-time/")
+    ap.add_argument("--url", default="https://canadiandataproject.github.io/canada-through-time/")
     url = ap.parse_args().url
     PA = json.loads((D / "money/public_accounts.json").read_text())
     POP = json.loads((D / "population.json").read_text())

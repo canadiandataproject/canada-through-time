@@ -1,0 +1,79 @@
+{
+ "duration": 28.0,
+ "phases": [
+  {
+   "t": 0,
+   "year": 2021,
+   "kind": "glyph",
+   "text": "1.3M",
+   "stiff": 0.09
+  },
+  {
+   "t": 5.5,
+   "year": 2025,
+   "kind": "glyph",
+   "text": "2.9M"
+  },
+  {
+   "t": 13.5,
+   "year": 2026,
+   "kind": "glyph",
+   "text": "2.8M"
+  },
+  {
+   "t": 17.0,
+   "year": 2024,
+   "kind": "columns",
+   "stiff": 0.07
+  },
+  {
+   "t": 20.0,
+   "year": 2026,
+   "kind": "columns",
+   "stiff": 0.05
+  }
+ ],
+ "captions": [
+  {
+   "t0": 0,
+   "t1": 5.5,
+   "text": "TEMPORARY RESIDENTS\nIN CANADA, 2021",
+   "size": 74
+  },
+  {
+   "t0": 5.5,
+   "t1": 9.5,
+   "text": "2025",
+   "size": 96
+  },
+  {
+   "t0": 9.5,
+   "t1": 13.5,
+   "text": "MORE THAN MANITOBA\n+ SASKATCHEWAN",
+   "size": 74,
+   "color": [
+    255,
+    210,
+    120
+   ]
+  },
+  {
+   "t0": 13.5,
+   "t1": 17.0,
+   "text": "2026: THE FIRST DROP",
+   "size": 80
+  },
+  {
+   "t0": 17.0,
+   "t1": 20.0,
+   "text": "2024",
+   "size": 96
+  },
+  {
+   "t0": 20.0,
+   "t1": 28.0,
+   "text": "2026",
+   "size": 96
+  }
+ ]
+}
