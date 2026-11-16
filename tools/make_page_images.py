@@ -38,7 +38,7 @@ def main():
     with sync_playwright() as p:
         b = p.chromium.launch(args=["--use-gl=swiftshader", "--enable-webgl", "--ignore-gpu-blocklist"])
         pg = b.new_page(viewport={"width": 1440, "height": 900})
-        pg.add_init_script("window.SHARE_HOST='tjreeve-ship-it.github.io/canada-through-time';try{localStorage.setItem('ctt-home-seen','1');['map','nb','cl','mn'].forEach(k=>localStorage.setItem('ctt-tour-'+k,'1'))}catch(e){}")
+        pg.add_init_script("window.SHARE_HOST='canadiandataproject.github.io/canada-through-time';try{localStorage.setItem('ctt-home-seen','1');['map','nb','cl','mn'].forEach(k=>localStorage.setItem('ctt-tour-'+k,'1'))}catch(e){}")
         for name, h in jobs:
             if only and not any(o in name for o in only):
                 continue

@@ -18,7 +18,7 @@ ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / "web/explore-v2"
 WEB = ROOT / "web"
 OUT = ROOT / "site"
-SITE_URL = os.environ.get("SITE_URL", "https://tjreeve-ship-it.github.io/canada-through-time/")   # where the site is served (share previews, sitemap)
+SITE_URL = os.environ.get("SITE_URL", "https://canadiandataproject.github.io/canada-through-time/")   # where the site is served (share previews, sitemap)
 TITLE = "Canada Through Time"
 DESC = "People, places, money and climate: 55 years of official Canadian data on one map. Every number links back to its source."
 
