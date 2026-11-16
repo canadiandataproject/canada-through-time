@@ -660,6 +660,30 @@ sources:
     limitations:
       - "The most recent years are revised in later releases."
 
+  statcan_13100096:
+    title: "Health characteristics, annual estimates"
+    publisher: "Statistics Canada"
+    table_id: "13-10-0096-01"
+    doi: "https://doi.org/10.25318/1310009601-eng"
+    landing_url: "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1310009601"
+    download_url: "https://www150.statcan.gc.ca/n1/tbl/csv/13100096-eng.zip"
+    raw_file: "data/raw/statcan/13100096-eng.zip"
+    sha256: "b9e2a0ea95e7c7bd03b6740d0d4eccbb508099eb50021a6266412ce62d991c40"
+    retrieved: "2026-11-16"
+    release_in_file: "Covers 2015–2022 (table archived; later years use a different survey design)"
+    reporting_period: "Calendar year"
+    coverage: "Canada (excluding territories) and the ten provinces; household population aged 12 and over"
+    units: "Percent with 95% confidence interval"
+    licence: "Statistics Canada Open Licence"
+    licence_url: "https://www.statcan.gc.ca/en/reference/licence"
+    attribution: "Source: Statistics Canada. Table 13-10-0096-01 Health characteristics, annual estimates."
+    quality_class: survey_estimate
+    methodology_notes:
+      - "Canadian Community Health Survey. Excludes people living on reserves and other Indigenous settlements, full-time members of the Canadian Forces, and the institutionalized population."
+      - "2020-2022 collection was disrupted by the COVID-19 pandemic; Statistics Canada advises caution comparing with earlier years."
+    limitations:
+      - "Self-reported; a regular provider can be a family doctor or a nurse practitioner."
+      - "Survey estimates carry sampling error; 'E' values are to be used with caution."
   statcan_35100026:
     title: "Crime severity index and weighted clearance rates, Canada, provinces, territories and Census Metropolitan Areas"
     publisher: "Statistics Canada"

@@ -89,6 +89,8 @@ const [HC, HH, HCPI, HINC, HCITY, HCHN] = await Promise.all(['construction', 'ho
 const [DAGE, DMETRO, DURB] = await Promise.all([J('../data/demography/age.json'), J('../data/demography/metro.json'), J('../data/demography/urban_census.json')]);
 const [EGDP, ELFS, EGOV, ELANG, ENPR, EBIRTH, EPR] = await Promise.all(['gdp', 'lfs', 'govt', 'language', 'npr', 'birthplace'].map(n => J(`../data/more/${n}.json`)).concat(J('../data/explorer/pr_citizenship.json')));
 const ECRIME = await J('../data/more/crime.json');
+const EGAP = await J('../data/gaps/more.json');
+const gDoc = (g, y) => EGAP.doctor[g]?.[y] ?? null, gFood = (g, y) => EGAP.food[g]?.[y] ?? null;
 const crAt = (g, y) => ECRIME.data[g]?.[y] ?? null, crCity = (c, y, k) => ECRIME.cma[c.name]?.[y]?.[k] ?? null;
 await Promise.all([`600 16px "${UI_FONT}"`, `400 16px "${UI_FONT}"`, `500 16px "${UI_FONT}"`].map(f => document.fonts.load(f)));
 
@@ -323,6 +325,16 @@ MEASURES.push(
     years: [ELANG.years[0], ELANG.years.at(-1)], only: ELANG.years, split: y => y >= 2001, value: (g, y) => { const d = langAt(g, y); return d?.other != null && d.total ? d.other / d.total * 100 : null; },
     fmt: v => v.toFixed(1) + '%', unit: 'of residents', color: v => magnitude(v, 0, 70, false), rng: [0, 70], cover: 'Census years only',
     legend: { kind: 'mag', ticks: [[0, '0%'], [0.286, '20%'], [0.571, '40%'], [1, '70%']], cap: 'Neither English nor French as mother tongue, %' }, when: y => `${y} Census`, prelim: () => false },
+  { id: 'nodoc', group: 'Gaps worth fixing', label: 'No family doctor or nurse practitioner', q: 'Share of people 12 and over who say they have no regular health care provider: no family doctor, nurse practitioner or other regular provider. Survey estimate; the range is the 95% margin.', kind: 'fill', src: ['statcan_13100096'], tag: 'Survey estimate',
+    years: [2015, 2022], split: () => true, value: (g, y) => gDoc(g, y)?.v ?? null, fmt: v => v.toFixed(1) + '%', unit: 'of people 12+ without a regular provider', color: v => magnitude(v, 5, 25, false), rng: [5, 25],
+    cover: 'Provinces only · survey', legend: { kind: 'mag', ticks: [[0, '5%'], [0.25, '10%'], [0.5, '15%'], [0.75, '20%'], [1, '25%']], cap: 'No regular health care provider, % of people 12+', nodata: true }, when: y => `${y} survey`, prelim: () => false },
+  { id: 'hpr', group: 'Gaps worth fixing', label: 'Homes built per new resident', q: 'Homes started over five years, divided by how many people the province added over the same five years. Below about 0.4 (roughly one home for every 2.5 new people, close to the average household size) homes fall behind.', kind: 'fill', src: ['statcan_34100126', 'statcan_17100009'], tag: 'Derived',
+    years: [1976, 2025], split: y => y >= 1991, value: (g, y) => { let st = 0; for (let k = y - 4; k <= y; k++) { const v = hc(g, 'starts_total', k); if (v == null) return null; st += v; } const a = popAt(g, y), b = popAt(g, y - 5); return a && b && a - b > 0 ? st / (a - b) : null; },
+    fmt: v => v.toFixed(2), unit: 'homes started per person added (5 years)', color: v => magnitude(v, 0.1, 1.2, true), rng: [0.1, 1.2],
+    cover: 'Provinces only · shrinking or flat population: no value', legend: { kind: 'mag', ticks: [[0, '0.1'], [0.38, '0.25'], [0.66, '0.5'], [0.94, '1.0']], cap: 'Homes started per person added, 5 years to this one · log scale', nodata: true }, when: y => `${y - 4}–${y}`, prelim: () => false },
+  { id: 'foodh', group: 'Gaps worth fixing', label: 'Groceries in hours of work', q: 'How many hours at the median hourly wage it takes to buy the same groceries, compared with 1997 (1.00). Above 1.00: food prices have outrun wages.', kind: 'fill', src: ['statcan_18100005', 'statcan_14100064'], tag: 'Derived',
+    years: [1997, 2025], split: () => true, value: (g, y) => gFood(g, y)?.h ?? null, fmt: v => '×' + v.toFixed(2), unit: 'hours of work for the same groceries, 1997 = 1.00', color: v => diverging(v - 1, 0.15, 0.15, 0.01), rng: [0.85, 1.15],
+    cover: 'Provinces only · each against its own 1997', legend: { kind: 'div', neg: 0.15, pos: 0.15, dead: 0.01, decl: [[-0.15, '×0.85'], [-0.05, '×0.95']], grow: [[0.05, '×1.05'], [0.15, '×1.15']], deadLabel: 'within 1% of 1997', deadTick: '×1.00' }, when: y => `${y} average`, prelim: () => false },
   { id: 'csi', group: 'Crime and safety', label: 'Crime severity', q: 'Police-reported crime, with each offence weighted by how seriously courts punish it. Canada in 2006 = 100. Not a measure of overall safety: crimes not reported to police are missing.', kind: 'fill', src: ['statcan_35100026'], tag: 'Official statistic',
     years: ECRIME.years, split: y => y >= 1999, value: (g, y) => crAt(g, y)?.csi ?? null, fmt: v => v.toFixed(1), unit: 'index (Canada 2006 = 100)', color: v => magnitude(v, 40, 600, true), rng: [40, 600],
     cover: 'Police-reported · log scale', legend: { kind: 'mag', ticks: [[0, '40'], [0.338, '100'], [0.594, '200'], [0.851, '400']], cap: 'Crime Severity Index · Canada 2006 = 100 · log scale', nodata: true }, when: y => `Calendar year ${y}`, prelim: () => false },
@@ -340,7 +352,7 @@ MEASURES.push(
 
 const DIFF = { pop: 'level', dens: 'level', inc: 'level', rent: 'level', starts: 'abs', comp: 'abs', nat: 'abs', imm: 'abs', npr: 'abs', emi: 'abs', ipm: 'abs', flow: 'abs',
   chg: 'pp', rate: 'pp', share: 'pp', hhg: 'pp', rentrel: 'pp', vac: 'pp', chn: 'pp', fed: 'none', age: 'abs', o65: 'pp', u15: 'pp', metro: 'pp', urb: 'pp',
-  gdppc: 'level', gdpg: 'pp', ur: 'pp', er: 'pp', fedbal: 'abs', fedexp: 'level', cht: 'level', provbal: 'abs', provint: 'level', prdest: 'abs', nprsh: 'pp', bornout: 'pp', fr: 'pp', nonoff: 'pp', csi: 'level', vcsi: 'level', wcr: 'pp', csicity: 'level' };
+  gdppc: 'level', gdpg: 'pp', ur: 'pp', er: 'pp', fedbal: 'abs', fedexp: 'level', cht: 'level', provbal: 'abs', provint: 'level', prdest: 'abs', nprsh: 'pp', bornout: 'pp', fr: 'pp', nonoff: 'pp', csi: 'level', vcsi: 'level', wcr: 'pp', csicity: 'level', nodoc: 'pp', hpr: 'abs', foodh: 'abs' };
 const BREAKS = { inc: [[1993, 'survey change 1993'], [2012, 'survey change 2012']] };
 MEASURES.forEach(m => { m.diff = DIFF[m.id]; m.breaks = BREAKS[m.id] || []; });
 const M = Object.fromEntries(MEASURES.map(m => [m.id, m]));
@@ -722,7 +734,7 @@ function fitReading() { const L = document.getElementById('layers'), R = documen
 addEventListener('resize', () => fitReading());
 // Sections: a handful of plain top-level tabs; each holds one or more layer groups shown as labelled rows.
 const SECTIONS = [['People', ['Population', 'Where growth came from', 'Age and cities', 'Immigration and language']], ['Money', ['Government money']],
-  ['Economy', ['Economy and jobs', 'Housing and cost of living']], ['Safety', ['Crime and safety']], ['Politics', ['Politics']]];
+  ['Economy', ['Economy and jobs', 'Housing and cost of living']], ['Gaps', ['Gaps worth fixing']], ['Safety', ['Crime and safety']], ['Politics', ['Politics']]];
 const SEC_OF = Object.fromEntries(SECTIONS.flatMap(([s, gs]) => gs.map(g => [g, s])));
 for (const m of MEASURES) if (!SEC_OF[m.group]) { SECTIONS.push([m.group, [m.group]]); SEC_OF[m.group] = m.group; }
 const GROUPS = ['Questions', ...SECTIONS.map(s => s[0])];
@@ -905,6 +917,10 @@ function finding(m, g, y) {
   if (m.kind === 'party') { const e = electionAt(y), sts = e && (g === 'CAN' ? e.seats_total : e.seats_by_province[g === 'NT+NU' ? 'NT' : g]); const top = topSeats(sts);
     if (top && top[0] === 'TIE') return `In the election of ${fmtDate(e.date)}, <em>${top[2].map(partyShort).join(' and ')}</em> tied for the most seats in ${name}: ${top[1]} each of ${Object.values(sts).reduce((a, b) => a + b, 0)}.`;
     return top ? `In the election of ${fmtDate(e.date)}, the <em>${partyShort(top[0])}</em> party won the most seats in ${name}: ${top[1]} of ${Object.values(sts).reduce((a, b) => a + b, 0)}.` : `No seats recorded for ${name}.`; }
+  if (m.group === 'Gaps worth fixing' && v != null && g === 'CAN') { const y0 = m.years[0] + (m.id === 'hpr' ? 4 : 0), better = m.id === 'nodoc' || m.id === 'foodh' ? -1 : 1;
+    const ch = PROV.filter(k => m.value(k, y0) != null && m.value(k, y) != null).map(k => [k, m.value(k, y0), m.value(k, y), (m.value(k, y) - m.value(k, y0)) * better]).sort((a, b) => b[3] - a[3]);
+    const best = ch[0], v0 = m.value('CAN', y0);
+    return `Canada: <em>${m.fmt(v)}</em> ${m.unit} · ${m.when(y)}${v0 != null && y !== y0 ? ` (${m.fmt(v0)} in ${m.when(y0)})` : ''}.${best && best[3] > 0 && y !== y0 ? ` Biggest improvement since ${m.when(y0)}: <b>${NAMES[best[0]]}</b>, ${m.fmt(best[1])} → ${m.fmt(best[2])}. Tap it to see its full record.` : ''}`; }
   if (m.kind === 'points') { const c = CITIES.find(x => x.name === state.city), cv = c && m.cityValue(c, y);
     if (c) return cv == null ? `No published value for ${c.name} in ${y}.` : `${c.name}: <em>${m.fmt(cv)}</em> ${m.unit} · ${whenOf(m, y)}.`;
     if (m.id === 'csicity' && v != null) { const r = CITIES.map(c => [c.name, m.cityValue(c, y)]).filter(x => x[1] != null).sort((a, b) => b[1] - a[1]); return `Canada: <em>${m.fmt(v)}</em> (2006 = 100). Highest of the mapped cities in ${y}: ${r[0][0]}, ${m.fmt(r[0][1])}; lowest: ${r.at(-1)[0]}, ${m.fmt(r.at(-1)[1])}. Choose a city.`; }
@@ -1182,7 +1198,7 @@ function cmpRow(m, g, y) {
 function diffText(m, a, b) {
   if (a.v == null || b.v == null || m.diff === 'none') return '';
   const d = a.v - b.v;
-  if (m.diff === 'pp') { const pp = d * ({ vac: 1, chn: 1, o65: 1, u15: 1, metro: 1, urb: 1, gdpg: 1, ur: 1, er: 1, nprsh: 1, bornout: 1, fr: 1, nonoff: 1, wcr: 1 }[m.id] ?? 100); return `${NAMES[a.g]} is <b>${Math.abs(pp).toFixed(1)} percentage points</b> ${d >= 0 ? 'higher' : 'lower'}.`; }
+  if (m.diff === 'pp') { const pp = d * ({ vac: 1, chn: 1, o65: 1, u15: 1, metro: 1, urb: 1, gdpg: 1, ur: 1, er: 1, nprsh: 1, bornout: 1, fr: 1, nonoff: 1, wcr: 1, nodoc: 1 }[m.id] ?? 100); return `${NAMES[a.g]} is <b>${Math.abs(pp).toFixed(1)} percentage points</b> ${d >= 0 ? 'higher' : 'lower'}.`; }
   if (m.diff === 'abs') return `Difference: <b>${m.absFmt ? m.absFmt(d) : (d >= 0 ? '+' : '−') + Math.abs(d).toFixed(1)}</b> ${m.unit} (${NAMES[a.g]} minus ${NAMES[b.g]}).`;
   if (b.v === 0) return '';
   const rel = a.v / b.v - 1;
@@ -1227,7 +1243,7 @@ function timeBlock(m, label, valueAt, y, geoAt) {
   else if (brk.length) diff = `No difference shown: ${brk.map(([by, lab]) => lab.includes(String(by)) ? `the ${lab}` : `the ${lab} (${by})`).join(', ')} falls between these dates, so the two values are not directly comparable.`;
   else if (geoChange) diff = 'No difference shown: the area covered changes between these dates.';
   else if (m.diff !== 'none') { const d = B.v - A.v;
-    diff = m.diff === 'pp' ? `From ${ya} to ${yb}: <b>${d >= 0 ? '+' : '−'}${Math.abs(d * ({ vac: 1, chn: 1, o65: 1, u15: 1, metro: 1, urb: 1, gdpg: 1, ur: 1, er: 1, nprsh: 1, bornout: 1, fr: 1, nonoff: 1, wcr: 1 }[m.id] ?? 100)).toFixed(1)} percentage points</b>.`
+    diff = m.diff === 'pp' ? `From ${ya} to ${yb}: <b>${d >= 0 ? '+' : '−'}${Math.abs(d * ({ vac: 1, chn: 1, o65: 1, u15: 1, metro: 1, urb: 1, gdpg: 1, ur: 1, er: 1, nprsh: 1, bornout: 1, fr: 1, nonoff: 1, wcr: 1, nodoc: 1 }[m.id] ?? 100)).toFixed(1)} percentage points</b>.`
       : m.diff === 'abs' ? `From ${ya} to ${yb}: <b>${m.absFmt ? m.absFmt(d) : (d >= 0 ? '+' : '−') + Math.abs(d).toFixed(1)}</b> ${m.unit}.`
       : A.v ? `From ${ya} to ${yb}: <b>${d >= 0 ? '+' : '−'}${m.fmt(Math.abs(d)).replace(/^[+−-]/, '')}</b> (${pct(B.v / A.v - 1)}).` : '';
     if (/current dollars/i.test(m.unit + ' ' + (m.q || ''))) diff += ' Current dollars: not adjusted for inflation.'; }
@@ -1644,6 +1660,9 @@ function openHome(focusSearch = false) {
     <div class="hsearch"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input id="q-search" type="search" placeholder="${isPhone() ? T("Search a place, topic or year", "Chercher un lieu, un sujet, une année") : T("Try “Alberta unemployment 2010”, “toronto rent”, “glaciers”", "Essayez « Alberta unemployment 2010 », « toronto rent », « glaciers »")}" autocomplete="off" aria-label="Search"><div id="q-results" role="listbox"></div></div>
     <div class="hworlds">${W.map(([k, t, d, f, ic]) => `<button class="hworld w-${k}" data-goworld="${k}"><svg viewBox="0 0 24 24" aria-hidden="true">${ICON[ic]}</svg><span class="wt">${t}</span><span class="wd">${d}</span><span class="wf">${f}</span><span class="wgo">${T("Open →", "Ouvrir →")}</span></button>`).join('')}</div>
     <button class="hgap" data-goworld="wa"><span class="gk">${T("Gaps worth fixing · 1", "Écarts à combler · 1")}</span><span class="gt">${T("Drinking water advisories still in place", "Les avis sur la qualité de l’eau potable toujours en vigueur")}</span><span class="gd">${T("Long-term advisories on First Nations public water systems: which remain, for how long, and what fixed the ones that were lifted.", "Avis à long terme sur les réseaux publics d’eau des Premières Nations : ceux qui restent, depuis combien de temps, et ce qui a réglé ceux qui ont été levés.")}</span><span class="wgo">${T("Open →", "Ouvrir →")}</span></button>
+    <div class="hgaps">${[['nodoc', 2022, T('No family doctor', 'Sans médecin de famille'), T('1 in 7 people 12+ had no regular provider in 2022; in two provinces, more than 1 in 5.', 'En 2022, 1 personne de 12 ans et plus sur 7 n’avait pas de prestataire régulier; plus de 1 sur 5 dans deux provinces.')],
+      ['hpr', 2025, T('Homes vs new residents', 'Logements et nouveaux résidents'), T('Homes started for each person added, five years at a time, since 1976.', 'Logements mis en chantier pour chaque personne ajoutée, par périodes de cinq ans, depuis 1976.')],
+      ['foodh', 2025, T('Groceries in hours of work', 'L’épicerie en heures de travail'), T('The same groceries, priced in hours at the median wage, against 1997.', 'Le même panier, compté en heures au salaire médian, par rapport à 1997.')]].map(([m, y, t, d], i) => `<button class="hgap small" data-gapm="${m}" data-gapy="${y}"><span class="gk">${T('Gaps worth fixing', 'Écarts à combler')} · ${i + 2}</span><span class="gt">${t}</span><span class="gd">${d}</span></button>`).join('')}</div>
     <button class="hjourney" data-journey><span class="jpl">▶</span><span><b>${T("Watch: Canada, measured", "Regarder : Le Canada, en chiffres")}</b><span>${T("A guided journey, about two minutes. It drives the map for you; touch anything to take over.", "Un voyage guidé d’environ deux minutes. Il conduit la carte pour vous; touchez n’importe quoi pour prendre la main.")}</span></span></button>
     <section class="hlife" aria-labelledby="hlife-h"><h2 id="hlife-h" class="hq2">${T("Your life in Canada", "Votre vie au Canada")}</h2>
       <p class="hlq">${T("Enter the year you were born and where you live. Nothing leaves this device.", "Entrez votre année de naissance et où vous vivez. Rien ne quitte cet appareil.")}</p>
@@ -1666,6 +1685,7 @@ homeEl.addEventListener('click', e => {
   if (e.target.closest('[data-nbhome]')) { closeHome(); window.CITIES?.open(); return; }
   if (e.target.closest('[data-clhome]')) { closeHome(); window.CLIMATE?.open(); return; }
   if (e.target.closest('[data-journey]')) { window.JOURNEY?.start(); return; }
+  const gm = e.target.closest('[data-gapm]'); if (gm) { state.navQ = false; state.story = null; state.q = null; state.m = gm.dataset.gapm; state.y = clampYear(M[state.m], +gm.dataset.gapy); state.p = null; state.city = null; state.cmp = null; closeHome(); update(); return; }
   const lf = e.target.closest('[data-life-m]'); if (lf) { state.navQ = false; state.story = null; state.q = null; state.m = lf.dataset.lifeM; state.y = clampYear(M[state.m], +lf.dataset.lifeY); state.p = document.getElementById('life-g')?.value || null; state.city = null; state.cmp = null; closeHome(); update(); return; }
   const c = e.target.closest('[data-card]'); if (c) { const d = HOME_CARDS[+c.dataset.card]; state.navQ = false; state.story = null; state.q = null; state.m = d.m; state.y = clampYear(M[d.m], lastYear(M[d.m])); state.p = d.place && d.place !== 'CAN' ? d.place : null; state.city = null; state.cmp = null; closeHome(); update();
     if (d.open) setTimeout(() => { const det = [...document.querySelectorAll('details.path')].find(x => x.querySelector('summary').textContent.includes(d.open)); if (det) { det.open = true; } }, 50); return; }
