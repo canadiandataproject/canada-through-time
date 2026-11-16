@@ -350,6 +350,13 @@ MEASURES.push(
     legend: { kind: 'mag', ticks: [[0, '40'], [0.5, '100'], [0.878, '200']], cap: 'Crime Severity Index by metropolitan area · log scale', points: true }, when: y => `Calendar year ${y}`, prelim: () => false },
 );
 
+// French names (layers, groups, sections). Statistics Canada's own French terms where it has them. Longer explanations are still
+// English for now; the home page says so.
+const FR_LABEL = {"pop": "Population", "chg": "Variation depuis 1971", "rate": "Croissance de la dernière année", "dens": "Habitants par km²", "share": "Part des Canadiens", "nat": "Accroissement naturel", "imm": "Immigrants", "npr": "Résidents non permanents (net)", "emi": "Émigration (nette)", "ipm": "Migration interprovinciale", "flow": "Flux migratoires", "fed": "Sièges aux élections fédérales", "starts": "Mises en chantier", "comp": "Achèvements de logements", "hhg": "Croissance des ménages", "vac": "Taux d’inoccupation locatif", "rent": "Loyer moyen, 2 chambres", "rentrel": "Loyers par rapport à l’ensemble des prix", "chn": "Besoins impérieux de logement (recensement)", "inc": "Revenu médian après impôt", "age": "Âge médian", "o65": "65 ans et plus", "u15": "Moins de 15 ans", "metro": "Dans une région métropolitaine", "urb": "Part urbaine (recensement)", "gdppc": "PIB par habitant", "gdpg": "Croissance du PIB réel", "ur": "Taux de chômage", "er": "Taux d’emploi", "fedbal": "Argent fédéral : perçu et dépensé", "fedexp": "Dépenses fédérales par habitant", "cht": "Transfert canadien en matière de santé par habitant", "provbal": "Solde budgétaire provincial", "provint": "Intérêts provinciaux sur la dette", "prdest": "Nouveaux résidents permanents", "nprsh": "Résidents temporaires", "bornout": "Immigrants (Recensement de 2021)", "fr": "Langue maternelle française", "nonoff": "Autres langues maternelles", "nodoc": "Sans médecin de famille ni infirmière praticienne", "hpr": "Logements mis en chantier par nouveau résident", "foodh": "L’épicerie en heures de travail", "csi": "Gravité de la criminalité", "vcsi": "Gravité des crimes violents", "wcr": "Crimes résolus par la police", "csicity": "Gravité de la criminalité par ville"};
+const FR_GROUP = {"Population": "Population", "Where growth came from": "D’où vient la croissance", "Age and cities": "Âge et villes", "Immigration and language": "Immigration et langue", "Government money": "Finances publiques", "Economy and jobs": "Économie et emploi", "Housing and cost of living": "Logement et coût de la vie", "Politics": "Politique", "Gaps worth fixing": "Écarts à combler", "Crime and safety": "Criminalité et sécurité"};
+const FR_SEC = {"People": "Population", "Money": "Argent", "Economy": "Économie", "Gaps": "Écarts", "Safety": "Sécurité", "Politics": "Politique"};
+if (window.LANG === 'fr') MEASURES.forEach(m => { if (FR_LABEL[m.id]) m.label = FR_LABEL[m.id]; });
+const GNAME = g => window.LANG === 'fr' ? FR_GROUP[g] || g : g;
 const DIFF = { pop: 'level', dens: 'level', inc: 'level', rent: 'level', starts: 'abs', comp: 'abs', nat: 'abs', imm: 'abs', npr: 'abs', emi: 'abs', ipm: 'abs', flow: 'abs',
   chg: 'pp', rate: 'pp', share: 'pp', hhg: 'pp', rentrel: 'pp', vac: 'pp', chn: 'pp', fed: 'none', age: 'abs', o65: 'pp', u15: 'pp', metro: 'pp', urb: 'pp',
   gdppc: 'level', gdpg: 'pp', ur: 'pp', er: 'pp', fedbal: 'abs', fedexp: 'level', cht: 'level', provbal: 'abs', provint: 'level', prdest: 'abs', nprsh: 'pp', bornout: 'pp', fr: 'pp', nonoff: 'pp', csi: 'level', vcsi: 'level', wcr: 'pp', csicity: 'level', nodoc: 'pp', hpr: 'abs', foodh: 'abs' };
@@ -738,14 +745,14 @@ const SECTIONS = [['People', ['Population', 'Where growth came from', 'Age and c
 const SEC_OF = Object.fromEntries(SECTIONS.flatMap(([s, gs]) => gs.map(g => [g, s])));
 for (const m of MEASURES) if (!SEC_OF[m.group]) { SECTIONS.push([m.group, [m.group]]); SEC_OF[m.group] = m.group; }
 const GROUPS = ['Questions', ...SECTIONS.map(s => s[0])];
-const TABNAME = g => g === 'Questions' ? 'Start here' : g;
+const TABNAME = g => g === 'Questions' ? T('Start here', 'Commencer ici') : window.LANG === 'fr' ? FR_SEC[g] || FR_GROUP[g] || g : g;
 const GROUP_SHORT = { 'Where growth came from': 'Where growth came from', 'Housing and cost of living': 'Housing', 'Age and cities': 'Age & cities', 'Economy and jobs': 'Economy & jobs', 'Immigration and language': 'Immigration & language' };
 function drawNav() { requestAnimationFrame(fitReading); const cur = state.navQ ? 'Questions' : SEC_OF[M[state.m].group];
   const tabs = `<div class="tabs">${GROUPS.map(g => `<button class="tab ${g === cur ? 'on' : ''}" data-g="${g}">${TABNAME(g)}</button>`).join('')}</div>`;
   if (cur === 'Questions') { document.getElementById('layers').innerHTML = tabs + `
     <div class="plates"><button class="opt qopt story ${state.story != null ? 'on' : ''}" data-story="0">The story: ${STORY.title}</button>${PATHS.map(p => `<button class="opt qopt ${state.q === p.id ? 'on' : ''}" data-q="${p.id}">${p.q}</button>`).join('')}</div>`; return; }
   const groups = SECTIONS.find(s => s[0] === cur)[1], g0 = M[state.m].group;
-  document.getElementById('layers').innerHTML = tabs + (groups.length > 1 ? `<div class="subtabs">${groups.map(g => `<button class="sub ${g === g0 ? 'on' : ''}" data-sub="${g}">${GROUP_SHORT[g] || g}</button>`).join('')}</div>` : '')
+  document.getElementById('layers').innerHTML = tabs + (groups.length > 1 ? `<div class="subtabs">${groups.map(g => `<button class="sub ${g === g0 ? 'on' : ''}" data-sub="${g}">${window.LANG === 'fr' ? GNAME(g) : GROUP_SHORT[g] || g}</button>`).join('')}</div>` : '')
     + `<div class="plates">${MEASURES.filter(m => m.group === g0).map(m => `<button class="opt ${m.id === state.m ? 'on' : ''}" data-m="${m.id}">${m.label}</button>`).join('')}${cur === 'Money' ? '<button class="opt goworld" data-goworld="mn">Departments, grants and contracts →</button>' : cur === 'Safety' ? '<button class="opt goworld" data-goworld="wa">Drinking water advisories on reserves →</button>' : ''}</div>`; }
 document.getElementById('layers').addEventListener('click', e => {
   if (e.target.closest('[data-story]')) { openStory(0); return; }
@@ -985,7 +992,7 @@ function reading(m) {
   document.getElementById('plate-cap').innerHTML = `<b>${m.label}</b>, ${whenOf(m, state.y)}${isPrelim(m, state.y) ? '<sup>1</sup>' : ''} · Lambert conformal conic projection · generalized boundaries`;
   { const on = overNote(m, state.y), lg = document.getElementById('legend'); lg.innerHTML = legendHTML(m) + on.html; lg.classList.toggle('has-hi', on.hi); lg.classList.toggle('has-lo', on.lo); }
   document.getElementById('pathcard').innerHTML = pathCard();
-  document.getElementById('layer-btn').textContent = 'Layers';
+  document.getElementById('layer-btn').textContent = T('Layers', 'Couches');
 }
 document.getElementById('pathcard').addEventListener('click', e => { const sb = e.target.closest('[data-storygo]'); if (sb) { sb.dataset.storygo === 'x' ? (state.story = null, update()) : openStory(+sb.dataset.storygo); return; }
   if (e.target.closest('[data-closeq]')) { state.q = null; update(); return; }
@@ -1454,7 +1461,7 @@ function openEvent(e) {
 function timelineCtx(y) {
   const mi = ministryAt(`${y}-07-01`), evs = YEAR_EV[y] || [];
   const ev = evs.length ? `<div class="evl"><i class="m-${evs[0].k}"></i>${evs[0].title}${evs.length > 1 ? ` <span style="color:var(--ink-3)">+${evs.length - 1} more</span>` : ''}</div>` : '';
-  document.getElementById('tl-ctx').innerHTML = `${ev}<div>Prime Minister on July 1, ${y}: <b>${mi ? `${mi.pm}` : '—'}</b>${mi ? ` (${partyShort(mi.party)})` : ''}</div>`;
+  document.getElementById('tl-ctx').innerHTML = `${ev}<div>${T(`Prime Minister on July 1, ${y}`, `Premier ministre au 1er juillet ${y}`)}: <b>${mi ? `${mi.pm}` : '—'}</b>${mi ? ` (${partyShort(mi.party)})` : ''}</div>`;
   document.getElementById('mev').innerHTML = evs.length ? `<span class="evl"><i class="m-${evs[0].k}" style="display:inline-block;width:7px;height:7px;margin-right:6px"></i>${evs[0].title}</span>` : (mi ? `Prime Minister: ${mi.pm} (${partyShort(mi.party)})` : '');
   document.querySelectorAll('#tl-era span').forEach(s => { const m = ERAS[+s.dataset.i]; s.classList.toggle('now', m === mi); });
   document.querySelectorAll('#tl-ev i').forEach(i => i.classList.toggle('off', +i.dataset.y > y));
@@ -1792,7 +1799,7 @@ else if (!STUDIO && !FIRST_HASH && PLACE.g) { state.p = PLACE.g; update(); }   /
 // ================================================================ v2 views: race · scatter · trends · compare · change
 // Every view reads the same published values as the map (m.value), for the year on the timeline. Nothing is estimated:
 // a missing value is drawn as missing. Scatter plots show association only.
-const VIEWS = [['map', 'Map'], ['race', 'Ranking'], ['scatter', 'X vs Y'], ['trends', 'Trends'], ['compare', 'Compare'], ['change', 'Change']];
+const VIEWS = [['map', T('Map', 'Carte')], ['race', T('Ranking', 'Classement')], ['scatter', T('X vs Y', 'X c. Y')], ['trends', T('Trends', 'Tendances')], ['compare', T('Compare', 'Comparer')], ['change', T('Change', 'Variation')]];
 state.view = 'map'; state.y2m = 'gdppc'; state.cA = 'AB'; state.cB = 'ON'; state.y0 = null; state.trails = false;
 const numericM = m => ['fill', 'spike'].includes(m.kind) && typeof m.value === 'function';
 const vbar = document.createElement('div'); vbar.id = 'viewbar'; if (STUDIO) vbar.style.display = 'none'; vbar.setAttribute('role', 'tablist'); document.getElementById('app').appendChild(vbar);
