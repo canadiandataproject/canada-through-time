@@ -58,7 +58,7 @@ function build() {
     const m = e.target.closest('[data-clm]'); if (m) { S.mode = m.dataset.clm; S.gl = null; if (S.mode === 'precip' && S.y > A.p_years[1]) S.y = A.p_years[1]; render(); return; }
     if (e.target.closest('[data-clavg]')) { S.avg = e.target.closest('[data-clavg]').dataset.clavg === '1'; render(); return; }
     if (e.target.closest('[data-clplay]')) { togglePlay(); return; }
-    const g = e.target.closest('[data-glac]'); if (g) { S.gl = g.dataset.glac; render(); return; }
+    const g = e.target.closest('[data-glac]'); if (g) { S.gl = g.dataset.glac; S.gy = null; render(); return; }
     if (e.target.closest('[data-clclear]')) { S.st = null; S.gl = null; render(); }
   });
   el.addEventListener('input', e => { if (e.target.id === 'cl-year') { S.y = +e.target.value; render(true); } });
@@ -174,6 +174,36 @@ function stationChart(s, k) {
     <text x="0" y="${H + 12}">${x0}</text><text x="${W}" y="${H + 12}" text-anchor="end">${x1}</text></svg>
     <div class="lg2"><span><i class="dot"></i>each year</span><span><i class="ln"></i>10-year average</span></div>`;
 }
+// Cross-section: the drop of the ice surface is to scale (glacier-wide average thinning = running total of mass balance ÷ 0.9,
+// since ice is about 900 kg/m³); the valley and the starting thickness are a drawing, not survey data.
+let XS_K = null;
+function xsSvg(g, y) {
+  if (XS_K == null) { const worst = Math.min(...G.glaciers.map(x => lastC(cum(x))?.[1] ?? 0)); XS_K = 52 / (Math.abs(worst) / 0.9 || 1); }
+  const c = cum(g).filter(Boolean), y0 = g.b[0], y1 = lastC(cum(g))[0]; y = Math.max(y0, Math.min(y1, y));
+  const at = c.filter(p => p[0] <= y).slice(-1)[0], we = at ? at[1] : 0, ice = we / 0.9, drop = Math.max(0, -ice) * XS_K, rise = Math.max(0, ice) * XS_K;
+  const W = 290, H = 160, bed = x => 128 - 70 * (x / W) + 14 * Math.sin(x / W * Math.PI), top0 = x => bed(x) - 62 * Math.sin(Math.min(1, x / W * 1.15) * Math.PI * 0.92 + 0.12);
+  const pts = Array.from({ length: 41 }, (_, i) => i / 40 * W), line = f => pts.map((x, i) => (i ? 'L' : 'M') + x.toFixed(1) + ' ' + f(x).toFixed(1)).join('');
+  const now = x => Math.min(bed(x), top0(x) + drop - rise);
+  const iceNow = line(now) + pts.slice().reverse().map(x => 'L' + x.toFixed(1) + ' ' + bed(x).toFixed(1)).join('') + 'Z';
+  const lost = line(top0) + pts.slice().reverse().map(x => 'L' + x.toFixed(1) + ' ' + now(x).toFixed(1)).join('') + 'Z';
+  const sb = 10 * XS_K, frac = (y - y0) / Math.max(1, y1 - y0);
+  return `<svg class="cl-xs" viewBox="0 0 ${W} ${H + 28}" data-xs="${g.id}" role="img" aria-label="${esc(g.name)} cross-section, ${y}: surface ${ice < 0 ? 'lowered' : 'raised'} ${nf(Math.abs(ice), 1)} m of ice since ${y0}">
+    <path d="${line(x => bed(x) + 4)}L${W} ${H}L0 ${H}Z" class="rock"/><path d="${lost}" class="lost"/><path d="${iceNow}" class="ice"/>
+    <path d="${line(top0)}" class="was"/><text x="6" y="${top0(6) - 6}" class="lab">${y0} surface</text>
+    <g class="sb"><line x1="${W - 8}" x2="${W - 8}" y1="18" y2="${18 + sb}"/><text x="${W - 12}" y="${22 + sb / 2}" text-anchor="end">10 m</text></g>
+    <text x="8" y="16" class="yr">${y}</text><text x="8" y="31" class="val">${ice < 0 ? '−' : '+'}${nf(Math.abs(ice), 1)} m of ice</text>
+    <line x1="0" x2="${W}" y1="${H + 14}" y2="${H + 14}" class="trk"/><circle cx="${frac * W}" cy="${H + 14}" r="6" class="knob"/>
+    <text x="0" y="${H + 27}" class="tk">${y0}</text><text x="${W}" y="${H + 27}" class="tk" text-anchor="end">${y1}</text></svg>`;
+}
+function bindXs(box, g) {
+  const sv = () => box.querySelector('svg.cl-xs'); let drag = false;
+  const setFrom = e => { const r = sv().getBoundingClientRect(), y0 = g.b[0], y1 = lastC(cum(g))[0];
+    S.gy = Math.round(y0 + Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * (y1 - y0)); sv().outerHTML = xsSvg(g, S.gy); bindXs(box, g); };
+  const el2 = sv(); el2.style.touchAction = 'pan-y';
+  el2.onpointerdown = e => { drag = true; el2.setPointerCapture?.(e.pointerId); setFrom(e); };
+  el2.onpointermove = e => { if (drag || e.pointerType === 'mouse' && e.buttons) setFrom(e); };
+  el2.onpointerup = el2.onpointercancel = () => { drag = false; };
+}
 function detail() {
   const box = el.querySelector('#cl-detail');
   if (S.mode === 'ice') {
@@ -185,9 +215,12 @@ function detail() {
     box.innerHTML = `<div class="dt-h"><div><span class="kick">${g.region.includes('western') ? 'Western mountains' : 'Arctic'} · ${nf(g.lat, 2)}°N</span><h3>${esc(g.name)}</h3></div><button data-clclear aria-label="Close">×</button></div>
       <div class="dt-pop"><b>${sgn(lc[1], 1, ' m')}</b> running total, ${g.b[0]}–${lc[0]}${ng ? ` <span class=\"gapn\">(${ng} year${ng > 1 ? 's' : ''} not measured)</span>` : ''}</div>
       <p class="hint">${neg} of ${vals.length} measured years were negative (more melt than snowfall).</p>
+      <h4>Drag across the glacier <small>surface lowering to scale</small></h4>${xsSvg(g, S.gy ?? lc[0])}
+      <p class="def">Average thinning across the whole glacier, to scale: the running total of mass balance converted to ice (÷ 0.9; ice is lighter than water). The valley and the starting thickness are a drawing, not a survey; the glacier also gets shorter, which this view doesn’t show.</p>
       <h4>Each year <small>m water equivalent</small></h4>
       <svg class="cl-st" viewBox="0 0 ${W} ${H + 16}"><line x1="0" x2="${W}" y1="${Y(0)}" y2="${Y(0)}" class="mid"/>${vals.map(([y, v]) => `<rect x="${X(y) - bw / 2}" y="${Math.min(Y(v), Y(0))}" width="${bw}" height="${Math.abs(Y(v) - Y(0))}" fill="rgb(${v < 0 ? PAL.dec[2] : PAL.seq[3]})"><title>${y}: ${sgn(v, 2, ' m')}</title></rect>`).join('')}
       <text x="0" y="${H + 12}">${g.b[0]}</text><text x="${W}" y="${H + 12}" text-anchor="end">${g.b[0] + g.b[1].length - 1}</text></svg>`;
+    bindXs(box, g);
     return;
   }
   const s = A.stations.find(x => x.id === S.st);

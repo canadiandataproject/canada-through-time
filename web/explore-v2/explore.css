@@ -1120,3 +1120,14 @@ body.has-shell #ab { top: var(--shell-h); }
 #from-short.mini .fs-say, #from-short.mini .fs-next, #from-short.mini b { display: none; }
 #from-short.mini .fs-k::after { content: " · tap for more"; color: var(--ink-3); font-weight: 600; text-transform: none; letter-spacing: 0; }
 #from-short.mini .fs-x { width: 26px; height: 26px; font-size: 16px; }
+#cl .cl-xs { width: 100%; height: auto; display: block; margin: 4px 0 2px; cursor: ew-resize; user-select: none; -webkit-user-select: none; }
+#cl .cl-xs .rock { fill: var(--land); stroke: var(--boundary); stroke-width: .8; }
+#cl .cl-xs .ice { fill: #e9f1f5; stroke: #9db7c4; stroke-width: 1; }
+#cl .cl-xs .was { fill: none; stroke: var(--ink-3); stroke-dasharray: 4 3; stroke-width: 1; }
+#cl .cl-xs .lab, #cl .cl-xs .tk, #cl .cl-xs .sb text { fill: var(--ink-3); font: 10px var(--font-ui); }
+#cl .cl-xs .sb line { stroke: var(--ink-2); stroke-width: 1.5; }
+#cl .cl-xs .yr { fill: var(--ink-1); font: 600 15px var(--font-ui); font-variant-numeric: tabular-nums; }
+#cl .cl-xs .val { fill: var(--ink-2); font: 12px var(--font-ui); font-variant-numeric: tabular-nums; }
+#cl .cl-xs .trk { stroke: var(--hairline); stroke-width: 3; stroke-linecap: round; }
+#cl .cl-xs .knob { fill: var(--ink-1); }
+#cl .cl-xs .lost { fill: color-mix(in srgb, var(--dec-2) 22%, transparent); }
