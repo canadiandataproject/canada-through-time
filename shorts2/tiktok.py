@@ -17,7 +17,8 @@ ORG = "6afa9bec49dfc7619b94264c"
 BASE = "https://canadiandataproject.github.io/canada-through-time/media/"
 TAIL = "\n\nFree explorer, link in bio."
 PLAN = [  # (local Edmonton time, media file, title, caption)
- ("2026-11-16T19:00", "short-08-glaciers.mp4", "How much ice have Canada's glaciers lost?",
+ # posted early, Nov 16 12:44 PM (shareNow): https://tiktok.com/@thecanadiandataproject/video/7708841606492851477
+ ("2026-11-16T12:44", "short-08-glaciers.mp4", "How much ice have Canada's glaciers lost?",
   "How much ice have Canada's glaciers lost? 🧊 Peyto lost more in 25 years than in the 35 before. 7 of 7 long-measured glaciers: net loss." + TAIL + "\n\n#canada #glaciers #climate #dataviz"),
  ("2026-11-17T12:30", "short-12-receipt.mp4", "Ottawa's $493 billion receipt",
   "If Ottawa printed a receipt for 2025–26, it would say $493.5B. About $11,860 per person. Where did it go? 🧾" + TAIL + "\n\n#canada #budget #cdnpoli #dataviz"),
@@ -33,6 +34,19 @@ PLAN = [  # (local Edmonton time, media file, title, caption)
   "Canada's long-running weather stations vs their own 1961–1990 average: 263 of 263 warmer in the 2000s. One exception since. Guess where? 🌡️" + TAIL + "\n\n#canada #climate #weather #dataviz"),
  ("2026-11-20T12:30", "short-10-unemployment.mp4", "Which province has had Canada's lowest unemployment?",
   "Which province has had Canada's lowest unemployment rate? 6 different provinces have been #1 since 1976. One led 20 of 50 years. 📊" + TAIL + "\n\n#canada #jobs #economy #dataviz"),
+ # older Shorts (#1–#7), downloaded from Studio and upscaled; facts checked against their YouTube descriptions
+ ("2026-11-20T19:00", "short-01-who-moved-where.mp4", "Who moved where in Canada, 1971–2025",
+  "Since 1971, B.C. gained 718,665 people from other provinces and Alberta 713,526. Quebec lost 652,072. Where does yours land? 🚚" + TAIL + "\n\n#canada #alberta #bc #dataviz"),
+ ("2026-11-21T12:30", "short-02-seniors.mp4", "Canada now has more seniors than kids",
+  "In 2016, Canadians 65+ outnumbered kids under 15 for the first time in records back to 1971. Median age: 26.2 then, 40.9 now. 👴👶" + TAIL + "\n\n#canada #demographics #aging #dataviz"),
+ ("2026-11-21T19:00", "short-07-ottawa-money.mp4", "Where Ottawa collects more than it spends",
+  "Federal money collected minus spent in each province, 2007–2025. Only 3 came out ahead. Alberta: +$314B. Quebec: −$374B. Surprised? 💸" + TAIL + "\n\n#canada #alberta #cdnpoli #dataviz"),
+ ("2026-11-22T12:30", "short-06-pr-countries.mp4", "Who's #1? Where Canada's new permanent residents come from",
+  "For 10 years, 3 countries traded #1 for new permanent residents to Canada. Since 2017 it's been India every year. Who's #2? 🌏" + TAIL + "\n\n#canada #immigration #india #dataviz"),
+ ("2026-11-22T19:00", "short-05-growth-migration.mp4", "92% of Canada's growth came from international migration",
+  "In 1971–72, a third of Canada's growth came from international migration. In 2024–25: 92%. 📈" + TAIL + "\n\n#canada #immigration #population #dataviz"),
+ ("2026-11-23T12:30", "short-04-added-20m.mp4", "Canada added 20 million people since 1971",
+  "Canada went from 22.0M people in 1971 to 41.8M in 2026, up 90%. Ontario, B.C. and Alberta took 77% of the growth. 🇨🇦" + TAIL + "\n\n#canada #population #ontario #dataviz"),
 ]
 
 def q(query, v=None):
