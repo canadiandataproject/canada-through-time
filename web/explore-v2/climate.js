@@ -9,9 +9,9 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 const nf = (v, dp = 0) => v.toLocaleString('en-CA', { minimumFractionDigits: dp, maximumFractionDigits: dp });
 const sgn = (v, dp = 1, u = '') => (v > 0 ? '+' : v < 0 ? '−' : '±') + nf(Math.abs(v), dp) + u;
 
-let A, G, F, PROV, LAKES, el, deckI, ready, fready;
+let A, G, F, SP, PROV, LAKES, el, deckI, ready, fready;
 const S = { mode: 'temp', y: 2020, avg: true, st: null, gl: null, playing: false };
-const MODES = [['temp', 'Temperature'], ['precip', 'Precipitation'], ['trend', 'Long-term warming'], ['ice', 'Glaciers'], ['forest', 'Forests']];
+const MODES = [['temp', 'Temperature'], ['precip', 'Precipitation'], ['trend', 'Long-term warming'], ['ice', 'Glaciers'], ['forest', 'Forests'], ['sprawl', 'Cities spreading']];
 const yr = (s, k) => s[k] ? s[k][0] : null;
 const at = (s, k, y) => { const p = s[k]; if (!p) return null; const i = y - p[0]; return i >= 0 && i < p[1].length ? p[1][i] : null; };
 function baseline(s, k) { const key = '_b' + k; if (key in s) return s[key]; let n = 0, sum = 0; for (let y = 1961; y <= 1990; y++) { const v = at(s, k, y); if (v != null) { n++; sum += v; } } return s[key] = n >= 25 ? sum / n : null; }
@@ -48,6 +48,7 @@ function build() {
     <div id="cl-modes" role="tablist"></div></header>
   <aside id="cl-side" class="nbx-side"></aside>
   <div id="cl-map" class="nbx-map" aria-label="Map of climate stations"></div>
+  <canvas id="cl-sprawl" class="nbx-map" hidden aria-label="Built-up land around the chosen city"></canvas>
   <div id="cl-legend" class="nbx-legend"></div>
   <div id="cl-time" class="nbx-time"></div>
   <aside id="cl-detail" class="nbx-detail"></aside>
@@ -55,9 +56,10 @@ function build() {
   document.body.appendChild(el);
   el.querySelector('.nbx-back').onclick = close;
   el.addEventListener('click', e => {
-    const m = e.target.closest('[data-clm]'); if (m) { S.mode = m.dataset.clm; S.gl = null; if (S.mode === 'precip' && S.y > A.p_years[1]) S.y = A.p_years[1]; if (S.mode === 'forest') { loadForest().then(() => { S.y = Math.max(F.years[0], Math.min(F.years[1], S.y)); render(); }); return; } render(); return; }
+    const m = e.target.closest('[data-clm]'); if (m) { S.mode = m.dataset.clm; S.gl = null; if (S.mode === 'precip' && S.y > A.p_years[1]) S.y = A.p_years[1]; if (S.mode === 'forest') { loadForest().then(() => { S.y = Math.max(F.years[0], Math.min(F.years[1], S.y)); render(); }); return; } if (S.mode === 'sprawl') { loadSprawl().then(() => { S.y = Math.max(1975, Math.min(2020, S.y)); render(); }); return; } render(); return; }
     if (e.target.closest('[data-clavg]')) { S.avg = e.target.closest('[data-clavg]').dataset.clavg === '1'; render(); return; }
     if (e.target.closest('[data-clplay]')) { togglePlay(); return; }
+    const spc = e.target.closest('[data-spc]'); if (spc) { S.sc = spc.dataset.spc; render(); return; }
     const g = e.target.closest('[data-glac]'); if (g) { S.gl = g.dataset.glac; S.gy = null; render(); return; }
     if (e.target.closest('[data-clclear]')) { S.st = null; S.gl = null; render(); }
   });
@@ -72,7 +74,7 @@ function bindScrub(mapBox) {
   const hud = document.createElement('div'); hud.className = 'cl-scrub'; hud.hidden = true; mapBox.appendChild(hud);
   let g = null; const pts = new Set();
   const fitZ = () => { const box = mapBox.getBoundingClientRect(); return Math.log2(Math.min(box.width / 5400, box.height / 4600) * 0.98); };
-  const ok = e => (S.mode === 'temp' || S.mode === 'precip' || S.mode === 'forest') && !e.shiftKey && e.button === 0 && pts.size === 1 && (CLZ == null || CLZ <= fitZ() + 0.35);
+  const ok = e => (S.mode === 'temp' || S.mode === 'precip' || S.mode === 'forest' || S.mode === 'sprawl') && !e.shiftKey && e.button === 0 && pts.size === 1 && (S.mode === 'sprawl' || CLZ == null || CLZ <= fitZ() + 0.35);
   mapBox.addEventListener('pointerdown', e => { pts.add(e.pointerId); g = ok(e) ? { id: e.pointerId, x0: e.clientX, y0: e.clientY, y: S.y, on: false } : null; }, true);
   mapBox.addEventListener('pointermove', e => { if (!g || e.pointerId !== g.id) return; if (pts.size > 1) { g = null; hud.hidden = true; return; }
     const dx = e.clientX - g.x0, dy = e.clientY - g.y0;
@@ -80,14 +82,14 @@ function bindScrub(mapBox) {
     e.stopPropagation(); e.preventDefault();
     const [a, b] = range(), per = Math.max(8, Math.min(26, mapBox.clientWidth * 0.8 / (b - a))), y = Math.max(a, Math.min(b, Math.round(g.y + dx / per)));
     const r = mapBox.getBoundingClientRect(); hud.style.left = Math.max(80, Math.min(r.width - 80, e.clientX - r.left)) + 'px'; hud.style.top = Math.max(40, e.clientY - r.top - 96) + 'px';
-    hud.textContent = S.mode === 'forest' || !S.avg ? y : `${y - 9}–${y}`; if (y !== S.y) { S.y = y; render(true); } }, true);
+    hud.textContent = S.mode === 'sprawl' ? (SP.epochs.filter(e => e <= y).at(-1) ?? y) : S.mode === 'forest' || !S.avg ? y : `${y - 9}–${y}`; if (y !== S.y) { S.y = y; render(true); } }, true);
   const end = e => { pts.delete(e.pointerId); if (g && e.pointerId === g.id) { if (g.on) { e.stopPropagation(); hud.hidden = true; } g = null; } };
   mapBox.addEventListener('pointerup', end, true); mapBox.addEventListener('pointercancel', end, true);
 }
 function togglePlay() { S.playing = !S.playing; clearInterval(timer);
   if (S.playing) { const [y0, y1] = range(); if (S.y >= y1) S.y = Math.max(y0, 1900); timer = setInterval(() => { const [, b] = range(); if (S.y >= b) { S.playing = false; clearInterval(timer); render(); return; } S.y++; render(true); }, 160); }
   render(true); }
-const range = () => S.mode === 'precip' ? [1900, A.p_years[1]] : S.mode === 'temp' ? [1900, A.t_years[1]] : S.mode === 'forest' ? F.years : [1900, 2020];
+const range = () => S.mode === 'precip' ? [1900, A.p_years[1]] : S.mode === 'temp' ? [1900, A.t_years[1]] : S.mode === 'forest' ? F.years : S.mode === 'sprawl' ? [1975, 2020] : [1900, 2020];
 
 function fit() { if (!deckI) return; const box = el.querySelector('#cl-map').getBoundingClientRect(), b = [3700, 300, 9100, 4900];   // km, StatCan Lambert: all of Canada
   const z = Math.log2(Math.min(box.width / (b[2] - b[0]), box.height / (b[3] - b[1])) * 0.98);
@@ -109,16 +111,17 @@ const SHARE = {};
 function render(fast) {
   pal(); writeHash();
   el.querySelector('#cl-modes').innerHTML = MODES.map(([k, l]) => `<button role="tab" data-clm="${k}" class="${S.mode === k ? 'on' : ''}" aria-selected="${S.mode === k}">${l}</button>`).join('');
-  const timed = S.mode === 'temp' || S.mode === 'precip' || S.mode === 'forest', [y0, y1] = range();
+  const timed = S.mode === 'temp' || S.mode === 'precip' || S.mode === 'forest' || S.mode === 'sprawl', [y0, y1] = range();
   el.querySelector('#cl-time').hidden = !timed;
   if (timed) { const t = el.querySelector('#cl-time'); if (!t.querySelector('#cl-year') || !fast) t.innerHTML = `<button data-clplay class="play" aria-label="Play">${S.playing ? '❚❚' : '▶'}</button><b id="cl-y"></b><input id="cl-year" type="range" min="${y0}" max="${y1}" step="1" aria-label="Year"><span class="smooth"><button data-clavg="1" class="${S.avg ? 'on' : ''}">10-year average</button><button data-clavg="0" class="${S.avg ? '' : 'on'}">Single year</button></span>`;
-    t.querySelector('#cl-year').value = S.y; t.querySelector('#cl-y').textContent = S.mode === 'forest' ? S.y : S.avg ? `${S.y - 9}–${S.y}` : S.y; const sm = t.querySelector('.smooth'); if (sm) sm.style.display = S.mode === 'forest' ? 'none' : ''; t.querySelector('[data-clplay]').textContent = S.playing ? '❚❚' : '▶'; }
+    t.querySelector('#cl-year').value = S.y; t.querySelector('#cl-y').textContent = S.mode === 'sprawl' ? spEpoch() : S.mode === 'forest' ? S.y : S.avg ? `${S.y - 9}–${S.y}` : S.y; const sm = t.querySelector('.smooth'); if (sm) sm.style.display = S.mode === 'forest' || S.mode === 'sprawl' ? 'none' : ''; t.querySelector('[data-clplay]').textContent = S.playing ? '❚❚' : '▶'; }
   side(); detail(); legend(); drawMap();
 }
 function side() {
   const box = el.querySelector('#cl-side');
   if (S.mode === 'ice') { box.innerHTML = iceSide(); return; }
   if (S.mode === 'forest') { box.innerHTML = forestSide(); return; }
+  if (S.mode === 'sprawl') { box.innerHTML = sprawlSide(); return; }
   const rows = stationRows().filter(r => r[1] != null), up = rows.filter(r => r[1] > 0).length, mode = S.mode;
   const share = SHARE[mode] ||= warmerShare(mode === 'trend' ? 'temp' : mode);
   const what = mode === 'temp' ? 'warmer' : mode === 'precip' ? 'wetter' : 'warmer';
@@ -172,6 +175,7 @@ function cumChart(gs) {
 }
 function legend() {
   const box = el.querySelector('#cl-legend');
+  if (S.mode === 'sprawl') { box.innerHTML = sprawlLegend(); return; }
   if (S.mode === 'forest') { box.innerHTML = `<div class="lg-t">Forest disturbed, each ${F.cell_km} km square</div><div class="lg2"><span><i style="background:rgb(${FIRE()})"></i>Burned in ${S.y}</span><span><i style="background:rgb(${CUT()})"></i>Harvested in ${S.y}</span></div><div class="lg2"><span><i style="background:rgb(${PAL.seq[1]})"></i>Earlier years since 1985, paler with time</span></div><div class="lg-miss">Bigger dot: more hectares. Under 50 ha in a year (earlier years: under 1% of the square) not drawn, still counted.</div>`; return; }
   if (S.mode === 'ice') { box.innerHTML = `<div class="lg-t">Glaciers with 10+ years of mass balance</div><div class="lg2"><span><i style="background:rgb(${PAL.seq[3]})"></i>Western mountains</span><span><i style="background:rgb(${PAL.dec[2]})"></i>Arctic</span></div><div class="lg-miss">Bigger circle: more years measured</div>`; return; }
   const d = DOM[S.mode], st = Array.from({ length: 11 }, (_, i) => { const v = -d + i / 10 * 2 * d; return `rgb(${col(S.mode, v)}) ${i * 10}%`; });
@@ -227,6 +231,7 @@ function bindXs(box, g) {
 function detail() {
   const box = el.querySelector('#cl-detail');
   if (S.mode === 'forest') { box.innerHTML = forestDetail(); return; }
+  if (S.mode === 'sprawl') { box.innerHTML = sprawlDetail(); return; }
   if (S.mode === 'ice') {
     const g = G.glaciers.find(x => x.id === S.gl);
     if (!g) { box.innerHTML = `<h3>Click a glacier</h3><p class="hint">Mass balance is measured with stakes and snow pits across the glacier every year. Only a handful of Canadian glaciers have long records; these are all of them in the WGMS database with 10 or more years.</p>`; return; }
@@ -261,6 +266,7 @@ function detail() {
 }
 
 function drawMap() {
+  const spc = el.querySelector('#cl-sprawl'); if (spc) spc.hidden = S.mode !== 'sprawl'; if (S.mode === 'sprawl') { drawSprawl(); deckI?.setProps({ layers: [] }); return; }
   const key = [S.mode, S.y, S.avg, S.st, S.gl, PAL.page].join('|');
   const land = new GeoJsonLayer({ id: 'land', data: PROV, filled: true, stroked: true, getFillColor: [...PAL.land, 255], getLineColor: [...PAL.line, 120], lineWidthUnits: 'pixels', getLineWidth: 0.8, updateTriggers: { getFillColor: key, getLineColor: key } });
   const lakes = new GeoJsonLayer({ id: 'lakes', data: LAKES, filled: true, stroked: false, getFillColor: [...PAL.water, 255], updateTriggers: { getFillColor: key } });
@@ -327,11 +333,54 @@ function forestDetail() {
   return `<h3>By province and territory</h3><p class="hint">Hectares disturbed, 1985–2015 together.</p><div class="nb-list">${rows.map(([g, f, h]) => `<div class="fo-row"><b>${g}</b><span>${haF(f)} burned</span><span>${haF(h)} harvested</span></div>`).join('')}</div>`;
 }
 
+// ---------------------------------------------------------------- cities spreading (JRC GHS-BUILT-S, 100 m, 1975–2020)
+const IMG = {};
+const loadSprawl = () => sready ||= J('../data/sprawl/sprawl.json').then(d => { SP = d; S.sc ||= 'toronto'; });
+let sready;
+const spCity = () => SP.cities.find(c => c.slug === S.sc) || SP.cities[0];
+const spIdx = () => { let k = 0; SP.epochs.forEach((e, i) => { if (e <= S.y) k = i; }); return k; };
+const spEpoch = () => SP ? SP.epochs[spIdx()] : S.y;
+const SPCOL = () => { const a = hex(css('--accent')); return [[52, 48, 42], [104, 92, 76], [146, 128, 98], [196, 164, 104], [222, 132, 78], a]; };   // oldest dark, newest the accent
+function cityImg(c) { if (IMG[c.slug]) return IMG[c.slug];
+  const im = new Image(); IMG[c.slug] = { ready: false };
+  im.onload = () => { const cv = document.createElement('canvas'); cv.width = im.width; cv.height = im.height; const x = cv.getContext('2d'); x.drawImage(im, 0, 0);
+    IMG[c.slug] = { ready: true, w: im.width, h: im.height, px: x.getImageData(0, 0, im.width, im.height).data }; if (S.mode === 'sprawl') drawSprawl(); };
+  im.src = `../data/sprawl/${c.slug}.png`; return IMG[c.slug]; }
+function drawSprawl() {
+  const cv = el.querySelector('#cl-sprawl'), c = spCity(), im = cityImg(c); if (!im.ready) return;
+  const box = cv.getBoundingClientRect(), dpr = Math.min(2, devicePixelRatio || 1); cv.width = box.width * dpr; cv.height = box.height * dpr;
+  const g = cv.getContext('2d'); g.fillStyle = `rgb(${PAL.land})`; g.fillRect(0, 0, cv.width, cv.height);
+  const k = spIdx() + 1, cols = SPCOL(), off = document.createElement('canvas'); off.width = im.w; off.height = im.h;
+  const o = off.getContext('2d'), id = o.createImageData(im.w, im.h), d = id.data;
+  for (let i = 0, p = 0; i < im.px.length; i += 4, p += 4) { const e = im.px[i]; if (e && e <= k) { const col = cols[e - 1]; d[p] = col[0]; d[p + 1] = col[1]; d[p + 2] = col[2]; d[p + 3] = e === k && k > 1 ? 255 : 215; } }
+  o.putImageData(id, 0, 0);
+  const sz = Math.min(cv.width, cv.height) * 0.94, x0 = (cv.width - sz) / 2, y0 = (cv.height - sz) / 2;
+  g.imageSmoothingEnabled = false; g.drawImage(off, x0, y0, sz, sz);
+  // scale bar: 10 km
+  const pxKm = sz / (2 * c.half_km), bar = 10 * pxKm; g.fillStyle = `rgb(${PAL.ink})`; g.fillRect(x0 + sz - 14 * dpr - bar, y0 + 70 * dpr, bar, 3 * dpr);
+  g.font = `${12 * dpr}px system-ui, sans-serif`; g.textAlign = 'right'; g.fillText('10 km', x0 + sz - 14 * dpr, y0 + 88 * dpr); g.textAlign = 'left';
+  g.font = `600 ${44 * dpr}px Newsreader, Georgia, serif`; g.textAlign = 'right'; g.fillText(String(SP.epochs[k - 1]), x0 + sz - 14 * dpr, y0 + 52 * dpr); g.textAlign = 'left';
+}
+function sprawlSide() {
+  const c = spCity(), i = spIdx(), k0 = c.km2[0], k1 = c.km2[i];
+  const chart = (() => { const Wd = 290, H = 90, mx = Math.max(...c.km2), X = j => (SP.epochs[j] - 1975) / 45 * Wd, Y = v => H - v / mx * H;
+    return `<svg class="cl-share" viewBox="0 0 ${Wd} ${H + 16}" role="img" aria-label="Built-up surface by year"><polyline fill="none" stroke="currentColor" stroke-width="2" points="${c.km2.map((v, j) => `${X(j)},${Y(v)}`).join(' ')}"/>${c.km2.map((v, j) => `<circle cx="${X(j)}" cy="${Y(v)}" r="${j === i ? 4.5 : 2.5}" ${j === i ? 'class="cur"' : ''}><title>${SP.epochs[j]}: ${nf(v)} km²</title></circle>`).join('')}<text x="0" y="${H + 12}">1975</text><text x="${Wd}" y="${H + 12}" text-anchor="end">2020</text></svg>`; })();
+  return `<h2>${T('Cities spreading out', 'Des villes qui s’étalent')}</h2><p class="q">${T('Land covered by buildings around each city, mapped from satellite images. Each colour is the year a 100 m square first became built up.', 'Le sol couvert par les bâtiments autour de chaque ville, cartographié à partir d’images satellites. Chaque couleur indique l’année où un carré de 100 m est devenu bâti.')}</p>
+    <div class="big"><b>${nf(k1)} km²</b><span>${T(`of buildings within ${c.half_km} km of central ${c.name} in ${SP.epochs[i]}`, `de bâtiments à moins de ${c.half_km} km du centre de ${c.name} en ${SP.epochs[i]}`)}${i ? T(`, ${nf((k1 / k0 - 1) * 100)}% more than in 1975`, `, ${nf((k1 / k0 - 1) * 100)} % de plus qu’en 1975`) : ''}</span></div>
+    ${chart}
+    <div class="sp-cities">${SP.cities.map(x => `<button data-spc="${x.slug}" class="${x.slug === c.slug ? 'on' : ''}">${x.name}</button>`).join('')}</div>
+    <p class="def">${SP.notes.map(esc).join(' ')}</p>
+    <p class="src">${T('Source: European Commission, Joint Research Centre, GHS-BUILT-S R2023A (Pesaresi and Politis, 2023), CC BY 4.0.', 'Source : Commission européenne, Centre commun de recherche, GHS-BUILT-S R2023A (Pesaresi et Politis, 2023), CC BY 4.0.')}</p>`;
+}
+function sprawlLegend() { const cols = SPCOL(); return `<div class="lg-t">${T('First built up', 'Bâti pour la première fois')}</div><div class="lg2">${SP.epochs.map((e, i) => `<span><i style="background:rgb(${cols[i]})"></i>${i === 0 ? T('by 1975', 'avant 1976') : e}</span>`).join('')}</div><div class="lg-miss">${T('A square counts once buildings cover 20% of it.', 'Un carré compte dès que les bâtiments en couvrent 20 %.')}</div>`; }
+function sprawlDetail() { const rows = SP.cities.map(c => [c, c.km2.at(-1) / c.km2[0] - 1]).sort((a, b) => b[1] - a[1]);
+  return `<h3>${T('Growth in built-up land, 1975–2020', 'Croissance du sol bâti, 1975–2020')}</h3><p class="hint">${T('Same-size squares around each centre; tap a city.', 'Carrés de même taille autour de chaque centre; touchez une ville.')}</p><div class="nb-list">${rows.map(([c, g]) => `<button class="fo-row sp-row ${c.slug === S.sc ? 'on' : ''}" data-spc="${c.slug}"><b>${c.name}</b><span>${nf(c.km2[0])} → ${nf(c.km2.at(-1))} km²</span><span>+${nf(g * 100)}%</span></button>`).join('')}</div>`; }
+
 // ---------------------------------------------------------------- open / close / hash
-function writeHash() { const h = `#cl=${S.mode}/${S.y}${S.avg ? '' : '/y'}${S.st ? '/s' + S.st : ''}${S.gl ? '/g' + S.gl : ''}`; if (location.hash !== h) history.replaceState(null, '', h); }
+function writeHash() { const h = `#cl=${S.mode}/${S.y}${S.avg ? '' : '/y'}${S.st ? '/s' + S.st : ''}${S.gl ? '/g' + S.gl : ''}${S.mode === 'sprawl' && S.sc ? '/c' + S.sc : ''}`; if (location.hash !== h) history.replaceState(null, '', h); }
 async function readHash() { const h = decodeURIComponent(location.hash); if (!h.startsWith('#cl=')) return; const [m, y, ...rest] = h.slice(4).split('/');
-  if (MODES.some(x => x[0] === m)) S.mode = m; if (+y >= 1900 && +y <= 2025) S.y = +y; if (S.mode === 'forest') { await loadForest(); S.y = Math.max(F.years[0], Math.min(F.years[1], S.y)); }
-  for (const r of rest) { if (r === 'y') S.avg = false; else if (r[0] === 's') S.st = r.slice(1); else if (r[0] === 'g') S.gl = r.slice(1); } }
+  if (MODES.some(x => x[0] === m)) S.mode = m; if (+y >= 1900 && +y <= 2025) S.y = +y; if (S.mode === 'forest') { await loadForest(); S.y = Math.max(F.years[0], Math.min(F.years[1], S.y)); } if (S.mode === 'sprawl') { await loadSprawl(); S.y = Math.max(1975, Math.min(2020, S.y)); }
+  for (const r of rest) { if (r === 'y') S.avg = false; else if (r[0] === 's') S.st = r.slice(1); else if (r[0] === 'g') S.gl = r.slice(1); else if (r[0] === 'c') S.sc = r.slice(1); } }
 let prevHash = '';
 async function open(opts = {}) {
   if (!el) build();
@@ -342,7 +391,7 @@ async function open(opts = {}) {
     PROV = km(p); LAKES = km(l); S.y = A.t_years[1]; });
   await ready; await readHash();
   if (opts.mode) S.mode = opts.mode;
-  if (!deckI) bindScrub(el.querySelector('#cl-map'));
+  if (!deckI) { bindScrub(el.querySelector('#cl-map')); bindScrub(el.querySelector('#cl-sprawl')); addEventListener('resize', () => S.mode === 'sprawl' && drawSprawl()); }
   if (!deckI) deckI = new Deck({ parent: el.querySelector('#cl-map'), views: new OrthographicView({ flipY: false }), controller: { doubleClickZoom: true }, onViewStateChange: ({ viewState }) => { CLZ = viewState.zoom; }, initialViewState: { target: [6400, 2400, 0], zoom: -3 },
     getCursor: ({ isHovering }) => isHovering ? 'pointer' : 'grab', onHover: tip,
     onClick: ({ object }) => { if (!object) return; if (object.b) S.gl = object.id; else S.st = object.s.id; render(); }, style: { position: 'absolute', inset: 0 } });

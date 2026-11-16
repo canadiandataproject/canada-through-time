@@ -684,6 +684,29 @@ sources:
     limitations:
       - "Self-reported; a regular provider can be a family doctor or a nurse practitioner."
       - "Survey estimates carry sampling error; 'E' values are to be used with caution."
+  jrc_ghsl_built_s:
+    title: "GHS-BUILT-S R2023A: GHS built-up surface grid, 1975-2030 (5-year epochs), 100 m"
+    publisher: "European Commission, Joint Research Centre (JRC)"
+    doi: "https://doi.org/10.2905/9F06F36F-4B11-47EC-ABB0-4F8B7B1D72EA"
+    landing_url: "https://human-settlement.emergency.copernicus.eu/download.php?ds=bu"
+    download_url: "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_BUILT_S_GLOBE_R2023A/"
+    raw_file: "data/raw/ghsl/manifest.json"
+    sha256: "8b6a3d43d5a58bc19324f53ad0393ca11673d18c59f9123410ee0382ad4ffe76"
+    retrieved: "2026-11-16"
+    release_in_file: "R2023A, version 1.0; 42 tiles (7 tiles x 6 epochs: 1975, 1985, 1990, 2000, 2010, 2020) listed with their SHA-256 in the manifest"
+    reporting_period: "Epochs (snapshot years)"
+    coverage: "Global grid; this project uses the tiles around 12 Canadian metros"
+    units: "Square metres of built-up surface per 100 m cell"
+    licence: "Creative Commons Attribution 4.0 International (CC BY 4.0)"
+    licence_url: "https://creativecommons.org/licenses/by/4.0/"
+    attribution: "Pesaresi M., Politis P. (2023): GHS-BUILT-S R2023A - GHS built-up surface grid, derived from Sentinel2 composite and Landsat, multitemporal (1975-2030). European Commission, Joint Research Centre (JRC)."
+    quality_class: modelled_estimate
+    methodology_notes:
+      - "Building footprint area per cell estimated by machine learning from Landsat (1975-2014) and Sentinel-2 (2018) imagery; epochs between observations are interpolated by the JRC."
+      - "2025 and 2030 epochs are projections and are not used."
+    limitations:
+      - "Satellite estimate, not a building survey; small or low buildings and dense tree cover can be missed."
+      - "The 20% 'built up' threshold on the city pictures is this project's choice; totals use the full values."
   statcan_35100026:
     title: "Crime severity index and weighted clearance rates, Canada, provinces, territories and Census Metropolitan Areas"
     publisher: "Statistics Canada"
