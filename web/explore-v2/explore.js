@@ -87,6 +87,8 @@ const [pop, comp, flows, area, politics, evData, provinces, ntnu, countries, lak
 const [HC, HH, HCPI, HINC, HCITY, HCHN] = await Promise.all(['construction', 'households', 'cpi', 'income', 'cities', 'core_need'].map(n => J(`../data/housing/${n}.json`)));
 const [DAGE, DMETRO, DURB] = await Promise.all([J('../data/demography/age.json'), J('../data/demography/metro.json'), J('../data/demography/urban_census.json')]);
 const [EGDP, ELFS, EGOV, ELANG, ENPR, EBIRTH, EPR] = await Promise.all(['gdp', 'lfs', 'govt', 'language', 'npr', 'birthplace'].map(n => J(`../data/more/${n}.json`)).concat(J('../data/explorer/pr_citizenship.json')));
+const ECRIME = await J('../data/more/crime.json');
+const crAt = (g, y) => ECRIME.data[g]?.[y] ?? null, crCity = (c, y, k) => ECRIME.cma[c.name]?.[y]?.[k] ?? null;
 await Promise.all([`600 16px "${UI_FONT}"`, `400 16px "${UI_FONT}"`, `500 16px "${UI_FONT}"`].map(f => document.fonts.load(f)));
 
 const S = pop.series, D = pop.dates;
@@ -320,11 +322,24 @@ MEASURES.push(
     years: [ELANG.years[0], ELANG.years.at(-1)], only: ELANG.years, split: y => y >= 2001, value: (g, y) => { const d = langAt(g, y); return d?.other != null && d.total ? d.other / d.total * 100 : null; },
     fmt: v => v.toFixed(1) + '%', unit: 'of residents', color: v => magnitude(v, 0, 70, false), rng: [0, 70], cover: 'Census years only',
     legend: { kind: 'mag', ticks: [[0, '0%'], [0.286, '20%'], [0.571, '40%'], [1, '70%']], cap: 'Neither English nor French as mother tongue, %' }, when: y => `${y} Census`, prelim: () => false },
+  { id: 'csi', group: 'Crime and safety', label: 'Crime severity', q: 'Police-reported crime, with each offence weighted by how seriously courts punish it. Canada in 2006 = 100. Not a measure of overall safety: crimes not reported to police are missing.', kind: 'fill', src: ['statcan_35100026'], tag: 'Official statistic',
+    years: ECRIME.years, split: y => y >= 1999, value: (g, y) => crAt(g, y)?.csi ?? null, fmt: v => v.toFixed(1), unit: 'index (Canada 2006 = 100)', color: v => magnitude(v, 40, 600, true), rng: [40, 600],
+    cover: 'Police-reported · log scale', legend: { kind: 'mag', ticks: [[0, '40'], [0.338, '100'], [0.594, '200'], [0.851, '400']], cap: 'Crime Severity Index · Canada 2006 = 100 · log scale', nodata: true }, when: y => `Calendar year ${y}`, prelim: () => false },
+  { id: 'vcsi', group: 'Crime and safety', label: 'Violent crime severity', q: 'The same index for violent offences only (homicide, assault, sexual assault, robbery, uttering threats and others). Canada in 2006 = 100.', kind: 'fill', src: ['statcan_35100026'], tag: 'Official statistic',
+    years: ECRIME.years, split: y => y >= 1999, value: (g, y) => crAt(g, y)?.vcsi ?? null, fmt: v => v.toFixed(1), unit: 'index (Canada 2006 = 100)', color: v => magnitude(v, 40, 600, true), rng: [40, 600],
+    cover: 'Police-reported · log scale', legend: { kind: 'mag', ticks: [[0, '40'], [0.338, '100'], [0.594, '200'], [0.851, '400']], cap: 'Violent Crime Severity Index · Canada 2006 = 100 · log scale', nodata: true }, when: y => `Calendar year ${y}`, prelim: () => false },
+  { id: 'wcr', group: 'Crime and safety', label: 'Crimes solved by police', q: 'Weighted clearance rate: the share of police-reported incidents that police solved (a charge was laid or the case was cleared another way), with serious crimes counting for more.', kind: 'fill', src: ['statcan_35100026'], tag: 'Official statistic',
+    years: ECRIME.years, split: y => y >= 1999, value: (g, y) => crAt(g, y)?.wcr ?? null, fmt: v => v.toFixed(1) + '%', unit: 'weighted share of incidents solved', color: v => magnitude(v, 15, 80, false), rng: [15, 80],
+    cover: 'Police-reported', legend: { kind: 'mag', ticks: [[0.077, '20%'], [0.385, '40%'], [0.692, '60%'], [1, '80%']], cap: 'Weighted clearance rate, %', nodata: true }, when: y => `Calendar year ${y}`, prelim: () => false },
+  { id: 'csicity', group: 'Crime and safety', label: 'Crime severity by city', q: 'Crime Severity Index for each metropolitan area, using police-service boundaries (these do not always match census boundaries). Canada in 2006 = 100.', kind: 'points', src: ['statcan_35100026'], tag: 'Official statistic',
+    years: ECRIME.years, split: y => y >= 1999, cityValue: (c, y) => crCity(c, y, 'csi'), value: (g, y) => g === 'CAN' ? crAt('CAN', y)?.csi ?? null : null,
+    fmt: v => v.toFixed(1), unit: 'index (Canada 2006 = 100)', color: v => magnitude(v, 40, 250, true), rng: [40, 250], cover: 'Police-reported · cities only',
+    legend: { kind: 'mag', ticks: [[0, '40'], [0.5, '100'], [0.878, '200']], cap: 'Crime Severity Index by metropolitan area · log scale', points: true }, when: y => `Calendar year ${y}`, prelim: () => false },
 );
 
 const DIFF = { pop: 'level', dens: 'level', inc: 'level', rent: 'level', starts: 'abs', comp: 'abs', nat: 'abs', imm: 'abs', npr: 'abs', emi: 'abs', ipm: 'abs', flow: 'abs',
   chg: 'pp', rate: 'pp', share: 'pp', hhg: 'pp', rentrel: 'pp', vac: 'pp', chn: 'pp', fed: 'none', age: 'abs', o65: 'pp', u15: 'pp', metro: 'pp', urb: 'pp',
-  gdppc: 'level', gdpg: 'pp', ur: 'pp', er: 'pp', fedbal: 'abs', fedexp: 'level', cht: 'level', provbal: 'abs', provint: 'level', prdest: 'abs', nprsh: 'pp', bornout: 'pp', fr: 'pp', nonoff: 'pp' };
+  gdppc: 'level', gdpg: 'pp', ur: 'pp', er: 'pp', fedbal: 'abs', fedexp: 'level', cht: 'level', provbal: 'abs', provint: 'level', prdest: 'abs', nprsh: 'pp', bornout: 'pp', fr: 'pp', nonoff: 'pp', csi: 'level', vcsi: 'level', wcr: 'pp', csicity: 'level' };
 const BREAKS = { inc: [[1993, 'survey change 1993'], [2012, 'survey change 2012']] };
 MEASURES.forEach(m => { m.diff = DIFF[m.id]; m.breaks = BREAKS[m.id] || []; });
 const M = Object.fromEntries(MEASURES.map(m => [m.id, m]));
@@ -433,7 +448,7 @@ function tooltip(info) {
   let html = '';
   if (o.geo && o.xy && state.hoverCity !== o.name && !isPhone()) { state.hoverCity = o.name; theDeck.setProps({ layers: layers() }); }
   if (o.geo && o.xy) { const m = M[state.m]; const v = m.cityValue ? m.cityValue(o, state.y) : null;
-    html = `<b>${o.geo}</b><div class="m">${m.label}: ${v == null ? (o.rent2br_status?.[state.y] === 'F' ? 'too unreliable to publish' : 'not surveyed') : m.fmt(v)}</div>`; }
+    html = `<b>${o.geo}</b><div class="m">${m.label}: ${v == null ? (o.rent2br_status?.[state.y] === 'F' ? 'too unreliable to publish' : m.id === 'csicity' ? 'not published' : 'not surveyed') : m.fmt(v)}</div>`; }
   else if (o.properties?.abbr || o.k) { const g = o.properties?.abbr || o.k; const m = M[state.m]; const v = m.value(g, state.y);
     html = `<b>${NAMES[g]}</b><div class="m">${m.label}: ${v == null ? 'no data' : m.fmt(v)}</div>`; }
   else if (o.o) html = `<b>${NAMES[o.o]} → ${NAMES[o.d]}</b><div class="m">${fmtInt(o.v)} moves, July ${state.y - 1}–June ${state.y}</div>`;
@@ -692,7 +707,7 @@ function fitReading() { const L = document.getElementById('layers'), R = documen
 addEventListener('resize', () => fitReading());
 // Sections: a handful of plain top-level tabs; each holds one or more layer groups shown as labelled rows.
 const SECTIONS = [['People', ['Population', 'Where growth came from', 'Age and cities', 'Immigration and language']], ['Money', ['Government money']],
-  ['Economy', ['Economy and jobs', 'Housing and cost of living']], ['Politics', ['Politics']]];
+  ['Economy', ['Economy and jobs', 'Housing and cost of living']], ['Safety', ['Crime and safety']], ['Politics', ['Politics']]];
 const SEC_OF = Object.fromEntries(SECTIONS.flatMap(([s, gs]) => gs.map(g => [g, s])));
 for (const m of MEASURES) if (!SEC_OF[m.group]) { SECTIONS.push([m.group, [m.group]]); SEC_OF[m.group] = m.group; }
 const GROUPS = ['Questions', ...SECTIONS.map(s => s[0])];
@@ -815,6 +830,7 @@ function finding(m, g, y) {
     return top ? `In the election of ${fmtDate(e.date)}, the <em>${partyShort(top[0])}</em> party won the most seats in ${name}: ${top[1]} of ${Object.values(sts).reduce((a, b) => a + b, 0)}.` : `No seats recorded for ${name}.`; }
   if (m.kind === 'points') { const c = CITIES.find(x => x.name === state.city), cv = c && m.cityValue(c, y);
     if (c) return cv == null ? `No published value for ${c.name} in ${y}.` : `${c.name}: <em>${m.fmt(cv)}</em> ${m.unit} · ${whenOf(m, y)}.`;
+    if (m.id === 'csicity' && v != null) { const r = CITIES.map(c => [c.name, m.cityValue(c, y)]).filter(x => x[1] != null).sort((a, b) => b[1] - a[1]); return `Canada: <em>${m.fmt(v)}</em> (2006 = 100). Highest of the mapped cities in ${y}: ${r[0][0]}, ${m.fmt(r[0][1])}; lowest: ${r.at(-1)[0]}, ${m.fmt(r.at(-1)[1])}. Choose a city.`; }
     if (m.id === 'vac' && v != null) return `Across Canada's metropolitan areas, <em>${m.fmt(v)}</em> of purpose-built rental apartments were vacant in October ${y}.`;
     return `Published for cities, not for Canada as a whole. Choose a city on the map.`; }
   if (g === 'CAN' && (m.id === 'ipm' || m.id === 'flow')) return 'Moves between provinces cancel out for Canada as a whole. Choose a province.';
@@ -1050,7 +1066,7 @@ function cityPanel(m, y) {
     <div class="hero-sub">${v == null ? (st === 'F' ? 'Too unreliable to publish for this year (CMHC quality flag F).' : 'Not surveyed or not available for this year.') : m.unit}</div>
     ${cityTable(m, y).replace('<details open>', '<details>')}
     ${cityCompare(m, c, y)}
-    ${timeBlock(m, c.name, yy => { const v = m.cityValue(c, yy), st = m.id === 'rent' ? c.rent2br_status?.[yy] : null; return { v, why: v == null ? (st === 'F' ? 'suppressed (F)' : 'not surveyed') : '' }; }, y)}
+    ${timeBlock(m, c.name, yy => { const v = m.cityValue(c, yy), st = m.id === 'rent' ? c.rent2br_status?.[yy] : null; return { v, why: v == null ? (st === 'F' ? 'suppressed (F)' : m.id === 'csicity' ? 'not published' : 'not surveyed') : '' }; }, y)}
     <p class="step"><b>Vacancy rate</b>, apartments of 6+ units, October · ${c.name}${c2 ? ' vs ' + c2.name : ''}</p>${multiChart([{ label: c.name, c: 'var(--ink-1)', d: vs }, ...(c2 ? [{ label: c2.name, c: 'var(--cmp)', dash: '5 3', d: Object.fromEntries(Object.entries(c2.vacancy).map(([k, v]) => [+k, v])) }] : [])], { y0: 1971, y1: 2025, cur: y, unit: '%', zero: true, h: 120 })}
     <p class="step"><b>Average rent, two-bedroom</b>, current dollars · ${c.name}${c2 ? ' vs ' + c2.name : ''}</p>${multiChart([{ label: c.name, c: 'var(--ink-1)', d: rs }, ...(c2 ? [{ label: c2.name, c: 'var(--cmp)', dash: '5 3', d: Object.fromEntries(Object.entries(c2.rent2br).map(([k, v]) => [+k, v])) }] : [])], { y0: 1987, y1: 2025, cur: y, unit: '$ per month', h: 120 })}
     <p class="fine">${c.place ? `Point placed at ${c.place} (Natural Earth)` : 'Not drawn on the map (no position in the place file used)'}; the survey covers the whole metropolitan area. Rents are not adjusted for inflation.</p>
@@ -1060,7 +1076,7 @@ function cityTable(m, y) {
   const rows = CITIES.map(c => ({ c, v: m.cityValue(c, y), st: m.id === 'rent' ? c.rent2br_status?.[y] : null })).sort((a, b) => (b.v ?? -1) - (a.v ?? -1));
   return `<details open><summary>All ${CITIES.length} areas · ${y}<span class="hint wide">${MAPPED.length} on the map</span></summary><div class="in"><input class="citysearch" type="search" data-cityfilter placeholder="Find a city" aria-label="Find a city"><table>${rows.map(({ c, v, st }) =>
     `<tr class="click ${c.name === state.city ? 'cur' : ''}" data-city="${c.name}"><td>${c.name}${c.xy ? '' : ' ' + STAT.nm}</td><td>${v == null ? (st === 'F' ? STAT.sup : STAT.ns) : m.fmt(v) + (over(m, v) ? `<span class="ovm" title="${over(m, v) > 0 ? 'Above' : 'Below'} the map's colour scale">${OV[over(m, v)]}</span>` : '')}</td></tr>`).join('')}</table>
-    <div class="fine">${m.id === 'rent' ? 'Current dollars. F = too unreliable to publish (CMHC); left blank, never estimated.' : 'Purpose-built apartments of 6+ units, October survey.'}</div></div></details>`;
+    <div class="fine">${m.id === 'rent' ? 'Current dollars. F = too unreliable to publish (CMHC); left blank, never estimated.' : m.id === 'csicity' ? 'Police-reported. Canada 2006 = 100. Not a measure of overall safety.' : 'Purpose-built apartments of 6+ units, October survey.'}</div></div></details>`;
 }
 function flowTable(y) {
   const f = flowStats(y);
@@ -1089,7 +1105,7 @@ function cmpRow(m, g, y) {
 function diffText(m, a, b) {
   if (a.v == null || b.v == null || m.diff === 'none') return '';
   const d = a.v - b.v;
-  if (m.diff === 'pp') { const pp = d * ({ vac: 1, chn: 1, o65: 1, u15: 1, metro: 1, urb: 1, gdpg: 1, ur: 1, er: 1, nprsh: 1, bornout: 1, fr: 1, nonoff: 1 }[m.id] ?? 100); return `${NAMES[a.g]} is <b>${Math.abs(pp).toFixed(1)} percentage points</b> ${d >= 0 ? 'higher' : 'lower'}.`; }
+  if (m.diff === 'pp') { const pp = d * ({ vac: 1, chn: 1, o65: 1, u15: 1, metro: 1, urb: 1, gdpg: 1, ur: 1, er: 1, nprsh: 1, bornout: 1, fr: 1, nonoff: 1, wcr: 1 }[m.id] ?? 100); return `${NAMES[a.g]} is <b>${Math.abs(pp).toFixed(1)} percentage points</b> ${d >= 0 ? 'higher' : 'lower'}.`; }
   if (m.diff === 'abs') return `Difference: <b>${m.absFmt ? m.absFmt(d) : (d >= 0 ? '+' : '−') + Math.abs(d).toFixed(1)}</b> ${m.unit} (${NAMES[a.g]} minus ${NAMES[b.g]}).`;
   if (b.v === 0) return '';
   const rel = a.v / b.v - 1;
@@ -1134,7 +1150,7 @@ function timeBlock(m, label, valueAt, y, geoAt) {
   else if (brk.length) diff = `No difference shown: ${brk.map(([by, lab]) => lab.includes(String(by)) ? `the ${lab}` : `the ${lab} (${by})`).join(', ')} falls between these dates, so the two values are not directly comparable.`;
   else if (geoChange) diff = 'No difference shown: the area covered changes between these dates.';
   else if (m.diff !== 'none') { const d = B.v - A.v;
-    diff = m.diff === 'pp' ? `From ${ya} to ${yb}: <b>${d >= 0 ? '+' : '−'}${Math.abs(d * ({ vac: 1, chn: 1, o65: 1, u15: 1, metro: 1, urb: 1, gdpg: 1, ur: 1, er: 1, nprsh: 1, bornout: 1, fr: 1, nonoff: 1 }[m.id] ?? 100)).toFixed(1)} percentage points</b>.`
+    diff = m.diff === 'pp' ? `From ${ya} to ${yb}: <b>${d >= 0 ? '+' : '−'}${Math.abs(d * ({ vac: 1, chn: 1, o65: 1, u15: 1, metro: 1, urb: 1, gdpg: 1, ur: 1, er: 1, nprsh: 1, bornout: 1, fr: 1, nonoff: 1, wcr: 1 }[m.id] ?? 100)).toFixed(1)} percentage points</b>.`
       : m.diff === 'abs' ? `From ${ya} to ${yb}: <b>${m.absFmt ? m.absFmt(d) : (d >= 0 ? '+' : '−') + Math.abs(d).toFixed(1)}</b> ${m.unit}.`
       : A.v ? `From ${ya} to ${yb}: <b>${d >= 0 ? '+' : '−'}${m.fmt(Math.abs(d)).replace(/^[+−-]/, '')}</b> (${pct(B.v / A.v - 1)}).` : '';
     if (/current dollars/i.test(m.unit + ' ' + (m.q || ''))) diff += ' Current dollars: not adjusted for inflation.'; }
@@ -1149,7 +1165,7 @@ function cityCompare(m, c, y) {
   const pick = `<label class="cmppick">Compare with <select data-cmpcity><option value="">— choose a city —</option>${opts}</select></label>`;
   const c2 = CITIES.find(x => x.name === state.cmpCity && x.name !== c.name);
   if (!c2) return `<div class="cmp">${pick}</div>`;
-  const row = (x, mm) => { const v = mm.cityValue(x, y), st = mm.id === 'rent' ? x.rent2br_status?.[y] : null; return { v, why: v == null ? (st === 'F' ? 'suppressed (too unreliable to publish)' : 'not surveyed this year') : '' }; };
+  const row = (x, mm) => { const v = mm.cityValue(x, y), st = mm.id === 'rent' ? x.rent2br_status?.[y] : null; return { v, why: v == null ? (st === 'F' ? 'suppressed (too unreliable to publish)' : mm.id === 'csicity' ? 'not published this year' : 'not surveyed this year') : '' }; };
   const tr = mm => { const a = row(c, mm), b = row(c2, mm); const cell = r => `<td>${r.v == null ? `<span class="na">— ${r.why}</span>` : `<b>${mm.fmt(r.v)}</b>`}</td>`;
     const d = a.v != null && b.v != null ? (mm.id === 'vac' ? `${Math.abs(a.v - b.v).toFixed(1)} pts ${a.v >= b.v ? 'higher' : 'lower'}` : `${mm.fmt(Math.abs(a.v - b.v))} ${a.v >= b.v ? 'higher' : 'lower'} (${pct(a.v / b.v - 1)})`) : '—';
     return `<tr><td>${mm.label}</td>${cell(a)}${cell(b)}<td>${d}</td></tr>`; };
@@ -1193,7 +1209,7 @@ function renderPanel() {
     ${m.kind === 'party' || m.kind === 'points' || (g === 'CAN' && ['ipm', 'flow', 'share'].includes(m.id)) ? '' : chartSVG(g, m, state.cmp && state.cmp !== g && g !== 'CAN' ? geoFor(m, state.cmp, y) : null)}
     ${compareBlock(m, g, y)}
     ${timeBlock(m, NAMES[g], yy => cmpRow(m, g, yy), y, yy => geoFor(m, g, yy))}
-    ${m.kind === 'points' ? `<p class="fine" style="margin-top:14px">${m.id === 'vac' ? 'Canada figure: CMHC average across census metropolitan areas.' : 'No national or provincial average is published in this table.'} Choose a city on the map or in the list.</p>${cityTable(m, y)}` : ''}
+    ${m.kind === 'points' ? `<p class="fine" style="margin-top:14px">${m.id === 'vac' ? 'Canada figure: CMHC average across census metropolitan areas.' : m.id === 'csicity' ? 'Canada figure: the national index. Provinces are in the “Crime severity” layer.' : 'No national or provincial average is published in this table.'} Choose a city on the map or in the list.</p>${cityTable(m, y)}` : ''}
     ${m.kind === 'arcs' && g === 'CAN' ? flowTable(y) : ''}
     <button class="srcrow" data-why="src"><span>Source &amp; method</span><small>${src} · ${m.tag} →</small></button>
     ${evs.length ? `<details ${isPhone() || m.group === 'Housing and cost of living' ? '' : 'open'}><summary>In ${y}<span class="hint">${evs[0].title}</span></summary><div class="in">${evs.map(x => `<div class="ev"><span class="tag"><i class="m-${x.k}"></i>${{ elec: 'Election result', hist: 'Historical fact', note: 'Data note' }[x.k]}</span><b>${x.title}</b>${fmtDate(x.date)} · ${x.where}.
@@ -1282,6 +1298,10 @@ const COVER = {
   starts: 'CMHC table 34-10-0126 covers Canada and the ten provinces only. The territories are shown dimmed as “no data”, not as zero. Completions in this table end in 2022; starts continue to 2025.',
   vac: `CMHC publishes vacancy for census metropolitan areas, not provinces. ${MAPPED.length} areas are mapped at their core city; ${HCITY.unplaced.map(x => x.split(',')[0]).join(', ')} are not in the place file used for positions and are listed but not drawn. Each area enters the series in a different year.`,
   rent: `CMHC average rents are published for centres of 10,000+, not provinces. Two-bedroom units in row and apartment structures of 3+ units, current dollars. Values flagged “too unreliable to publish” (F) are left blank. ${MAPPED.length} metropolitan areas are drawn; ${CITIES.length - MAPPED.length} more are listed in the panel.`,
+  csi: 'Statistics Canada publishes the index for Canada, provinces, territories and policing-based metropolitan areas. 1998 Northwest Territories includes Nunavut, so the two are shown together that year. Reporting changes can move a series: the 2018 “founded incident” definition update, and British Columbia’s 2019 classification standards.',
+  vcsi: 'Same coverage and reporting breaks as the overall index. Violent offences only.',
+  wcr: 'Solved means a charge was laid or recommended, or police cleared the incident another way (for example, the accused died or the complainant declined to proceed). Weighted by seriousness, like the index.',
+  csicity: `Police-service metropolitan areas, which do not always match census boundaries. ${Object.keys(ECRIME.cma).length} areas are published; the ones the explorer can place on the map are drawn. Oshawa (Durham) is not in this table.`,
   rentrel: 'Statistics Canada replaced its rent method in January 2019 (matched units → a hedonic model on Labour Force Survey rents), so this layer starts from 2019. The rent index covers all tenants (new leases, renewals and mid-lease), so it rises more slowly than asking rents for vacant units. Provinces only: the territories have city indexes (Whitehorse, Yellowknife, Iqaluit).',
 };
 function openSource(m, why = 'src') {
@@ -1506,6 +1526,7 @@ const HOME_CARDS = [
   { sec: 'People', q: 'Who moved where between provinces?', m: 'flow', big: () => { const y = lastYear(M.ipm), b = best(M.ipm, y); return [NAMES[b[0]], `most net arrivals per 1,000, ${compWhen(y)}${pre(M.ipm, y)}`]; }, spark: () => sparkOf(M.ipm, 'AB') },
   { sec: 'People', q: 'Where is Canada getting older?', m: 'age', big: () => { const y = lastYear(M.age), b = best(M.age, y); return [NAMES[b[0]], `oldest: median age ${M.age.fmt(b[1])} in ${y}${pre(M.age, y)}`]; }, spark: () => sparkOf(M.age) },
   { sec: 'Economy', q: 'Where are jobs hardest to find?', m: 'ur', big: () => { const y = lastYear(M.ur), b = best(M.ur, y); return [NAMES[b[0]], `${M.ur.fmt(b[1])} unemployment rate in ${y}`]; }, spark: () => sparkOf(M.ur) },
+  { sec: 'Safety', q: 'Is police-reported crime higher than in 1998?', m: 'csi', big: () => { const y = lastYear(M.csi), a = M.csi.value('CAN', 1998), b = M.csi.value('CAN', y); return [`${M.csi.fmt(b)} vs ${M.csi.fmt(a)}`, `Canada’s Crime Severity Index, ${y} vs 1998 (2006 = 100)`]; }, spark: () => sparkOf(M.csi) },
   { sec: 'Economy', q: 'How fast are homes being built?', m: 'starts', big: () => { const y = lastYear(M.starts), b = best(M.starts, y); return [NAMES[b[0]], `most starts per 1,000 residents in ${y}`]; }, spark: () => sparkOf(M.starts) },
 ];
 const homeEl = document.createElement('div'); homeEl.id = 'home'; homeEl.hidden = true; document.getElementById('app').appendChild(homeEl);

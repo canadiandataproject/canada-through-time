@@ -660,6 +660,32 @@ sources:
     limitations:
       - "The most recent years are revised in later releases."
 
+  statcan_35100026:
+    title: "Crime severity index and weighted clearance rates, Canada, provinces, territories and Census Metropolitan Areas"
+    publisher: "Statistics Canada"
+    table_id: "35-10-0026-01"
+    doi: "https://doi.org/10.25318/3510002601-eng"
+    landing_url: "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3510002601"
+    download_url: "https://www150.statcan.gc.ca/n1/tbl/csv/35100026-eng.zip"
+    raw_file: "data/raw/statcan/35100026-eng.zip"
+    sha256: "f156f446e793ddafdaa0982c0f005d027d79355956bb92631b3dfee00f33020d"
+    retrieved: "2026-11-16"
+    release_in_file: "File dated 2026-07-22; covers 1998–2025"
+    reporting_period: "Calendar year"
+    coverage: "Canada, provinces, territories and policing-based census metropolitan areas"
+    units: "Index (Canada 2006 = 100) and weighted percent"
+    licence: "Statistics Canada Open Licence"
+    licence_url: "https://www.statcan.gc.ca/en/reference/licence"
+    attribution: "Source: Statistics Canada. Table 35-10-0026-01 Crime severity index and weighted clearance rates, Canada, provinces, territories and Census Metropolitan Areas."
+    quality_class: official_statistics
+    methodology_notes:
+      - "Incident-based Uniform Crime Reporting Survey; each offence weighted by sentences actually handed down (notes 1, 20)."
+      - "Policing-based CMA boundaries differ from census CMAs (notes 3, 52). 1998 Northwest Territories includes Nunavut (note 15)."
+      - "Series breaks: 2018 founded/unfounded definition change (note 44); British Columbia 2019 reporting standards (note 45); several city-specific notes (4, 9, 27, 49, 57-59)."
+    limitations:
+      - "Police-reported crime only; crimes not reported to police are missing, and reporting rates differ by offence and place."
+      - "Not an indicator of overall safety (note 55); places that serve many non-residents can show higher values (notes 47-48)."
+      - "2025 may undercount RCMP national-security incidents (note 60)."
   statcan_14100327:
     title: "Labour force characteristics by gender and detailed age group, annual"
     publisher: "Statistics Canada"
