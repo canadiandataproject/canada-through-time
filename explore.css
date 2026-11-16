@@ -1326,3 +1326,18 @@ body.journey-on #mtl, body.journey-on #timeline { opacity: .35; }
 #cl .sp-row { width: 100%; text-align: left; background: none; border: 0; cursor: pointer; color: inherit; font: inherit; display: grid !important; grid-template-columns: 1fr auto 52px; gap: 8px; align-items: baseline; }
 #cl .sp-row span:last-child { text-align: right; }
 #cl .sp-row.on b { color: var(--accent); }
+/* fly-through */
+body.fly-on #sheet, body.fly-on #layers, body.fly-on #viewbar, body.fly-on #reading, body.fly-on #timeline, body.fly-on #mtl, body.fly-on #shell, body.fly-on #scrub-hint { opacity: 0; pointer-events: none; transition: opacity .6s; }
+body.fly-on #mapctl button:not(.flyb) { opacity: 0; pointer-events: none; }
+#mapctl button.flyb.on { background: var(--accent); color: #fff; }
+#fly-lower { position: absolute; left: 6%; bottom: 12%; z-index: 22; pointer-events: none; color: var(--ink-1); }
+#fly-lower b { display: block; font: 600 clamp(34px, 6vw, 64px)/1 "Newsreader", Georgia, serif; letter-spacing: -.01em; }
+#fly-lower span { display: block; margin-top: 8px; font-size: 14px; color: var(--ink-2); letter-spacing: .04em; text-transform: uppercase; }
+#fly-lower em { display: inline-block; margin-top: 10px; font: 600 clamp(24px, 4vw, 40px)/1 "Newsreader", Georgia, serif; font-style: normal; padding: 4px 12px; background: var(--accent); color: #fff; border-radius: 6px; }
+#fly-lower.in { animation: flyin .7s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes flyin { from { opacity: 0; transform: translateX(-18px); } to { opacity: 1; transform: none; } }
+@media (max-width: 1100px) { #fly-lower { bottom: 24%; } }
+.hplace input { min-width: 220px; }
+.hplace-go { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 4px; }
+.hplace-go button { font: 600 14px/1 inherit; padding: 10px 14px; border-radius: 99px; border: 1px solid var(--hairline); background: var(--panel); color: var(--ink-1); cursor: pointer; }
+.hplace-go button:first-child { background: var(--ink-1); color: var(--panel); }

@@ -798,6 +798,34 @@ playBtns.forEach(b => b.onclick = toggle);
 document.getElementById('tl-speed').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; state.speed = +b.dataset.s;
   document.querySelectorAll('#tl-speed button').forEach(x => x.classList.toggle('on', x === b)); });
 
+// ---------------------------------------------------------------- fly-through: one tap, a cinematic camera path
+// West to east across the provinces, then the North, with a lower-third for each (the published value for the year on screen),
+// then back to all of Canada. With a province selected, the camera circles that province instead. Any touch or Esc stops it.
+const lower = document.createElement('div'); lower.id = 'fly-lower'; lower.hidden = true; mapEl.appendChild(lower);
+let FLY = null;
+const ease = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+function camTo(v, ms) { view = { ...view, ...v, transitionDuration: ms, transitionEasing: ease, transitionInterpolator: new deck.LinearInterpolator(['target', 'zoom', 'rotationX', 'rotationOrbit']) }; theDeck.setProps({ viewState: view }); }
+async function flyThrough() {
+  if (FLY) { stopFly(); return; }
+  const tok = FLY = {}, m = M[state.m], y = state.y, f = fitView(), wait = ms => new Promise(r => setTimeout(r, ms)), alive = () => FLY === tok;
+  const small = new Set(['PE', 'NS', 'NB']), split = m.split(y);
+  const order = state.p ? [state.p] : ['BC', 'AB', 'SK', 'MB', 'ON', 'QC', 'NB', 'NS', 'PE', 'NL', 'YT', split ? 'NT' : 'NT+NU', ...(split ? ['NU'] : [])];
+  userMoved = true; document.body.classList.add('fly-on'); document.querySelector('[data-act=fly]')?.classList.add('on'); stop();
+  const show = g => { const gg = (g === 'NT' || g === 'NU') && !split ? 'NT+NU' : g, v = m.kind === 'party' ? null : m.value(gg, y);
+    lower.innerHTML = `<b>${NAMES[gg]}</b><span>${m.label} · ${m.when ? m.when(y) : y}</span>${v != null ? `<em>${m.fmt(v)}</em>` : ''}`; lower.hidden = false; lower.classList.remove('in'); void lower.offsetWidth; lower.classList.add('in'); };
+  camTo({ rotationX: 30, zoom: f.zoom + 0.35, rotationOrbit: -8 }, 1400); await wait(1500);
+  for (const [i, g] of order.entries()) { if (!alive()) return; const at = anchor[g === 'NT+NU' ? 'NT+NU' : g]; if (!at) continue;
+    const z = f.zoom + (small.has(g) ? 2.3 : g === 'NU' || g === 'NT+NU' ? 0.9 : 1.35), orb = -14 + i * (28 / Math.max(1, order.length - 1));
+    camTo({ target: [at[0], at[1], 0], zoom: z, rotationX: state.p ? 38 : 28, rotationOrbit: orb }, i === 0 ? 2200 : 1700); await wait(i === 0 ? 1600 : 1200); if (!alive()) return;
+    show(g); await wait(state.p ? 900 : 1500);
+    if (state.p) { camTo({ rotationOrbit: orb + 40, zoom: z + 0.3 }, 5200); await wait(5400); } }
+  if (!alive()) return; lower.hidden = true; camTo({ ...f }, 2200); await wait(2300); stopFly(true);
+}
+function stopFly(done) { FLY = null; lower.hidden = true; document.body.classList.remove('fly-on'); document.querySelector('[data-act=fly]')?.classList.remove('on');
+  if (!done) camTo({ ...fitView() }, 900); userMoved = false; }
+addEventListener('pointerdown', e => { if (FLY && !e.target.closest('[data-act=fly]')) stopFly(); }, true);
+addEventListener('keydown', e => { if (FLY && e.key === 'Escape') stopFly(); });
+
 // ---------------------------------------------------------------- then / now wipe handle
 const wipeEl = document.createElement('div'); wipeEl.id = 'wipe'; wipeEl.hidden = true; wipeEl.innerHTML = '<i></i><b class="wl"></b><b class="wr"></b><button aria-label="Move the divider">⇆</button>'; mapEl.appendChild(wipeEl);
 function wipeAt(sx) { const vp = theDeck.getViewports()[0]; if (!vp) return; const r = mapEl.getBoundingClientRect(), sy = r.height * 0.5;
@@ -876,6 +904,7 @@ document.getElementById('mapctl').addEventListener('click', e => { const a = e.t
   const v = { ...view };
   if (a === 'zin') v.zoom += 0.5; if (a === 'zout') v.zoom -= 0.5;
   if (a === 'wipe') { toggleWipe(); return; }
+  if (a === 'fly') { flyThrough(); return; }
   if (a === 'tilt') v.rotationX = isPhone() ? (Math.abs(v.rotationX - fitView().rotationX) < 3 ? (fitView().rotationX > 60 ? 40 : 70) : fitView().rotationX) : v.rotationX > 10 ? 0 : fitView().rotationX; if (a === 'reset') { Object.assign(v, fitView()); userMoved = false; } else userMoved = true;
   view = { ...boundView(v), transitionDuration: 500, transitionInterpolator: new deck.LinearInterpolator(['target', 'zoom', 'rotationX', 'rotationOrbit']) };
   theDeck.setProps({ viewState: view }); });
@@ -1626,7 +1655,7 @@ const HOME_CARDS = [
 const homeEl = document.createElement('div'); homeEl.id = 'home'; homeEl.hidden = true; document.getElementById('app').appendChild(homeEl);
 
 // "Your life in Canada": the same published values as the map, read at the year someone was born and now. Kept in memory only.
-const LIFE = ['pop', 'age', 'o65', 'u15', 'ur', 'inc', 'starts', 'imm', 'csi', 'fr'];
+const LIFE = ['pop', 'age', 'o65', 'u15', 'ur', 'inc', 'foodh', 'starts', 'hpr', 'nodoc', 'imm', 'csi', 'fr'];
 function lifeRows(by, g) {
   const out = [];
   for (const id of LIFE) { const m = M[id]; if (!m) continue;
@@ -1646,6 +1675,21 @@ function drawLife() {
     return `<button class="hlrow" data-life-m="${r.m.id}" data-life-y="${r.y0}"><span class="hll">${r.m.label}</span><span class="hlv"><i>${r.y0}${r.late ? '*' : ''}</i>${r.m.fmt(r.v0)}</span><span class="hla">${up ? '↗' : r.v1 < r.v0 ? '↘' : '→'}</span><span class="hlv"><i>${r.y1}</i><b>${r.m.fmt(r.v1)}</b></span></button>`; }).join('')}</div>
     <p class="hlq">${T(`${NAMES[g]}. * the series starts after ${by}, so its first year is shown. Tap a row to see it on the map. Income is in 2024 dollars; the rest are as published.`, `${NAMES[g]}. * la série commence après ${by}; sa première année est affichée. Touchez une ligne pour la voir sur la carte. Le revenu est en dollars de 2024; le reste tel que publié.`)}</p>`;
 }
+// Your place first: a city (any of the census metropolitan areas with neighbourhood maps) or a postal code's first letter
+// (its province). Kept on this device only; nothing is sent anywhere.
+const PC1 = { A: 'NL', B: 'NS', C: 'PE', E: 'NB', G: 'QC', H: 'QC', J: 'QC', K: 'ON', L: 'ON', M: 'ON', N: 'ON', P: 'ON', R: 'MB', S: 'SK', T: 'AB', V: 'BC', Y: 'YT' };
+const CMA_PROV = code => ['NL', 'PE', 'NS', 'NB', 'QC', 'ON', 'MB', 'SK', 'AB', 'BC'][+String(code).padStart(3, '0')[0]];
+let PLACE = {}; try { PLACE = JSON.parse(localStorage.getItem('ct.place') || '{}'); } catch (e) { PLACE = {}; }
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+function resolvePlace(q) { q = (q || '').trim(); if (!q) return null;
+  const pc = q.toUpperCase().replace(/\s/g, ''); if (/^[A-Z]\d[A-Z]/.test(pc) || /^[A-Z]\d?$/.test(pc)) { const g = pc[0] === 'X' ? null : PC1[pc[0]]; return g ? { g, label: pc.slice(0, 3), cma: null } : (pc[0] === 'X' ? { g: 'NT', label: pc.slice(0, 3), cma: null, xNote: true } : null); }
+  const n = norm(q).trim(); const hit = CITY_AL.find(c => norm(c[1]) === n) || CITY_AL.find(c => c[2].some(x => x.startsWith(n))) || CITY_AL.find(c => norm(c[1]).includes(n));
+  return hit ? { g: CMA_PROV(hit[0]), label: hit[1], cma: hit[0] } : null; }
+function drawPlace() { const out = document.getElementById('place-out'); if (!out) return; const P = PLACE; if (!P.g) { out.innerHTML = ''; return; }
+  const gsel = document.getElementById('life-g'); if (gsel && gsel.value !== P.g) { gsel.value = P.g; drawLife(); }
+  out.innerHTML = `<div class="hplace-go"><button data-place-map>${T(`${NAMES[P.g]} on the map`, `${NAMES[P.g]} sur la carte`)} →</button>${P.cma ? `<button data-place-nb="${P.cma}">${T(`${P.label}: every neighbourhood`, `${P.label} : chaque quartier`)} →</button>` : ''}${P.xNote ? `<span class="hlq">${T('X postal codes cover both the Northwest Territories and Nunavut; showing the Northwest Territories.', 'Les codes postaux en X couvrent les Territoires du Nord-Ouest et le Nunavut; affichage des Territoires du Nord-Ouest.')}</span>` : ''}</div>`; }
+function setPlace(q) { const r = resolvePlace(q); if (!r) { const o = document.getElementById('place-out'); if (o && q.trim().length > 2) o.innerHTML = `<p class="hlq">${T('Try a city name or the first three characters of a postal code.', 'Essayez un nom de ville ou les trois premiers caractères d’un code postal.')}</p>`; return; }
+  PLACE = r; try { localStorage.setItem('ct.place', JSON.stringify(r)); } catch (e) {} drawPlace(); }
 function openHome(focusSearch = false) {
   const cards = HOME_CARDS.filter(c => M[c.m]).map((c, i) => { let big = ['', ''], sp = ''; try { big = c.big(); sp = sparkSvg(c.spark()); } catch (e) { console.warn('home card', c.q, e); }
     return `<button class="hcard" data-card="${i}"><span class="hsec">${c.sec}</span><span class="hq">${c.q}</span><span class="hbig">${big[0]}</span><span class="hsub">${big[1]}</span>${sp}</button>`; }).join('');
@@ -1666,6 +1710,8 @@ function openHome(focusSearch = false) {
     <button class="hjourney" data-journey><span class="jpl">▶</span><span><b>${T("Watch: Canada, measured", "Regarder : Le Canada, en chiffres")}</b><span>${T("A guided journey, about two minutes. It drives the map for you; touch anything to take over.", "Un voyage guidé d’environ deux minutes. Il conduit la carte pour vous; touchez n’importe quoi pour prendre la main.")}</span></span></button>
     <section class="hlife" aria-labelledby="hlife-h"><h2 id="hlife-h" class="hq2">${T("Your life in Canada", "Votre vie au Canada")}</h2>
       <p class="hlq">${T("Enter the year you were born and where you live. Nothing leaves this device.", "Entrez votre année de naissance et où vous vivez. Rien ne quitte cet appareil.")}</p>
+      <div class="hlin hplace"><label>${T("Where you live", "Où vous vivez")} <input id="place-q" list="place-list" autocomplete="off" placeholder="${T("City or postal code", "Ville ou code postal")}" value="${esc(PLACE.label || '')}"></label><datalist id="place-list">${CITY_AL.map(c => `<option value="${esc(c[1])}">`).join('')}</datalist></div>
+      <div id="place-out" class="hlout"></div>
       <div class="hlin"><label>${T("Born in", "Né·e en")} <input id="life-y" type="number" inputmode="numeric" min="1971" max="${YMAX - 1}" placeholder="1990"></label>
       <label>${T("Living in", "Vivant en/au")} <select id="life-g">${PT13.map(g => `<option value="${g}" ${g === 'ON' ? 'selected' : ''}>${NAMES[g]}</option>`).join('')}</select></label></div>
       <div id="life-out" class="hlout"></div></section>
@@ -1674,6 +1720,8 @@ function openHome(focusSearch = false) {
     <div class="hfoot"><button class="hgo" data-close>${T("Explore the map freely →", "Explorer la carte librement →")}</button><button class="linkish" data-story="0">Or read the story: ${STORY.title}</button><button class="linkish" data-goworld="ab">${T("About and sources", "À propos et sources")}</button></div></div>`;
   homeEl.hidden = false; document.body.classList.add('home-on');
   ['life-y', 'life-g'].forEach(id => document.getElementById(id)?.addEventListener('input', drawLife));
+  document.getElementById('place-q')?.addEventListener('change', e => setPlace(e.target.value)); document.getElementById('place-q')?.addEventListener('input', e => { if (resolvePlace(e.target.value)?.cma || /^[A-Za-z]\d[A-Za-z]$/.test(e.target.value.trim())) setPlace(e.target.value); });
+  drawPlace();
   const inp = document.getElementById('q-search'); inp.addEventListener('input', () => drawResults(inp.value)); inp.addEventListener('keydown', e => { if (e.key === 'Enter') { const r = searchAll(inp.value)[0]; if (r) { r.go(); closeHome(); } } if (e.key === 'Escape') closeHome(); });
   if (focusSearch) setTimeout(() => inp.focus(), 30);
 }
@@ -1685,6 +1733,8 @@ homeEl.addEventListener('click', e => {
   if (e.target.closest('[data-nbhome]')) { closeHome(); window.CITIES?.open(); return; }
   if (e.target.closest('[data-clhome]')) { closeHome(); window.CLIMATE?.open(); return; }
   if (e.target.closest('[data-journey]')) { window.JOURNEY?.start(); return; }
+  if (e.target.closest('[data-place-map]')) { state.navQ = false; state.story = null; state.q = null; state.p = PLACE.g; state.city = null; state.cmp = null; closeHome(); update(); return; }
+  const pn = e.target.closest('[data-place-nb]'); if (pn) { closeHome(); location.hash = `#nb=${String(pn.dataset.placeNb).padStart(3, '0').slice(-3)}/inc`; return; }
   const gm = e.target.closest('[data-gapm]'); if (gm) { state.navQ = false; state.story = null; state.q = null; state.m = gm.dataset.gapm; state.y = clampYear(M[state.m], +gm.dataset.gapy); state.p = null; state.city = null; state.cmp = null; closeHome(); update(); return; }
   const lf = e.target.closest('[data-life-m]'); if (lf) { state.navQ = false; state.story = null; state.q = null; state.m = lf.dataset.lifeM; state.y = clampYear(M[state.m], +lf.dataset.lifeY); state.p = document.getElementById('life-g')?.value || null; state.city = null; state.cmp = null; closeHome(); update(); return; }
   const c = e.target.closest('[data-card]'); if (c) { const d = HOME_CARDS[+c.dataset.card]; state.navQ = false; state.story = null; state.q = null; state.m = d.m; state.y = clampYear(M[d.m], lastYear(M[d.m])); state.p = d.place && d.place !== 'CAN' ? d.place : null; state.city = null; state.cmp = null; closeHome(); update();
@@ -1736,6 +1786,7 @@ function searchAll(raw) {
 }
 function drawResults(v) { LAST_RESULTS = searchAll(v); document.getElementById('q-results').innerHTML = LAST_RESULTS.map((r, i) => `<button data-res="${i}" class="${i ? '' : 'first'}"><b>${r.t}</b><span>${r.s}</span></button>`).join('') || (v.trim() ? '<div class="none">No match. Try a province, a topic like “rent” or “jobs”, or a year.</div>' : ''); }
 if (!STUDIO && !FIRST_HASH && (() => { try { return !localStorage.getItem('ctt-home-seen'); } catch (e) { return true; } })()) openHome();
+else if (!STUDIO && !FIRST_HASH && PLACE.g) { state.p = PLACE.g; update(); }   // a returning visitor's own province, chosen on the home page and kept on this device
 
 
 // ================================================================ v2 views: race · scatter · trends · compare · change
