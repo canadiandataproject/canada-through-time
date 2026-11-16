@@ -1655,7 +1655,7 @@ const HOME_CARDS = [
 const homeEl = document.createElement('div'); homeEl.id = 'home'; homeEl.hidden = true; document.getElementById('app').appendChild(homeEl);
 
 // "Your life in Canada": the same published values as the map, read at the year someone was born and now. Kept in memory only.
-const LIFE = ['pop', 'age', 'o65', 'u15', 'ur', 'inc', 'starts', 'imm', 'csi', 'fr'];
+const LIFE = ['pop', 'age', 'o65', 'u15', 'ur', 'inc', 'foodh', 'starts', 'hpr', 'nodoc', 'imm', 'csi', 'fr'];
 function lifeRows(by, g) {
   const out = [];
   for (const id of LIFE) { const m = M[id]; if (!m) continue;
@@ -1675,6 +1675,21 @@ function drawLife() {
     return `<button class="hlrow" data-life-m="${r.m.id}" data-life-y="${r.y0}"><span class="hll">${r.m.label}</span><span class="hlv"><i>${r.y0}${r.late ? '*' : ''}</i>${r.m.fmt(r.v0)}</span><span class="hla">${up ? '↗' : r.v1 < r.v0 ? '↘' : '→'}</span><span class="hlv"><i>${r.y1}</i><b>${r.m.fmt(r.v1)}</b></span></button>`; }).join('')}</div>
     <p class="hlq">${T(`${NAMES[g]}. * the series starts after ${by}, so its first year is shown. Tap a row to see it on the map. Income is in 2024 dollars; the rest are as published.`, `${NAMES[g]}. * la série commence après ${by}; sa première année est affichée. Touchez une ligne pour la voir sur la carte. Le revenu est en dollars de 2024; le reste tel que publié.`)}</p>`;
 }
+// Your place first: a city (any of the census metropolitan areas with neighbourhood maps) or a postal code's first letter
+// (its province). Kept on this device only; nothing is sent anywhere.
+const PC1 = { A: 'NL', B: 'NS', C: 'PE', E: 'NB', G: 'QC', H: 'QC', J: 'QC', K: 'ON', L: 'ON', M: 'ON', N: 'ON', P: 'ON', R: 'MB', S: 'SK', T: 'AB', V: 'BC', Y: 'YT' };
+const CMA_PROV = code => ['NL', 'PE', 'NS', 'NB', 'QC', 'ON', 'MB', 'SK', 'AB', 'BC'][+String(code).padStart(3, '0')[0]];
+let PLACE = {}; try { PLACE = JSON.parse(localStorage.getItem('ct.place') || '{}'); } catch (e) { PLACE = {}; }
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+function resolvePlace(q) { q = (q || '').trim(); if (!q) return null;
+  const pc = q.toUpperCase().replace(/\s/g, ''); if (/^[A-Z]\d[A-Z]/.test(pc) || /^[A-Z]\d?$/.test(pc)) { const g = pc[0] === 'X' ? null : PC1[pc[0]]; return g ? { g, label: pc.slice(0, 3), cma: null } : (pc[0] === 'X' ? { g: 'NT', label: pc.slice(0, 3), cma: null, xNote: true } : null); }
+  const n = norm(q).trim(); const hit = CITY_AL.find(c => norm(c[1]) === n) || CITY_AL.find(c => c[2].some(x => x.startsWith(n))) || CITY_AL.find(c => norm(c[1]).includes(n));
+  return hit ? { g: CMA_PROV(hit[0]), label: hit[1], cma: hit[0] } : null; }
+function drawPlace() { const out = document.getElementById('place-out'); if (!out) return; const P = PLACE; if (!P.g) { out.innerHTML = ''; return; }
+  const gsel = document.getElementById('life-g'); if (gsel && gsel.value !== P.g) { gsel.value = P.g; drawLife(); }
+  out.innerHTML = `<div class="hplace-go"><button data-place-map>${T(`${NAMES[P.g]} on the map`, `${NAMES[P.g]} sur la carte`)} →</button>${P.cma ? `<button data-place-nb="${P.cma}">${T(`${P.label}: every neighbourhood`, `${P.label} : chaque quartier`)} →</button>` : ''}${P.xNote ? `<span class="hlq">${T('X postal codes cover both the Northwest Territories and Nunavut; showing the Northwest Territories.', 'Les codes postaux en X couvrent les Territoires du Nord-Ouest et le Nunavut; affichage des Territoires du Nord-Ouest.')}</span>` : ''}</div>`; }
+function setPlace(q) { const r = resolvePlace(q); if (!r) { const o = document.getElementById('place-out'); if (o && q.trim().length > 2) o.innerHTML = `<p class="hlq">${T('Try a city name or the first three characters of a postal code.', 'Essayez un nom de ville ou les trois premiers caractères d’un code postal.')}</p>`; return; }
+  PLACE = r; try { localStorage.setItem('ct.place', JSON.stringify(r)); } catch (e) {} drawPlace(); }
 function openHome(focusSearch = false) {
   const cards = HOME_CARDS.filter(c => M[c.m]).map((c, i) => { let big = ['', ''], sp = ''; try { big = c.big(); sp = sparkSvg(c.spark()); } catch (e) { console.warn('home card', c.q, e); }
     return `<button class="hcard" data-card="${i}"><span class="hsec">${c.sec}</span><span class="hq">${c.q}</span><span class="hbig">${big[0]}</span><span class="hsub">${big[1]}</span>${sp}</button>`; }).join('');
@@ -1695,6 +1710,8 @@ function openHome(focusSearch = false) {
     <button class="hjourney" data-journey><span class="jpl">▶</span><span><b>${T("Watch: Canada, measured", "Regarder : Le Canada, en chiffres")}</b><span>${T("A guided journey, about two minutes. It drives the map for you; touch anything to take over.", "Un voyage guidé d’environ deux minutes. Il conduit la carte pour vous; touchez n’importe quoi pour prendre la main.")}</span></span></button>
     <section class="hlife" aria-labelledby="hlife-h"><h2 id="hlife-h" class="hq2">${T("Your life in Canada", "Votre vie au Canada")}</h2>
       <p class="hlq">${T("Enter the year you were born and where you live. Nothing leaves this device.", "Entrez votre année de naissance et où vous vivez. Rien ne quitte cet appareil.")}</p>
+      <div class="hlin hplace"><label>${T("Where you live", "Où vous vivez")} <input id="place-q" list="place-list" autocomplete="off" placeholder="${T("City or postal code", "Ville ou code postal")}" value="${esc(PLACE.label || '')}"></label><datalist id="place-list">${CITY_AL.map(c => `<option value="${esc(c[1])}">`).join('')}</datalist></div>
+      <div id="place-out" class="hlout"></div>
       <div class="hlin"><label>${T("Born in", "Né·e en")} <input id="life-y" type="number" inputmode="numeric" min="1971" max="${YMAX - 1}" placeholder="1990"></label>
       <label>${T("Living in", "Vivant en/au")} <select id="life-g">${PT13.map(g => `<option value="${g}" ${g === 'ON' ? 'selected' : ''}>${NAMES[g]}</option>`).join('')}</select></label></div>
       <div id="life-out" class="hlout"></div></section>
@@ -1703,6 +1720,8 @@ function openHome(focusSearch = false) {
     <div class="hfoot"><button class="hgo" data-close>${T("Explore the map freely →", "Explorer la carte librement →")}</button><button class="linkish" data-story="0">Or read the story: ${STORY.title}</button><button class="linkish" data-goworld="ab">${T("About and sources", "À propos et sources")}</button></div></div>`;
   homeEl.hidden = false; document.body.classList.add('home-on');
   ['life-y', 'life-g'].forEach(id => document.getElementById(id)?.addEventListener('input', drawLife));
+  document.getElementById('place-q')?.addEventListener('change', e => setPlace(e.target.value)); document.getElementById('place-q')?.addEventListener('input', e => { if (resolvePlace(e.target.value)?.cma || /^[A-Za-z]\d[A-Za-z]$/.test(e.target.value.trim())) setPlace(e.target.value); });
+  drawPlace();
   const inp = document.getElementById('q-search'); inp.addEventListener('input', () => drawResults(inp.value)); inp.addEventListener('keydown', e => { if (e.key === 'Enter') { const r = searchAll(inp.value)[0]; if (r) { r.go(); closeHome(); } } if (e.key === 'Escape') closeHome(); });
   if (focusSearch) setTimeout(() => inp.focus(), 30);
 }
@@ -1714,6 +1733,8 @@ homeEl.addEventListener('click', e => {
   if (e.target.closest('[data-nbhome]')) { closeHome(); window.CITIES?.open(); return; }
   if (e.target.closest('[data-clhome]')) { closeHome(); window.CLIMATE?.open(); return; }
   if (e.target.closest('[data-journey]')) { window.JOURNEY?.start(); return; }
+  if (e.target.closest('[data-place-map]')) { state.navQ = false; state.story = null; state.q = null; state.p = PLACE.g; state.city = null; state.cmp = null; closeHome(); update(); return; }
+  const pn = e.target.closest('[data-place-nb]'); if (pn) { closeHome(); location.hash = `#nb=${String(pn.dataset.placeNb).padStart(3, '0').slice(-3)}/inc`; return; }
   const gm = e.target.closest('[data-gapm]'); if (gm) { state.navQ = false; state.story = null; state.q = null; state.m = gm.dataset.gapm; state.y = clampYear(M[state.m], +gm.dataset.gapy); state.p = null; state.city = null; state.cmp = null; closeHome(); update(); return; }
   const lf = e.target.closest('[data-life-m]'); if (lf) { state.navQ = false; state.story = null; state.q = null; state.m = lf.dataset.lifeM; state.y = clampYear(M[state.m], +lf.dataset.lifeY); state.p = document.getElementById('life-g')?.value || null; state.city = null; state.cmp = null; closeHome(); update(); return; }
   const c = e.target.closest('[data-card]'); if (c) { const d = HOME_CARDS[+c.dataset.card]; state.navQ = false; state.story = null; state.q = null; state.m = d.m; state.y = clampYear(M[d.m], lastYear(M[d.m])); state.p = d.place && d.place !== 'CAN' ? d.place : null; state.city = null; state.cmp = null; closeHome(); update();
@@ -1765,6 +1786,7 @@ function searchAll(raw) {
 }
 function drawResults(v) { LAST_RESULTS = searchAll(v); document.getElementById('q-results').innerHTML = LAST_RESULTS.map((r, i) => `<button data-res="${i}" class="${i ? '' : 'first'}"><b>${r.t}</b><span>${r.s}</span></button>`).join('') || (v.trim() ? '<div class="none">No match. Try a province, a topic like “rent” or “jobs”, or a year.</div>' : ''); }
 if (!STUDIO && !FIRST_HASH && (() => { try { return !localStorage.getItem('ctt-home-seen'); } catch (e) { return true; } })()) openHome();
+else if (!STUDIO && !FIRST_HASH && PLACE.g) { state.p = PLACE.g; update(); }   // a returning visitor's own province, chosen on the home page and kept on this device
 
 
 // ================================================================ v2 views: race · scatter · trends · compare · change
