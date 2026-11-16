@@ -1272,3 +1272,10 @@ body.has-shell #ab { top: var(--shell-h); }
 #scrub-hint.on { opacity: 1; transform: translate(-50%, 0); }
 @media (max-width: 1100px) { #scrub-hint { bottom: 46%; } }
 .cl-scrub { position: absolute; z-index: 20; transform: translateX(-50%); pointer-events: none; font: 600 46px/1 "Newsreader", Georgia, serif; color: var(--ink-1); background: color-mix(in srgb, var(--panel) 86%, transparent); padding: 8px 16px; border-radius: 14px; box-shadow: 0 8px 28px rgba(0,0,0,.16); }
+/* then / now wipe */
+#wipe { position: absolute; top: 0; bottom: 0; width: 0; z-index: 18; pointer-events: none; }
+#wipe i { position: absolute; top: 26%; bottom: 20%; left: -1.5px; width: 3px; background: var(--accent); border-radius: 2px; box-shadow: 0 0 0 1px color-mix(in srgb, var(--panel) 60%, transparent); }
+#wipe button { pointer-events: auto; position: absolute; top: 50%; left: 0; transform: translate(-50%, -50%); width: 46px; height: 46px; border-radius: 50%; border: 0; background: var(--accent); color: #fff; font-size: 20px; box-shadow: 0 6px 18px rgba(0,0,0,.25); cursor: ew-resize; touch-action: none; }
+#wipe b { position: absolute; top: calc(50% - 66px); font: 600 22px/1 "Newsreader", Georgia, serif; color: var(--ink-1); background: color-mix(in srgb, var(--panel) 88%, transparent); padding: 3px 8px; border-radius: 8px; white-space: nowrap; }
+#wipe .wl { right: 8px; } #wipe .wr { left: 8px; }
+#mapctl button.wipeb.on { background: var(--accent); color: #fff; }

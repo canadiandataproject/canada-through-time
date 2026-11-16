@@ -2,6 +2,7 @@
  * Not the published version (that is web/explore). Same data contracts, registry and evidence rules.
  * State lives in the URL hash (#chg-2026-ab) so any view can be shared.
  */
+const { ClipExtension } = deck;
 const { Deck, OrbitView, GeoJsonLayer, ColumnLayer, TextLayer, ArcLayer, PathLayer, ScatterplotLayer, LineLayer, LightingEffect, AmbientLight, DirectionalLight, COORDINATE_SYSTEM } = deck;
 const CART = COORDINATE_SYSTEM.CARTESIAN;
 const Q = new URLSearchParams(location.search);
@@ -523,6 +524,18 @@ function layers() { const L = layers0(); return STUDIO ? L.map(l => l.clone({ tr
 // glide between the two published values; every printed number is the published value for the year on screen.
 let TW = null;
 const tweenOf = (fn, g, cur) => { if (!TW || typeof cur !== 'number') return cur; const a = fn(g, TW.ya), b = fn(g, TW.yb); return typeof a === 'number' && typeof b === 'number' ? a + (b - a) * TW.k : cur; };
+// Then/now wipe: the left of the divider shows the first published year, the right the year on the timeline.
+// Both sides are the published values; nothing is blended.
+const thenYear = m => m.only ? m.only[0] : m.years[0];
+function wipeLayers(m, z) {
+  if (!state.wipe || m.kind !== 'fill') return [];
+  const y0 = thenYear(m), split = m.split(y0), feats = split ? featsSplit : featsCombined, val = Object.fromEntries(geosFor(split).map(g => [g, m.value(g, y0)])), dimC = C('land-dim');
+  const x = state.wipe.x;
+  return [new GeoJsonLayer({ id: 'land-then-' + Math.round(x), data: feats, coordinateSystem: CART, filled: true, stroked: true, extruded: false, pickable: false,
+      getFillColor: f => { const v = val[f.properties.abbr]; return v == null ? dimC : m.color(v); }, getLineColor: C('boundary'), lineWidthUnits: 'pixels', getLineWidth: 1,
+      extensions: [new ClipExtension()], clipBounds: [-1e9, -1e9, x, 1e9], clipByInstance: false, parameters: { depthTest: false },
+      updateTriggers: { getFillColor: [state.m, y0] } })];
+}
 function layers0() {
   const m = M[state.m], y = state.y, split = m.split(y);
   const feats = split ? featsSplit : featsCombined, geos = geosFor(split);
@@ -545,6 +558,7 @@ function layers0() {
       material: TRUE_COL ? { ambient: 0.91, diffuse: 0.285, shininess: 0, specularColor: [0, 0, 0] } : V === 's' ? { ambient: 0.5, diffuse: 0.75, shininess: 12, specularColor: [40, 34, 28] } : { ambient: 1, diffuse: 0.15, shininess: 0, specularColor: [0, 0, 0] },
       updateTriggers: { getFillColor: [state.m, y, state.p, twKey] }, transitions: { getFillColor: 450 } }),
     ...(TX === 'relief' && RELIEF.img ? [reliefLayer(m, z)] : []),
+    ...wipeLayers(m, z),
     lakeLayer,
     ...(m.kind === 'fill' ? [hatchLayer(feats.filter(f => val[f.properties.abbr] == null), split, z)] : []),
     new PathLayer({ id: 'bounds', data: split ? OUT_SPLIT : OUT_COMB, coordinateSystem: CART, getPath: d => d.path.map(p => [p[0], p[1], z + 0.6]),
@@ -622,7 +636,8 @@ function labels(pts, pos, val, m, sel, abbrOnly = false) {
   const phone = isPhone(), halo = [...C('halo'), 240], tablet = phone && innerWidth >= 700;
   const at = d => CALLOUT[d.k] ? [...CALLOUT[d.k], PLATE + 2] : pos(d);
   const showVal = d => !abbrOnly && (!phone || tablet || d.k === sel || m.kind === 'spike');   // phones: values on the people layer and the selection; all sizes stagger or drop on collision
-  const valText = d => { const v = val[d.k]; if (m.kind === 'party') return v ? (v[0] === 'TIE' ? `Tied ${v[1]}–${v[1]}` : `${partyCode(v[0])} ${v[1]}`) : ''; return v == null ? '—' : m.fmt(v) + OV[over(m, v)]; };
+  const thenV = state.wipe && m.kind === 'fill' ? (() => { const y0 = thenYear(m); return Object.fromEntries(geosFor(m.split(y0)).map(g => [g, m.value(g, y0)])); })() : null;
+  const valText = d => { const v = thenV && at(d)[0] < state.wipe.x ? thenV[d.k] : val[d.k]; if (m.kind === 'party') return v ? (v[0] === 'TIE' ? `Tied ${v[1]}–${v[1]}` : `${partyCode(v[0])} ${v[1]}`) : ''; return v == null ? '—' : m.fmt(v) + OV[over(m, v)]; };
   // Value labels that would touch (narrow provinces, long dollar values) are staggered down or up; if neither fits,
   // the value is dropped and the abbreviation stays (the value remains in the tooltip, panel and ranking).
   let vp = null; try { vp = theDeck.getViewports()[0]; } catch (e) { /* deck not initialised yet */ }
@@ -647,7 +662,7 @@ function labels(pts, pos, val, m, sel, abbrOnly = false) {
       getPixelOffset: d => off(d, showVal(d) && !hideVal.has(d.k) ? -16 : -2), updateTriggers: { getPosition: [state.m, state.y, TW && TW.k, TW && TW.ya], getColor: [sel], getSize: [sel, phone, tablet], getText: [state.m, state.y, hideVal.size, phone], getPixelOffset: [sel, phone, state.m, state.y, JSON.stringify(dy), hideVal.size] } }),
     new TextLayer({ id: 'val', data: pts.filter(d => showVal(d) && !hideVal.has(d.k)), ...common, getText: valText,
       getSize: d => d.k === sel ? 17 : 14.5, fontWeight: 600, getColor: C('ink-1'), getPixelOffset: d => off(d, 0),
-      updateTriggers: { getPosition: [state.m, state.y, TW && TW.k, TW && TW.ya], getText: [state.m, state.y], getSize: [sel], getPixelOffset: [state.m, state.y, JSON.stringify(dy)] } }),
+      updateTriggers: { getPosition: [state.m, state.y, TW && TW.k, TW && TW.ya], getText: [state.m, state.y, state.wipe && Math.round(state.wipe.x)], getSize: [sel], getPixelOffset: [state.m, state.y, JSON.stringify(dy)] } }),
   ];
 }
 // One status vocabulary everywhere (list, panel, map legend): each state has its own marker and words.
@@ -771,6 +786,24 @@ playBtns.forEach(b => b.onclick = toggle);
 document.getElementById('tl-speed').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; state.speed = +b.dataset.s;
   document.querySelectorAll('#tl-speed button').forEach(x => x.classList.toggle('on', x === b)); });
 
+// ---------------------------------------------------------------- then / now wipe handle
+const wipeEl = document.createElement('div'); wipeEl.id = 'wipe'; wipeEl.hidden = true; wipeEl.innerHTML = '<i></i><b class="wl"></b><b class="wr"></b><button aria-label="Move the divider">⇆</button>'; mapEl.appendChild(wipeEl);
+function wipeAt(sx) { const vp = theDeck.getViewports()[0]; if (!vp) return; const r = mapEl.getBoundingClientRect(), sy = r.height * 0.5;
+  const p = vp.unproject([sx, sy, 0]); state.wipe = { sx, x: p[0] }; wipeEl.style.left = sx + 'px'; paintWipe(); theDeck.setProps({ layers: layers() }); }
+function paintWipe() { if (!state.wipe) { wipeEl.hidden = true; return; } const m = M[state.m]; wipeEl.hidden = m.kind !== 'fill';
+  wipeEl.querySelector('.wl').textContent = whenShort(m, thenYear(m)); wipeEl.querySelector('.wr').textContent = whenShort(m, state.y); }
+const whenShort = (m, y) => String(y);
+function toggleWipe() { if (state.wipe) { state.wipe = null; if (wipeTilt != null) { view = { ...view, rotationX: wipeTilt }; theDeck.setProps({ viewState: view }); wipeTilt = null; } paintWipe(); theDeck.setProps({ layers: layers() }); document.querySelector('[data-act=wipe]')?.classList.remove('on'); return; }
+  const m = M[state.m]; if (m.kind !== 'fill') { flashNote(T('Then and now works on coloured-province layers.', 'Avant et maintenant fonctionne avec les couches de provinces colorées.')); return; }
+  state.y = m.years[1]; wipeTilt = view.rotationX; userMoved = true; view = { ...view, rotationX: Math.max(view.rotationX, 70), transitionDuration: 0 }; theDeck.setProps({ viewState: view }); update(); document.querySelector('[data-act=wipe]')?.classList.add('on'); setTimeout(() => wipeAt(mapEl.clientWidth * 0.5), 60); }
+let wipeTilt = null;
+function flashNote(t) { const h = document.getElementById('scrub-hint'); if (!h) return; h.textContent = t; h.classList.add('on'); setTimeout(() => h.classList.remove('on'), 3000); }
+{ let drag = false; const b = wipeEl.querySelector('button');
+  b.addEventListener('pointerdown', e => { drag = true; b.setPointerCapture(e.pointerId); e.stopPropagation(); e.preventDefault(); });
+  b.addEventListener('pointermove', e => { if (!drag) return; const r = mapEl.getBoundingClientRect(); wipeAt(Math.max(20, Math.min(r.width - 20, e.clientX - r.left))); e.stopPropagation(); });
+  b.addEventListener('pointerup', () => { drag = false; });
+  b.addEventListener('keydown', e => { if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { wipeAt(Math.max(20, Math.min(mapEl.clientWidth - 20, state.wipe.sx + (e.key === 'ArrowLeft' ? -24 : 24)))); e.preventDefault(); } }); }
+
 // ---------------------------------------------------------------- drag the map through time
 // At the whole-Canada view, a sideways drag anywhere on the map travels through the years (the year grows under your finger)
 // and an up/down swipe moves to the next or previous layer in the same section. Zoomed in, or with Shift held, drag moves the
@@ -797,7 +830,7 @@ document.getElementById('tl-speed').addEventListener('click', e => { const b = e
       hud.querySelector('.sh-y').textContent = j === i ? '↕' : (g.dy < 0 ? '↑ ' : '↓ ') + list[j].label; hud.querySelector('.sh-m').textContent = j === i ? T('Swipe further to change layer', 'Glissez plus loin pour changer de couche') : T('Release to switch', 'Relâchez pour changer'); g.target = list[j].id; } };
   const kill = e => { e.stopPropagation(); e.preventDefault(); };
   mapEl.addEventListener('pointerdown', e => { pts.set(e.pointerId, e);
-    if (pts.size > 1 || e.shiftKey || e.button !== 0 || !atFit() || state.story || document.body.classList.contains('home-on')) { g = null; hud.hidden = true; return; }
+    if (pts.size > 1 || e.shiftKey || e.button !== 0 || e.target.closest('#wipe') || !atFit() || state.story || document.body.classList.contains('home-on')) { g = null; hud.hidden = true; return; }
     g = { id: e.pointerId, x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY, yr0: state.y, mode: null }; }, true);
   mapEl.addEventListener('pointermove', e => { if (pts.has(e.pointerId)) pts.set(e.pointerId, e);
     if (!g || e.pointerId !== g.id) return; if (pts.size > 1) { g = null; hud.hidden = true; return; }
@@ -830,6 +863,7 @@ document.getElementById('mapctl').addEventListener('click', e => { const a = e.t
   if (a === 'pal') { const pp = document.getElementById('palpop'); pp.hidden = !pp.hidden; e.target.closest('button').setAttribute('aria-expanded', String(!pp.hidden)); return; }
   const v = { ...view };
   if (a === 'zin') v.zoom += 0.5; if (a === 'zout') v.zoom -= 0.5;
+  if (a === 'wipe') { toggleWipe(); return; }
   if (a === 'tilt') v.rotationX = isPhone() ? (Math.abs(v.rotationX - fitView().rotationX) < 3 ? (fitView().rotationX > 60 ? 40 : 70) : fitView().rotationX) : v.rotationX > 10 ? 0 : fitView().rotationX; if (a === 'reset') { Object.assign(v, fitView()); userMoved = false; } else userMoved = true;
   view = { ...boundView(v), transitionDuration: 500, transitionInterpolator: new deck.LinearInterpolator(['target', 'zoom', 'rotationX', 'rotationOrbit']) };
   theDeck.setProps({ viewState: view }); });
@@ -1382,6 +1416,7 @@ function timelineCtx(y) {
 }
 function update() {
   const m = M[state.m];
+  if (state.wipe) { if (m.kind !== 'fill') { state.wipe = null; document.querySelector('[data-act=wipe]')?.classList.remove('on'); } setTimeout(() => state.wipe && wipeAt(state.wipe.sx), 0); }
   state.y = clampYear(m, state.y);
   const p = ((state.y - YMIN) / span * 100) + '%';
   for (const r of [yr, myr]) { r.value = state.y; r.style.setProperty('--p', p); }
