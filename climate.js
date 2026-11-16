@@ -11,7 +11,8 @@ const sgn = (v, dp = 1, u = '') => (v > 0 ? '+' : v < 0 ? '−' : '±') + nf(Mat
 
 let A, G, F, SP, PROV, LAKES, el, deckI, ready, fready;
 const S = { mode: 'temp', y: 2020, avg: true, st: null, gl: null, playing: false };
-const MODES = [['temp', 'Temperature'], ['precip', 'Precipitation'], ['trend', 'Long-term warming'], ['ice', 'Glaciers'], ['forest', 'Forests'], ['sprawl', 'Cities spreading']];
+const TT = (en, fr) => window.T ? window.T(en, fr) : en;
+const MODES = [['temp', TT('Temperature', 'Température')], ['precip', TT('Precipitation', 'Précipitations')], ['trend', TT('Long-term warming', 'Réchauffement à long terme')], ['ice', TT('Glaciers', 'Glaciers')], ['forest', TT('Forests', 'Forêts')], ['sprawl', TT('Cities spreading', 'Villes qui s’étalent')]];
 const yr = (s, k) => s[k] ? s[k][0] : null;
 const at = (s, k, y) => { const p = s[k]; if (!p) return null; const i = y - p[0]; return i >= 0 && i < p[1].length ? p[1][i] : null; };
 function baseline(s, k) { const key = '_b' + k; if (key in s) return s[key]; let n = 0, sum = 0; for (let y = 1961; y <= 1990; y++) { const v = at(s, k, y); if (v != null) { n++; sum += v; } } return s[key] = n >= 25 ? sum / n : null; }
@@ -44,7 +45,7 @@ const fmtA = (mode, v) => mode === 'precip' ? sgn(v, 0, '%') : mode === 'trend' 
 function build() {
   el = document.createElement('section'); el.id = 'cl'; el.className = 'nbx'; el.hidden = true; el.setAttribute('aria-label', 'Climate');
   el.innerHTML = `<header id="cl-top" class="nbx-top"><button class="nbx-back" aria-label="Back to the national map">← Canada</button>
-    <div class="nbx-title"><span class="kick">Climate and land · Environment and Climate Change Canada, WGMS, Natural Resources Canada</span><h1>How Canada’s climate has changed</h1></div>
+    <div class="nbx-title"><span class="kick">Climate and land · Environment and Climate Change Canada, WGMS, Natural Resources Canada</span><h1>${TT('How Canada’s climate and land have changed', 'Comment le climat et le territoire du Canada ont changé')}</h1></div>
     <div id="cl-modes" role="tablist"></div></header>
   <aside id="cl-side" class="nbx-side"></aside>
   <div id="cl-map" class="nbx-map" aria-label="Map of climate stations"></div>
