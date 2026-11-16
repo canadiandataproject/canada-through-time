@@ -22,6 +22,9 @@ Files: `shorts2/sprawl.py` (engine), `shorts2/cues/sprawl.json` (timings, cards,
 - Honest limits (in the description): ground under buildings, not city limits or the metro area; years between satellite snapshots
   are modelled by the JRC; nothing is drawn between snapshots; the opening camera pull-back is the only motion that isn't data.
 
+## Voice (Tyson's pick, 11:20): lighter + strong clean
+`shorts2/voice_chain.py <take> out.wav --formant 1.06 --pitch 113 --clean 30`, then `voice_place.py`. Default for all Shorts from now on.
+
 ## Final mix (voice take 2026-11-16 10:56)
 - Take file `06 - Edmontons city spread.m4a` has two full reads (1: 3–41 s, 2: 45–76 s). Lines used: 1 = take 2, 2 = take 1
   ("satellites"; take 2 says "satellite"), 3 = take 1 ("grew out"), 4–5 = take 2, 6 = take 1. Clean: high-pass 80 Hz,

@@ -18,6 +18,7 @@ from parselmouth.praat import call
 args = sys.argv[1:]; src, out = args[0], args[1]
 opt = lambda k, d: float(args[args.index(k) + 1]) if k in args else d
 formant, pitch, clean_only = opt("--formant", 1.0), opt("--pitch", 0.0), "--clean-only" in args
+atten = opt("--clean", 15)                 # dB cap on noise/room removal (15 gentle, 30 strong)
 SR = 48000; tmp = Path(tempfile.mkdtemp())
 
 # 0. decode to 48 kHz mono
@@ -27,7 +28,7 @@ subprocess.run(["/home/claude/dfenv/bin/python", "-c", f"""
 import soundfile as sf, torch
 from df.enhance import init_df, enhance
 m, s, _ = init_df('/home/claude/dfmodel'); a, _ = sf.read('{tmp/'in.wav'}', dtype='float32')
-y = enhance(m, s, torch.from_numpy(a)[None], atten_lim_db=15)
+y = enhance(m, s, torch.from_numpy(a)[None], atten_lim_db={atten})
 sf.write('{tmp/'clean.wav'}', y[0].numpy(), s.sr())"""], check=True)
 x = tmp / "clean.wav"
 # 2. reshape
@@ -38,7 +39,7 @@ if not clean_only and (formant != 1.0 or pitch):
 # 3. finish
 chain = ",".join([
     "highpass=f=75:poles=2",
-    "equalizer=f=280:t=q:w=1.1:g=-2.5",      # low-mid mud (phone/room boxiness)
+    "equalizer=f=280:t=q:w=1.1:g=-3",      # low-mid mud (phone/room boxiness)
     "equalizer=f=3800:t=q:w=1.0:g=2",         # presence: words cut through the music
     "highshelf=f=9500:g=2.5",                 # air
     "deesser=i=0.35:m=0.5:f=0.5",
