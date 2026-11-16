@@ -65,7 +65,25 @@ function build() {
   addEventListener('keydown', e => { if (e.key === 'Escape' && !el.hidden) { if (S.st || S.gl) { S.st = S.gl = null; render(); } else close(); } });
   addEventListener('resize', () => { if (!el.hidden) fit(); });
 }
-let timer = null;
+let timer = null, CLZ = null;
+// Sideways drag on the map travels through the years (temperature, precipitation, forests) at the whole-Canada view; zoomed in,
+// or with Shift held, drag moves the map. Two fingers always pinch and move it.
+function bindScrub(mapBox) {
+  const hud = document.createElement('div'); hud.className = 'cl-scrub'; hud.hidden = true; mapBox.appendChild(hud);
+  let g = null; const pts = new Set();
+  const fitZ = () => { const box = mapBox.getBoundingClientRect(); return Math.log2(Math.min(box.width / 5400, box.height / 4600) * 0.98); };
+  const ok = e => (S.mode === 'temp' || S.mode === 'precip' || S.mode === 'forest') && !e.shiftKey && e.button === 0 && pts.size === 1 && (CLZ == null || CLZ <= fitZ() + 0.35);
+  mapBox.addEventListener('pointerdown', e => { pts.add(e.pointerId); g = ok(e) ? { id: e.pointerId, x0: e.clientX, y0: e.clientY, y: S.y, on: false } : null; }, true);
+  mapBox.addEventListener('pointermove', e => { if (!g || e.pointerId !== g.id) return; if (pts.size > 1) { g = null; hud.hidden = true; return; }
+    const dx = e.clientX - g.x0, dy = e.clientY - g.y0;
+    if (!g.on) { if (Math.abs(dx) > 9 && Math.abs(dx) > Math.abs(dy) * 1.2) { g.on = true; if (S.playing) togglePlay(); try { mapBox.setPointerCapture(e.pointerId); } catch (x) {} hud.hidden = false; } else return; }
+    e.stopPropagation(); e.preventDefault();
+    const [a, b] = range(), per = Math.max(8, Math.min(26, mapBox.clientWidth * 0.8 / (b - a))), y = Math.max(a, Math.min(b, Math.round(g.y + dx / per)));
+    const r = mapBox.getBoundingClientRect(); hud.style.left = Math.max(80, Math.min(r.width - 80, e.clientX - r.left)) + 'px'; hud.style.top = Math.max(40, e.clientY - r.top - 96) + 'px';
+    hud.textContent = S.mode === 'forest' || !S.avg ? y : `${y - 9}–${y}`; if (y !== S.y) { S.y = y; render(true); } }, true);
+  const end = e => { pts.delete(e.pointerId); if (g && e.pointerId === g.id) { if (g.on) { e.stopPropagation(); hud.hidden = true; } g = null; } };
+  mapBox.addEventListener('pointerup', end, true); mapBox.addEventListener('pointercancel', end, true);
+}
 function togglePlay() { S.playing = !S.playing; clearInterval(timer);
   if (S.playing) { const [y0, y1] = range(); if (S.y >= y1) S.y = Math.max(y0, 1900); timer = setInterval(() => { const [, b] = range(); if (S.y >= b) { S.playing = false; clearInterval(timer); render(); return; } S.y++; render(true); }, 160); }
   render(true); }
@@ -324,7 +342,8 @@ async function open(opts = {}) {
     PROV = km(p); LAKES = km(l); S.y = A.t_years[1]; });
   await ready; await readHash();
   if (opts.mode) S.mode = opts.mode;
-  if (!deckI) deckI = new Deck({ parent: el.querySelector('#cl-map'), views: new OrthographicView({ flipY: false }), controller: { doubleClickZoom: true }, initialViewState: { target: [6400, 2400, 0], zoom: -3 },
+  if (!deckI) bindScrub(el.querySelector('#cl-map'));
+  if (!deckI) deckI = new Deck({ parent: el.querySelector('#cl-map'), views: new OrthographicView({ flipY: false }), controller: { doubleClickZoom: true }, onViewStateChange: ({ viewState }) => { CLZ = viewState.zoom; }, initialViewState: { target: [6400, 2400, 0], zoom: -3 },
     getCursor: ({ isHovering }) => isHovering ? 'pointer' : 'grab', onHover: tip,
     onClick: ({ object }) => { if (!object) return; if (object.b) S.gl = object.id; else S.st = object.s.id; render(); }, style: { position: 'absolute', inset: 0 } });
   (window.__decks ||= {}).cl = deckI;
