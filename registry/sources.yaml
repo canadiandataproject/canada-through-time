@@ -1250,3 +1250,114 @@ sources:
     licence_url: "https://open.canada.ca/en/open-government-licence-canada"
     attribution: "Contains information licensed under the Open Government Licence – Canada. Source: Natural Resources Canada, Canadian Geographical Names Database."
     quality_class: official_statistics
+
+  statcan_18100205:
+    title: "New housing price index, monthly"
+    publisher: "Statistics Canada"
+    table_id: "18-10-0205-01"
+    doi: "https://doi.org/10.25318/1810020501-eng"
+    landing_url: "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1810020501"
+    download_url: "https://www150.statcan.gc.ca/n1/tbl/csv/18100205-eng.zip"
+    raw_file: "data/raw/statcan/18100205-eng.zip"
+    sha256: "a96ab6f6778e32137472f28eddc7810a6702b257092706d2e4bdab8e56397b68"
+    retrieved: "2026-11-16"
+    release_in_file: "Monthly, January 1981 to September 2026"
+    reporting_period: "Monthly; this platform uses calendar-year averages of complete years only"
+    coverage: "Canada, provinces (except the territories) and selected metropolitan areas"
+    units: "Index, December 2016 = 100"
+    licence: "Statistics Canada Open Licence"
+    licence_url: "https://www.statcan.gc.ca/en/reference/licence"
+    attribution: "Source: Statistics Canada. Table 18-10-0205-01 New housing price index, monthly."
+    quality_class: official_statistics
+    methodology_notes:
+      - "Contractors' selling prices of new single-family houses (single, semi-detached and row), same specifications over time. 'Total (house and land)' is used."
+    limitations:
+      - "New homes only; resale homes and condominium apartments are not in this index. It tracks price change, not price levels, so places are compared with their own past, not with each other."
+
+  statcan_36100480:
+    title: "Labour productivity and related measures by business sector industry and by non-commercial activity consistent with the industry accounts"
+    publisher: "Statistics Canada"
+    table_id: "36-10-0480-01"
+    doi: "https://doi.org/10.25318/3610048001-eng"
+    landing_url: "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3610048001"
+    download_url: "https://www150.statcan.gc.ca/n1/tbl/csv/36100480-eng.zip"
+    raw_file: "data/raw/statcan/36100480-eng.zip"
+    sha256: "4434de00682c046c176ade21343d8a0566a8986460737563f5e49549eba2754e"
+    retrieved: "2026-11-16"
+    release_in_file: "Annual, 1997 to 2024 (table marked inactive by Statistics Canada)"
+    reporting_period: "Calendar year"
+    coverage: "Canada, provinces and territories"
+    units: "Chained (2017) dollars per hour (labour productivity); dollars per hour (compensation)"
+    licence: "Statistics Canada Open Licence"
+    licence_url: "https://www.statcan.gc.ca/en/reference/licence"
+    attribution: "Source: Statistics Canada. Table 36-10-0480-01 Labour productivity and related measures by business sector industry and by non-commercial activity consistent with the industry accounts."
+    quality_class: official_statistics
+    methodology_notes:
+      - "Business sector industries. Labour productivity = real value added per hour worked (chained 2017 dollars). Compensation per hour = total compensation of all jobs per hour worked, current dollars."
+    limitations:
+      - "The table is inactive: 2024 is the last year it covers."
+
+  worldbank_gdp_per_worker:
+    title: "GDP per person employed (constant 2021 PPP $), indicator SL.GDP.PCAP.EM.KD"
+    publisher: "World Bank, World Development Indicators (from ILO modelled employment and World Bank GDP)"
+    landing_url: "https://data.worldbank.org/indicator/SL.GDP.PCAP.EM.KD"
+    download_url: "https://api.worldbank.org/v2/country/CAN;USA;AUS;GBR;DEU;FRA;JPN;NOR;NLD;SWE;NZL;OED/indicator/SL.GDP.PCAP.EM.KD?format=json&per_page=2000&date=1991:2025"
+    raw_file: "data/raw/worldbank/SL.GDP.PCAP.EM.KD.json"
+    sha256: "b9cdae7581c170c9dac1dc169669de00acc142b27bdc4d28a457b26bcd906c6d"
+    retrieved: "2026-11-16"
+    release_in_file: "World Development Indicators, last updated 2026-11-11"
+    reporting_period: "Calendar year, 1991-2025"
+    coverage: "Canada, United States, Australia, United Kingdom, Germany, France, Japan, Norway, Netherlands, Sweden, New Zealand, OECD members"
+    units: "Constant 2021 international dollars (PPP) per person employed"
+    licence: "CC BY 4.0"
+    licence_url: "https://datacatalog.worldbank.org/public-licenses#cc-by"
+    attribution: "Source: World Bank, World Development Indicators, SL.GDP.PCAP.EM.KD (CC BY 4.0)."
+    quality_class: established_research
+    methodology_notes:
+      - "GDP converted at purchasing power parity, divided by total employment (ILO modelled estimates). Per worker, not per hour worked."
+    limitations:
+      - "Countries where people work fewer hours per year look less productive per worker than per hour. Employment for recent years is modelled by the ILO and may be revised."
+
+  worldbank_gdp_per_person_ppp:
+    title: "GDP per capita, PPP (constant 2021 international $), indicator NY.GDP.PCAP.PP.KD"
+    publisher: "World Bank, World Development Indicators"
+    landing_url: "https://data.worldbank.org/indicator/NY.GDP.PCAP.PP.KD"
+    download_url: "https://api.worldbank.org/v2/country/CAN;USA;AUS;GBR;DEU;FRA;JPN;NOR;NLD;SWE;NZL;OED/indicator/NY.GDP.PCAP.PP.KD?format=json&per_page=2000&date=1991:2025"
+    raw_file: "data/raw/worldbank/NY.GDP.PCAP.PP.KD.json"
+    sha256: "d9db0808464e7902e4e5c604eb882c343dde4da53e7de262bf1e2931d22c5c13"
+    retrieved: "2026-11-16"
+    release_in_file: "World Development Indicators, last updated 2026-11-11"
+    reporting_period: "Calendar year, 1991-2025"
+    coverage: "Same 12 countries and groups as above"
+    units: "Constant 2021 international dollars (PPP) per person"
+    licence: "CC BY 4.0"
+    licence_url: "https://datacatalog.worldbank.org/public-licenses#cc-by"
+    attribution: "Source: World Bank, World Development Indicators, NY.GDP.PCAP.PP.KD (CC BY 4.0)."
+    quality_class: established_research
+    methodology_notes:
+      - "GDP converted at purchasing power parity, divided by midyear population."
+    limitations:
+      - "Purchasing power parities are estimates and are revised."
+
+  zenodo_ivory_gull_tracks:
+    title: "Data from: Annual movement patterns of endangered ivory gulls: the importance of sea ice (raw Argos satellite locations, 2010-2013)"
+    publisher: "Spencer, N. C., Gilchrist, H. G. and Mallory, M. L. (Acadia University, Carleton University), via Dryad/Zenodo"
+    doi: "https://doi.org/10.5281/zenodo.4952182"
+    landing_url: "https://zenodo.org/records/4952182"
+    download_url: "https://zenodo.org/api/records/4952182/files/ivgu_raw_data_2010-2013.csv/content"
+    raw_file: "data/raw/wildlife/ivgu_raw_data_2010-2013.csv"
+    sha256: "638315e2a56ad9cd1226062b6418422319ae229791f116cef7b40852306275ae"
+    retrieved: "2026-11-16"
+    release_in_file: "12 satellite-tagged ivory gulls from Seymour Island, Nunavut; June 2010 to 2013"
+    reporting_period: "Argos fixes, several per day"
+    coverage: "Canadian Arctic, Baffin Bay, Davis Strait, Labrador Sea"
+    units: "Latitude and longitude (degrees) with Argos location class"
+    licence: "CC0 1.0 (public domain dedication)"
+    licence_url: "https://creativecommons.org/publicdomain/zero/1.0/"
+    attribution: "Spencer, N. C., Gilchrist, H. G. and Mallory, M. L. (2014). Annual movement patterns of endangered ivory gulls: the importance of sea ice. PLoS ONE 9(12): e115231. Data: Dryad/Zenodo, CC0."
+    quality_class: established_research
+    methodology_notes:
+      - "Only Argos location classes 3, 2 and 1 (estimated error under about 1.5 km) are used. One position per bird per day: the median of that day's fixes. A day that would need more than 500 km of travel from the previous kept day is dropped as a likely bad fix."
+      - "Positions are rounded to 0.2 degrees of latitude and 0.5 degrees of longitude (roughly 15-25 km) before mapping, because the species is endangered."
+    limitations:
+      - "Twelve birds from one colony; transmitters stopped at different times, so fewer birds are tracked in later years. Not a census of the population."
