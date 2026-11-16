@@ -1,7 +1,7 @@
 {
  "short": 16,
  "city": "edmonton",
- "duration": 33.0,
+ "duration": 38.2,
  "map_y": 470,
  "open_zoom": {
   "from": 1.35,
@@ -67,15 +67,15 @@
   },
   {
    "t0": 25.4,
-   "t1": 28.8,
+   "t1": 32.6,
    "y": 260,
    "kick": "LAND COVERED BY BUILDINGS",
    "big": "84 TO 166 km²",
    "sub": "nearly double since 1975"
   },
   {
-   "t0": 29.0,
-   "t1": 32.6,
+   "t0": 32.8,
+   "t1": 37.9,
    "y": 260,
    "kick": "12 CITIES · FREE EXPLORER",
    "big": "WHAT ABOUT YOURS?",
@@ -86,27 +86,33 @@
  "script": [
   {
    "t": 0.2,
-   "say": "This is Edmonton in 1975. Every dark speck is land covered by buildings."
+   "say": "This is Edmonton in 1975. Every dark speck is land covered by buildings.",
+   "take": "2 @45.1"
   },
   {
-   "t": 4.8,
-   "say": "Then the satellites kept watching."
+   "t": 5.0,
+   "say": "Then the satellites kept watching.",
+   "take": "1 @11.7"
   },
   {
    "t": 11.0,
-   "say": "Edmonton didn't really grow up. It grew out."
+   "say": "Edmonton didn't really grow up, but it grew out.",
+   "take": "1 @14.2"
   },
   {
    "t": 20.1,
-   "say": "And it sped up: more was built after 2000 than in the twenty-five years before."
+   "say": "And in time it sped up. More was built after 2000 than in the twenty-five years before.",
+   "take": "2 @56.0"
   },
   {
-   "t": 25.5,
-   "say": "Eighty-four square kilometres of buildings in 1975. A hundred and sixty-six in 2020. Nearly double."
+   "t": 25.6,
+   "say": "Eighty-four square kilometres of buildings in 1975. A hundred and sixty-six in 2020. Nearly doubled.",
+   "take": "2 @62.1"
   },
   {
-   "t": 29.1,
-   "say": "Every big city's in the free explorer. Link's below. Yes, even Saskatoon."
+   "t": 32.8,
+   "say": "Every big city's in the free explorer. Link's below. Yes, even Saskatoon.",
+   "take": "1 @36.6"
   }
  ],
  "tick": {

@@ -1,6 +1,6 @@
 # Short #16 — Edmonton spread out: 1975 to 2020 from space
 
-Status: **review cut rendered, waiting on Tyson's voice take**. Not uploaded, not scheduled.
+Status: **final cut mixed with Tyson's voice (2026-11-16), ready for review**. Not uploaded, not scheduled.
 Files: `shorts2/sprawl.py` (engine), `shorts2/cues/sprawl.json` (timings, cards, checks, script), `shorts2/out/post_copy.json` key `"16"`,
 `web/explore-v2/from-short.js` entry 16. Review cut: `exports/shorts/short-16-edmonton.SCRATCH.mp4` (music bed only, not in git).
 
@@ -21,6 +21,14 @@ Files: `shorts2/sprawl.py` (engine), `shorts2/cues/sprawl.json` (timings, cards,
 - The engine and `post_copy.py` both assert 84, 166, +33 and +49 against the data file, so a wrong card can't render.
 - Honest limits (in the description): ground under buildings, not city limits or the metro area; years between satellite snapshots
   are modelled by the JRC; nothing is drawn between snapshots; the opening camera pull-back is the only motion that isn't data.
+
+## Final mix (voice take 2026-11-16 10:56)
+- Take file `06 - Edmontons city spread.m4a` has two full reads (1: 3–41 s, 2: 45–76 s). Lines used: 1 = take 2, 2 = take 1
+  ("satellites"; take 2 says "satellite"), 3 = take 1 ("grew out"), 4–5 = take 2, 6 = take 1. Clean: high-pass 80 Hz,
+  light denoise, 3:1 compression, per-line level match. Every word checked by re-transcribing the assembled voice.
+- The 84 → 166 line runs 6.8 s, so the ending stretches: duration 38.2 s, reveal card 25.4–32.6, call to action 32.8–37.9.
+  Narration at 0.2, 5.0, 11.0, 20.1, 25.6, 32.8. Loudness −16.4 LUFS, range 6.9 LU.
+- Files: `exports/shorts/short-16-edmonton.mp4`, captions `exports/shorts/short-16-edmonton.srt`.
 
 ## Revision 2 (Tyson's notes, 2026-11-16 10:32)
 - Growth now plays as the years tick: the counter runs 1975 → 2020 one year at a time (4.6–19.6 s). At each snapshot year the picture
