@@ -34,7 +34,9 @@ for b in range(1, nb):
         st = b * SEC + rng.choice([0.5, 1.5, 2.5]); m = NOTES[rng.integers(len(NOTES))]
         k = int(3.0 * SR); tt = np.arange(k) / SR; f = mtof(m)
         s = (np.sin(2 * np.pi * f * tt) + 0.2 * np.sin(4 * np.pi * f * tt)) * np.minimum(tt / 0.012, 1) * np.exp(-tt * 1.6) * 0.035
-        i0 = int(st * SR); j = min(n, i0 + k); L[i0:j] += 0.45 * s[: j - i0]; R[i0:j] += 0.55 * s[: j - i0]
+        i0 = int(st * SR); j = min(n, i0 + k)
+        if i0 >= n: continue
+        L[i0:j] += 0.45 * s[: j - i0]; R[i0:j] += 0.55 * s[: j - i0]
 sos = butter(2, 2200, btype="low", fs=SR, output="sos"); L = sosfilt(sos, L); R = sosfilt(sos, R)
 ir = rng.standard_normal(int(1.8 * SR)) * np.exp(-np.arange(int(1.8 * SR)) / SR * 3.2) * 0.012     # soft room
 L = L + fftconvolve(L, ir)[:n]; R = R + fftconvolve(R, ir[::-1].copy())[:n]

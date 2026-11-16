@@ -1,0 +1,232 @@
+{
+ "duration": 30.0,
+ "camera": [
+  {
+   "t": 0,
+   "at": [
+    6350000,
+    2700000
+   ],
+   "zoom": -13.2
+  },
+  {
+   "t": 1.8,
+   "at": [
+    6600000,
+    2300000
+   ],
+   "zoom": -12.6
+  },
+  {
+   "t": 4.6,
+   "at": "city",
+   "zoom": -8.0
+  },
+  {
+   "t": 6.5,
+   "at": "city",
+   "zoom": -7.8
+  },
+  {
+   "t": 8.2,
+   "at": "hhinc_lo",
+   "zoom": "fit:hhinc_lo",
+   "dz": 0
+  },
+  {
+   "t": 10.0,
+   "at": "hhinc_lo",
+   "zoom": "fit:hhinc_lo",
+   "dz": 0.15
+  },
+  {
+   "t": 11.0,
+   "at": "hhinc_hi",
+   "zoom": "fit:hhinc_hi",
+   "dz": 0
+  },
+  {
+   "t": 13.0,
+   "at": "hhinc_hi",
+   "zoom": "fit:hhinc_hi",
+   "dz": 0.15
+  },
+  {
+   "t": 14.2,
+   "at": "imm_lo",
+   "zoom": "fit:imm_lo",
+   "dz": 0
+  },
+  {
+   "t": 15.8,
+   "at": "imm_lo",
+   "zoom": "fit:imm_lo",
+   "dz": 0.15
+  },
+  {
+   "t": 16.8,
+   "at": "imm_hi",
+   "zoom": "fit:imm_hi",
+   "dz": 0
+  },
+  {
+   "t": 18.4,
+   "at": "imm_hi",
+   "zoom": "fit:imm_hi",
+   "dz": 0.15
+  },
+  {
+   "t": 19.4,
+   "at": "age_lo",
+   "zoom": "fit:age_lo",
+   "dz": 0
+  },
+  {
+   "t": 21.0,
+   "at": "age_lo",
+   "zoom": "fit:age_lo",
+   "dz": 0.15
+  },
+  {
+   "t": 22.0,
+   "at": "age_hi",
+   "zoom": "fit:age_hi",
+   "dz": 0
+  },
+  {
+   "t": 24.5,
+   "at": "age_hi",
+   "zoom": "fit:age_hi",
+   "dz": 0.15
+  },
+  {
+   "t": 27.0,
+   "at": "city",
+   "zoom": -7.9
+  },
+  {
+   "t": 30.0,
+   "at": "city",
+   "zoom": -8.0
+  }
+ ],
+ "measures": [
+  {
+   "t": 0,
+   "k": "hhinc"
+  },
+  {
+   "t": 14.0,
+   "k": "imm"
+  },
+  {
+   "t": 19.2,
+   "k": "age"
+  }
+ ],
+ "highlights": [
+  {
+   "id": "hhinc_lo",
+   "t0": 8.2,
+   "t1": 11.0
+  },
+  {
+   "id": "hhinc_hi",
+   "t0": 11.0,
+   "t1": 13.6
+  },
+  {
+   "id": "imm_lo",
+   "t0": 14.2,
+   "t1": 16.8
+  },
+  {
+   "id": "imm_hi",
+   "t0": 16.8,
+   "t1": 19.0
+  },
+  {
+   "id": "age_lo",
+   "t0": 19.4,
+   "t1": 22.0
+  },
+  {
+   "id": "age_hi",
+   "t0": 22.0,
+   "t1": 25.0
+  }
+ ],
+ "cards": [
+  {
+   "t0": 0,
+   "t1": 2.6,
+   "big": "CANADA",
+   "sub": "41.8 million people",
+   "y": 280
+  },
+  {
+   "t0": 2.6,
+   "t1": 5.4,
+   "big": "TORONTO",
+   "sub": "6.2 million people",
+   "y": 280
+  },
+  {
+   "t0": 5.4,
+   "t1": 8.2,
+   "big": "1,227",
+   "sub": "neighbourhoods (census tracts)",
+   "y": 280
+  },
+  {
+   "t0": 8.2,
+   "t1": 11.0,
+   "kick": "HOUSEHOLD INCOME",
+   "big": "$36,400",
+   "y": 280
+  },
+  {
+   "t0": 11.0,
+   "t1": 14.0,
+   "kick": "HOUSEHOLD INCOME",
+   "big": "$286,000",
+   "y": 280
+  },
+  {
+   "t0": 14.2,
+   "t1": 16.8,
+   "kick": "BORN OUTSIDE CANADA",
+   "big": "1 IN 10",
+   "y": 280
+  },
+  {
+   "t0": 16.8,
+   "t1": 19.2,
+   "kick": "BORN OUTSIDE CANADA",
+   "big": "8 IN 10",
+   "sub": "(78%)",
+   "y": 280
+  },
+  {
+   "t0": 19.4,
+   "t1": 22.0,
+   "kick": "MEDIAN AGE",
+   "big": "28",
+   "y": 280
+  },
+  {
+   "t0": 22.0,
+   "t1": 25.0,
+   "kick": "MEDIAN AGE",
+   "big": "63",
+   "y": 280
+  },
+  {
+   "t0": 25.5,
+   "t1": 30.0,
+   "big": "SAME CITY.",
+   "sub": "Every neighbourhood in 50 cities: free map, link below",
+   "y": 280
+  }
+ ]
+}

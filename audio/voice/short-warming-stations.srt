@@ -1,0 +1,40 @@
+1
+00:00:00,000 --> 00:00:03,500
+Canada has a couple hundred weather stations that have been running for a long, long time.
+
+2
+00:00:03,800 --> 00:00:08,500
+Each one gets compared to its own normal: its average from 1961 to 1990.
+
+3
+00:00:09,300 --> 00:00:13,100
+In the 1970s, 6% of them were warmer than normal.
+
+4
+00:00:13,200 --> 00:00:18,200
+Then the 2000s. 263 stations. 263 were warmer.
+
+5
+00:00:18,700 --> 00:00:19,600
+Every single one.
+
+6
+00:00:20,300 --> 00:00:25,800
+From 2011 to 2020, Inuvik was 3.2 degrees above its normal.
+
+7
+00:00:26,000 --> 00:00:29,400
+Three degrees doesn't sound like much, unless you're in Inuvik.
+
+8
+00:00:30,100 --> 00:00:33,600
+That decade, 216 out of the 217 were warmer.
+
+9
+00:00:34,200 --> 00:00:36,900
+The only one that wasn't was in Three Hills, Alberta.
+
+10
+00:00:37,600 --> 00:00:38,700
+I guess good for Three Hills.
+
