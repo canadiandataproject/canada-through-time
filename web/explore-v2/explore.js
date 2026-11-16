@@ -798,6 +798,34 @@ playBtns.forEach(b => b.onclick = toggle);
 document.getElementById('tl-speed').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; state.speed = +b.dataset.s;
   document.querySelectorAll('#tl-speed button').forEach(x => x.classList.toggle('on', x === b)); });
 
+// ---------------------------------------------------------------- fly-through: one tap, a cinematic camera path
+// West to east across the provinces, then the North, with a lower-third for each (the published value for the year on screen),
+// then back to all of Canada. With a province selected, the camera circles that province instead. Any touch or Esc stops it.
+const lower = document.createElement('div'); lower.id = 'fly-lower'; lower.hidden = true; mapEl.appendChild(lower);
+let FLY = null;
+const ease = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+function camTo(v, ms) { view = { ...view, ...v, transitionDuration: ms, transitionEasing: ease, transitionInterpolator: new deck.LinearInterpolator(['target', 'zoom', 'rotationX', 'rotationOrbit']) }; theDeck.setProps({ viewState: view }); }
+async function flyThrough() {
+  if (FLY) { stopFly(); return; }
+  const tok = FLY = {}, m = M[state.m], y = state.y, f = fitView(), wait = ms => new Promise(r => setTimeout(r, ms)), alive = () => FLY === tok;
+  const small = new Set(['PE', 'NS', 'NB']), split = m.split(y);
+  const order = state.p ? [state.p] : ['BC', 'AB', 'SK', 'MB', 'ON', 'QC', 'NB', 'NS', 'PE', 'NL', 'YT', split ? 'NT' : 'NT+NU', ...(split ? ['NU'] : [])];
+  userMoved = true; document.body.classList.add('fly-on'); document.querySelector('[data-act=fly]')?.classList.add('on'); stop();
+  const show = g => { const gg = (g === 'NT' || g === 'NU') && !split ? 'NT+NU' : g, v = m.kind === 'party' ? null : m.value(gg, y);
+    lower.innerHTML = `<b>${NAMES[gg]}</b><span>${m.label} · ${m.when ? m.when(y) : y}</span>${v != null ? `<em>${m.fmt(v)}</em>` : ''}`; lower.hidden = false; lower.classList.remove('in'); void lower.offsetWidth; lower.classList.add('in'); };
+  camTo({ rotationX: 30, zoom: f.zoom + 0.35, rotationOrbit: -8 }, 1400); await wait(1500);
+  for (const [i, g] of order.entries()) { if (!alive()) return; const at = anchor[g === 'NT+NU' ? 'NT+NU' : g]; if (!at) continue;
+    const z = f.zoom + (small.has(g) ? 2.3 : g === 'NU' || g === 'NT+NU' ? 0.9 : 1.35), orb = -14 + i * (28 / Math.max(1, order.length - 1));
+    camTo({ target: [at[0], at[1], 0], zoom: z, rotationX: state.p ? 38 : 28, rotationOrbit: orb }, i === 0 ? 2200 : 1700); await wait(i === 0 ? 1600 : 1200); if (!alive()) return;
+    show(g); await wait(state.p ? 900 : 1500);
+    if (state.p) { camTo({ rotationOrbit: orb + 40, zoom: z + 0.3 }, 5200); await wait(5400); } }
+  if (!alive()) return; lower.hidden = true; camTo({ ...f }, 2200); await wait(2300); stopFly(true);
+}
+function stopFly(done) { FLY = null; lower.hidden = true; document.body.classList.remove('fly-on'); document.querySelector('[data-act=fly]')?.classList.remove('on');
+  if (!done) camTo({ ...fitView() }, 900); userMoved = false; }
+addEventListener('pointerdown', e => { if (FLY && !e.target.closest('[data-act=fly]')) stopFly(); }, true);
+addEventListener('keydown', e => { if (FLY && e.key === 'Escape') stopFly(); });
+
 // ---------------------------------------------------------------- then / now wipe handle
 const wipeEl = document.createElement('div'); wipeEl.id = 'wipe'; wipeEl.hidden = true; wipeEl.innerHTML = '<i></i><b class="wl"></b><b class="wr"></b><button aria-label="Move the divider">⇆</button>'; mapEl.appendChild(wipeEl);
 function wipeAt(sx) { const vp = theDeck.getViewports()[0]; if (!vp) return; const r = mapEl.getBoundingClientRect(), sy = r.height * 0.5;
@@ -876,6 +904,7 @@ document.getElementById('mapctl').addEventListener('click', e => { const a = e.t
   const v = { ...view };
   if (a === 'zin') v.zoom += 0.5; if (a === 'zout') v.zoom -= 0.5;
   if (a === 'wipe') { toggleWipe(); return; }
+  if (a === 'fly') { flyThrough(); return; }
   if (a === 'tilt') v.rotationX = isPhone() ? (Math.abs(v.rotationX - fitView().rotationX) < 3 ? (fitView().rotationX > 60 ? 40 : 70) : fitView().rotationX) : v.rotationX > 10 ? 0 : fitView().rotationX; if (a === 'reset') { Object.assign(v, fitView()); userMoved = false; } else userMoved = true;
   view = { ...boundView(v), transitionDuration: 500, transitionInterpolator: new deck.LinearInterpolator(['target', 'zoom', 'rotationX', 'rotationOrbit']) };
   theDeck.setProps({ viewState: view }); });
