@@ -7,7 +7,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 ROOT = Path(__file__).resolve().parents[1]
 K = os.environ["BUFFER_KEY"]; YT = "6afa9c26ece6dfde5fdf8b01"; XC = "6afa9c4eece6dfde5fdf8e92"
-BASE = "https://tjreeve-ship-it.github.io/canada-through-time/media/"
+BASE = "https://canadiandataproject.github.io/canada-through-time/media/"
 num, media, when = sys.argv[1:4]
 copy = json.loads((ROOT / "shorts2/out/post_copy.json").read_text())[num]
 due = datetime.datetime.fromisoformat(when).replace(tzinfo=ZoneInfo("America/Edmonton")).isoformat()

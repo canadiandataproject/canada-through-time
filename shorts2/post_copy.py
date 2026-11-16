@@ -3,7 +3,7 @@ videos use; asserts keep the wording true. Writes shorts2/out/post_copy.json."""
 import json
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]; D = ROOT / "web/data"
-SITE = "https://tjreeve-ship-it.github.io/canada-through-time/"
+SITE = "https://canadiandataproject.github.io/canada-through-time/"
 
 pa = json.loads((D / "money/public_accounts.json").read_text()); v = dict(zip(pa["objects"], pa["totals"]["2026"])); TOT = sum(v.values()) * 1e3
 pop = json.loads((D / "population.json").read_text()); P25 = pop["series"]["CAN"][pop["dates"].index("2025-07-01")]
@@ -36,7 +36,7 @@ out["12"] = dict(
 Per person uses Statistics Canada's population on July 1, 2025 ({P25/1e6:.1f}M). Gross expenditures by standard object; items may not add due to rounding.
 Voice, music and sound: original.
 
-Explore federal spending by department and year: {SITE}#mn=spend/2026
+Explore federal spending by department and year: {SITE}?s=12#mn=spend/2026
 
 #Canada #FederalSpending #DataViz""",
     x=f"""Ottawa spent ${TOT/1e9:.1f}B in 2025–26. Here's the receipt.
@@ -66,7 +66,7 @@ out["13"] = dict(
 Contract value is the total committed over the life of the contract (including amendments and taxes), counted once in the year it was first awarded. Lamps: green = competed, red = non-competitive.
 Voice, music and sound: original.
 
-Explore every contract by department, vendor and province: {SITE}#mn=contracts/all
+Explore every contract by department, vendor and province: {SITE}?s=13#mn=contracts/all
 
 #Canada #Procurement #DataViz""",
     x=f"""Ottawa has disclosed {NC/1e6:.2f}M contracts (${CT/1e9:.0f}B).
@@ -94,7 +94,7 @@ out["14"] = dict(
 Income is for 2020 (pandemic benefits included).
 Voice, music and sound: original.
 
-Every neighbourhood in 50 cities, free: {SITE}#nb=535/hhinc
+Every neighbourhood in 50 cities, free: {SITE}?s=14#nb=535/hhinc
 
 #Toronto #Canada #DataViz""",
     x=f"""Toronto has {len(TOR):,} neighbourhoods (census tracts).
@@ -123,7 +123,7 @@ out["15"] = dict(
 Series starts July 1, 2021 after a method change.
 Voice, music and sound: original.
 
-Explore by province: {SITE}
+Explore by province: {SITE}?s=15#nprsh-2026
 
 #Canada #Immigration #DataViz""",
     x=f"""Temporary residents in Canada (July 1):

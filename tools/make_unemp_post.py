@@ -28,7 +28,7 @@ How to read it: lowest rate is ranked #1; equal published rates share #1. Annual
 Source: Statistics Canada, table 14-10-0327-01 (Open Government Licence – Canada).
 Music and sound: original.
 
-Explore every province, every year: https://tjreeve-ship-it.github.io/canada-through-time/#ur-{lt['year']}
+Explore every province, every year: https://canadiandataproject.github.io/canada-through-time/#ur-{lt['year']}
 
 #Canada #Jobs #DataViz
 

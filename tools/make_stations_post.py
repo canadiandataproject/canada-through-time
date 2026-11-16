@@ -28,7 +28,7 @@ How to read it: each dot is one station's 10-year average annual temperature min
 Source: Environment and Climate Change Canada, AHCCD (Open Government Licence – Canada).
 Music and sound: original.
 
-Explore every station, every year: https://tjreeve-ship-it.github.io/canada-through-time/#cl=temp/{y1}
+Explore every station, every year: https://canadiandataproject.github.io/canada-through-time/#cl=temp/{y1}
 
 #Canada #Climate #DataViz
 
