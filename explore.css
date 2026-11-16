@@ -1313,3 +1313,8 @@ body.journey-on #mtl, body.journey-on #timeline { opacity: .35; }
 .hjourney .jpl { flex: none; width: 44px; height: 44px; border-radius: 50%; background: #C2402A; color: #fff; display: grid; place-items: center; font-size: 17px; }
 .hjourney b { display: block; font: 600 19px/1.2 "Newsreader", Georgia, serif; } .hjourney span span { display: block; font-size: 13px; color: #CDBF9F; margin-top: 3px; }
 #journey [hidden], #journey[hidden] { display: none !important; }
+.hgaps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: -24px 0 36px; }
+.hgap.small { margin: 0; padding: 14px 16px; grid-template-columns: 1fr; grid-template-areas: "k" "t" "d"; }
+.hgap.small .gt { font-size: 18px; }
+.hgap:has(+ .hgaps) { margin-bottom: 36px; }
+@media (max-width: 760px) { .hgaps { grid-template-columns: 1fr; } }
