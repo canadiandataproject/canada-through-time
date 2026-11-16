@@ -350,5 +350,5 @@ async function open(opts = {}) {
   render(); requestAnimationFrame(fit);
 }
 function close() { S.playing = false; clearInterval(timer); el.hidden = true; document.body.classList.remove('nb-on'); history.replaceState(null, '', prevHash || location.pathname + location.search); dispatchEvent(new Event('nb-close')); }
-window.CLIMATE = { open, close, _render: () => render(), get state() { return S; }, get data() { return { A, G }; }, anom, baseline, perDecade, cum };
+window.CLIMATE = { open, close, _render: () => render(), get forest() { return F; }, loadForest, get state() { return S; }, get data() { return { A, G }; }, anom, baseline, perDecade, cum };
 if (location.hash.startsWith('#cl=')) open();

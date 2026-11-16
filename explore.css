@@ -1279,3 +1279,37 @@ body.has-shell #ab { top: var(--shell-h); }
 #wipe b { position: absolute; top: calc(50% - 66px); font: 600 22px/1 "Newsreader", Georgia, serif; color: var(--ink-1); background: color-mix(in srgb, var(--panel) 88%, transparent); padding: 3px 8px; border-radius: 8px; white-space: nowrap; }
 #wipe .wl { right: 8px; } #wipe .wr { left: 8px; }
 #mapctl button.wipeb.on { background: var(--accent); color: #fff; }
+
+/* guided journey: a short documentary that drives the explorer */
+#journey { position: fixed; inset: 0; z-index: 900; pointer-events: none; }
+#journey .jcard { position: absolute; inset: 0; pointer-events: auto; background: #1b1712; color: #F3E9D6; display: grid; place-items: center; overflow: hidden; }
+#journey .jgrain { position: absolute; inset: -50%; opacity: .16; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='.9'/></svg>"); animation: jgrain 0.9s steps(4) infinite; }
+@keyframes jgrain { 0% { transform: translate(0, 0); } 25% { transform: translate(-3%, 2%); } 50% { transform: translate(2%, -3%); } 75% { transform: translate(-1%, 3%); } }
+#journey .jcard::after { content: ""; position: absolute; inset: 0; box-shadow: inset 0 0 160px 40px rgba(0,0,0,.7); pointer-events: none; }
+#journey .jin { position: relative; z-index: 1; max-width: 640px; padding: 32px; text-align: center; animation: jfade 1.6s ease both; }
+@keyframes jfade { from { opacity: 0; transform: scale(1.02); } to { opacity: 1; transform: none; } }
+#journey .jk { font: 500 12px/1.4 "Newsreader", Georgia, serif; letter-spacing: .32em; text-transform: uppercase; color: #C9B48E; margin-bottom: 18px; }
+#journey .jcard h1 { font: 500 clamp(38px, 8vw, 72px)/1.02 "Newsreader", Georgia, serif; margin: 0 0 18px; letter-spacing: -.01em; }
+#journey .jcard h1::after { content: ""; display: block; width: 64px; height: 2px; background: #C2402A; margin: 22px auto 0; }
+#journey .jcard p { font: 400 clamp(17px, 2.6vw, 21px)/1.5 "Newsreader", Georgia, serif; color: #E6D9C0; margin: 0; }
+#journey .jend { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 28px; }
+#journey .jend button { font: 600 15px/1 inherit; padding: 13px 20px; border-radius: 99px; border: 1px solid #C9B48E; background: transparent; color: #F3E9D6; cursor: pointer; }
+#journey .jend button:first-child { background: #C2402A; border-color: #C2402A; color: #fff; }
+#journey .jbar { position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%); width: min(94vw, 760px); pointer-events: auto; background: rgba(27, 23, 18, .92); color: #F3E9D6; border-radius: 18px; padding: 12px 16px 12px; box-shadow: 0 12px 40px rgba(0,0,0,.35); backdrop-filter: blur(4px); }
+#journey.carded .jbar { background: transparent; box-shadow: none; }
+#journey .jcap { font: 400 clamp(16px, 2.2vw, 19px)/1.45 "Newsreader", Georgia, serif; margin: 6px 0 10px; min-height: 2.9em; }
+#journey .jcap.in { animation: jcap .8s ease both; }
+@keyframes jcap { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+#journey .jdots { display: flex; gap: 5px; }
+#journey .jdots i { flex: 1; height: 3px; border-radius: 2px; background: rgba(243,233,214,.22); }
+#journey .jdots i.done { background: rgba(243,233,214,.6); } #journey .jdots i.now { background: #C2402A; }
+#journey .jctl { display: flex; gap: 8px; align-items: center; }
+#journey .jctl button { background: rgba(243,233,214,.1); color: #F3E9D6; border: 0; border-radius: 99px; min-width: 40px; height: 36px; padding: 0 12px; font-size: 16px; cursor: pointer; }
+#journey .jctl .jx { margin-left: auto; }
+#journey.paused .jp { background: #C2402A; color: #fff; }
+@media (max-width: 1100px) { #journey .jbar { bottom: 10px; padding: 10px 12px; } }
+body.journey-on #mtl, body.journey-on #timeline { opacity: .35; }
+.hjourney { display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; margin: 14px 0 6px; padding: 16px 18px; border-radius: 16px; border: 0; cursor: pointer; background: #1b1712; color: #F3E9D6; }
+.hjourney .jpl { flex: none; width: 44px; height: 44px; border-radius: 50%; background: #C2402A; color: #fff; display: grid; place-items: center; font-size: 17px; }
+.hjourney b { display: block; font: 600 19px/1.2 "Newsreader", Georgia, serif; } .hjourney span span { display: block; font-size: 13px; color: #CDBF9F; margin-top: 3px; }
+#journey [hidden], #journey[hidden] { display: none !important; }
