@@ -1,0 +1,194 @@
+{
+ "duration": 29.0,
+ "print": [
+  {
+   "key": "h0",
+   "t": 0.0,
+   "dur": 0.0
+  },
+  {
+   "key": "h1",
+   "t": 0.0,
+   "dur": 0.0
+  },
+  {
+   "key": "h2",
+   "t": 0.0,
+   "dur": 0.0
+  },
+  {
+   "key": "d0",
+   "t": 0.0,
+   "dur": 0.0
+  },
+  {
+   "key": "Transfer payments",
+   "t": 5.6,
+   "dur": 0.6
+  },
+  {
+   "key": "Personnel",
+   "t": 9.4,
+   "dur": 0.5
+  },
+  {
+   "key": "Public debt charges",
+   "t": 11.6,
+   "dur": 0.5
+  },
+  {
+   "key": "Professional and special services",
+   "t": 15.4,
+   "dur": 0.5
+  },
+  {
+   "key": "Other subsidies and payments",
+   "t": 16.62,
+   "dur": 0.2
+  },
+  {
+   "key": "Acquisition of machinery and equipment",
+   "t": 16.84,
+   "dur": 0.2
+  },
+  {
+   "key": "Rentals",
+   "t": 17.06,
+   "dur": 0.2
+  },
+  {
+   "key": "Repair and maintenance",
+   "t": 17.28,
+   "dur": 0.2
+  },
+  {
+   "key": "Utilities, materials and supplies",
+   "t": 17.5,
+   "dur": 0.2
+  },
+  {
+   "key": "Acquisition of land, buildings and works",
+   "t": 17.72,
+   "dur": 0.2
+  },
+  {
+   "key": "Transportation and communications",
+   "t": 17.94,
+   "dur": 0.2
+  },
+  {
+   "key": "Information",
+   "t": 18.16,
+   "dur": 0.2
+  },
+  {
+   "key": "d1",
+   "t": 18.6,
+   "dur": 0.35
+  },
+  {
+   "key": "total",
+   "t": 19.6,
+   "dur": 0.35
+  },
+  {
+   "key": "per",
+   "t": 21.4,
+   "dur": 0.35
+  },
+  {
+   "key": "day",
+   "t": 23.4,
+   "dur": 0.35
+  },
+  {
+   "key": "d2",
+   "t": 23.8,
+   "dur": 0.35
+  },
+  {
+   "key": "thx",
+   "t": 24.4,
+   "dur": 0.35
+  },
+  {
+   "key": "src",
+   "t": 24.7,
+   "dur": 0.35
+  },
+  {
+   "key": "src2",
+   "t": 25.0,
+   "dur": 0.35
+  },
+  {
+   "key": "pad",
+   "t": 25.3,
+   "dur": 0.35
+  }
+ ],
+ "camera": [
+  {
+   "t": 0,
+   "z": 1.3,
+   "rot": -2.5
+  },
+  {
+   "t": 17,
+   "z": 1.15,
+   "rot": 1.5
+  },
+  {
+   "t": 19.6,
+   "z": 1.05,
+   "rot": 0,
+   "focus": "total"
+  },
+  {
+   "t": 21.4,
+   "z": 1.1,
+   "rot": -0.5,
+   "focus": "per"
+  },
+  {
+   "t": 25.5,
+   "z": 0.95,
+   "rot": 0.5,
+   "focus": "per"
+  },
+  {
+   "t": 29,
+   "z": 0.92,
+   "rot": 0.8,
+   "focus": "per"
+  }
+ ],
+ "circles": [
+  {
+   "key": "Public debt charges",
+   "t": 12.6,
+   "note": "buys nothing"
+  }
+ ],
+ "stamps": [
+  {
+   "key": "thx",
+   "t": 26.6,
+   "text": "NO RETURNS"
+  }
+ ],
+ "captions": [
+  {
+   "t0": 0,
+   "t1": 4.6,
+   "text": "OTTAWA SPENT $493B.\nHERE'S THE RECEIPT.",
+   "size": 92
+  },
+  {
+   "t0": 4.6,
+   "t1": 19.4,
+   "text": "FEDERAL SPENDING, 2025\u201326",
+   "size": 64
+  }
+ ]
+}

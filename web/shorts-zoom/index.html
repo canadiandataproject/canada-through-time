@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Short capture: one zoom</title>
+<style>html,body{margin:0;height:100%;background:#DCE5E4;overflow:hidden}#map{position:fixed;inset:0}</style></head>
+<body><div id="map"></div>
+<script src="../vendor/deck.min.js"></script>
+<script>
+// Capture page for Short #14: one continuous camera move from Canada to Toronto's census tracts, using the explorer's
+// own data files and its Field Paper · Ember palette. Coordinates: Statistics Canada Lambert, metres (same as the explorer).
+const { Deck, OrthographicView, GeoJsonLayer, BitmapLayer } = deck;
+const PAL = { ocean: [220, 229, 228], land: [251, 248, 241], coast: [127, 143, 144], bound: [107, 100, 87], miss: [201, 195, 182], sel: [15, 42, 51],
+  seq: ['#EFC4A0', '#E39A72', '#C8663F', '#8E3F2A', '#4E2318'].map(h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16))) };
+const lerp = (a, b, t) => a.map((x, i) => Math.round(x + (b[i] - x) * t));
+const rampAt = t => { t = Math.max(0, Math.min(1, t)) * 4; const i = Math.min(3, Math.floor(t)); return lerp(PAL.seq[i], PAL.seq[i + 1], t - i); };
+const J = u => fetch(u).then(r => r.json());
+let P, F, SH, PROV, LAKES, RELIEF, D = {}, cur = {};
+const CMA = '2021S0503535';
+const val = (a, k) => a && a.v[F.indexOf(k)];
+function domain(k) { const xs = SH.features.map(f => val(P.areas[f.properties.DGUID], k)).filter(v => v != null).sort((a, b) => a - b);
+  return { lo: xs[Math.floor((xs.length - 1) * 0.02)], hi: xs[Math.floor((xs.length - 1) * 0.98)] }; }
+function col(k, v) { if (v == null) return PAL.miss; const d = D[k]; return rampAt((v - d.lo) / (d.hi - d.lo)); }
+const deckI = new Deck({ parent: document.getElementById('map'), views: new OrthographicView({ flipY: false }), controller: false,
+  initialViewState: { target: [7000000, 1500000, 0], zoom: -13 }, layers: [] });
+async function init() {
+  const [p, s, pr, lk, rel] = await Promise.all([J('../data/cities/ct_profile.json'), J('../data/cities/ct_shapes.geojson'), J('../data/provinces.geojson'), J('../data/lakes.geojson'), J('../data/relief/relief.json')]);
+  P = p; F = p.fields; PROV = pr; LAKES = lk;
+  SH = { type: 'FeatureCollection', features: s.features.filter(f => P.areas[f.properties.DGUID] && P.areas[f.properties.DGUID].cma === CMA) };
+  for (const k of ['hhinc', 'imm', 'age', 'rent', 'nonoff']) D[k] = domain(k);
+  const im = new Image(); im.src = '../data/relief/relief_canada_3km.png'; await im.decode(); RELIEF = { img: im, b: rel.bounds_km.map(x => x * 1000) };
+  window.READY = true; return { tracts: SH.features.length, dom: D };
+}
+// state: {target:[x,y], zoom, a:'hhinc', b:'imm', mix:0..1, hl:[DGUID,...], tractAlpha}
+window.setFrame = async (st) => {
+  const [l, b, r, t] = RELIEF.b, ta = st.tractAlpha ?? 1;
+  const fill = f => { const a = P.areas[f.properties.DGUID]; const c1 = col(st.a, val(a, st.a)); const c2 = st.b ? col(st.b, val(a, st.b)) : c1; return [...lerp(c1, c2, st.mix || 0), Math.round(255 * ta)]; };
+  const layers = [
+    new GeoJsonLayer({ id: 'prov', data: PROV, filled: true, stroked: true, getFillColor: PAL.land, getLineColor: PAL.bound, lineWidthUnits: 'pixels', getLineWidth: 1.2 }),
+    new BitmapLayer({ id: 'relief', image: RELIEF.img, bounds: [l, b, r, t], opacity: 0.32, parameters: { depthTest: false } }),
+    new GeoJsonLayer({ id: 'lakes', data: LAKES, filled: true, stroked: false, getFillColor: PAL.ocean }),
+    new GeoJsonLayer({ id: 'tracts', data: SH, filled: true, stroked: true, getFillColor: fill, getLineColor: [251, 248, 241, Math.round(200 * ta)], lineWidthUnits: 'pixels', getLineWidth: st.zoom > -7.5 ? 0.6 : 0.2,
+      updateTriggers: { getFillColor: [st.a, st.b, st.mix, ta], getLineColor: ta } }),
+    new GeoJsonLayer({ id: 'hl0', data: { type: 'FeatureCollection', features: SH.features.filter(f => (st.hl || []).includes(f.properties.DGUID)) }, filled: false, stroked: true,
+      getLineColor: [251, 248, 241], lineWidthUnits: 'pixels', getLineWidth: 9, updateTriggers: { getLineColor: (st.hl || []).join() } }),
+    new GeoJsonLayer({ id: 'hl', data: { type: 'FeatureCollection', features: SH.features.filter(f => (st.hl || []).includes(f.properties.DGUID)) }, filled: false, stroked: true,
+      getLineColor: PAL.sel, lineWidthUnits: 'pixels', getLineWidth: 4, updateTriggers: { getLineColor: (st.hl || []).join() } }),
+  ];
+  deckI.setProps({ layers, viewState: { target: [...st.target, 0], zoom: st.zoom } });
+  await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))); deckI.redraw(true);
+  await new Promise(r => requestAnimationFrame(r)); return true;
+};
+window.tractCentre = id => { const f = SH.features.find(x => x.properties.DGUID === id); let sx = 0, sy = 0, n = 0;
+  const walk = c => typeof c[0] === 'number' ? (sx += c[0], sy += c[1], n++) : c.forEach(walk); walk(f.geometry.coordinates); return [sx / n, sy / n]; };
+window.tractBox = id => { const f = SH.features.find(x => x.properties.DGUID === id); let b = [1e12, 1e12, -1e12, -1e12]; const walk = c => typeof c[0] === 'number' ? (b = [Math.min(b[0], c[0]), Math.min(b[1], c[1]), Math.max(b[2], c[0]), Math.max(b[3], c[1])]) : c.forEach(walk); walk(f.geometry.coordinates); return b; };
+window.cityBox = () => { let b = [1e12, 1e12, -1e12, -1e12]; const walk = c => typeof c[0] === 'number' ? (b = [Math.min(b[0], c[0]), Math.min(b[1], c[1]), Math.max(b[2], c[0]), Math.max(b[3], c[1])]) : c.forEach(walk);
+  SH.features.forEach(f => walk(f.geometry.coordinates)); return b; };
+window.INIT = init();
+</script></body></html>

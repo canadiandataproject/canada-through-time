@@ -27,18 +27,19 @@ PROV = {"AB": "Alta.", "NT": "N.W.T."}
 idx = lambda y: y - Y0
 c1 = lambda a: ("+" if a > 0 else "−") + f"{abs(a):.1f} °C"
 cfg = dict(
-    id="short-warming-stations", format="9x16", fps=30, title="How many of Canada's weather stations got warmer?", years=[Y0, Y1], ramp=["#2F6DB5", "#F1ECDD", "#C2412D"], range=2.0, theme="notebook", wobble=3, channel="The Canadian Data Project",
+    id="short-warming-stations", format="9x16", voice="audio/voice/short-warming-stations.wav", fps=30, title="How many of Canada's weather stations got warmer?", years=[Y0, Y1], ramp=["#2F6DB5", "#F1ECDD", "#C2412D"], range=2.0, theme="notebook", wobble=3, channel="The Canadian Data Project",
     kicker="Long-running weather stations · 10-year average",
     between="Between cards, the 10-year window steps forward one year at a time; each dot is a station coloured by its 10-year average minus its own 1961–1990 average, and the counter shows how many were warmer.",
-    hook=dict(seconds=3.2, question="How many of Canada’s weather stations have <em>warmed</em>?"),
+    hook=dict(seconds=3.0,  question="How many of Canada’s weather stations have <em>warmed</em>?"),
     plan=[
-        dict(kind="run", to=3, s=3.2, ease="linear"),
-        dict(kind="run", to=idx(1985), s=9.5, ease="linear"),
-        dict(kind="run", to=idx(2010), s=5.0, ease="inout", riser=True),
-        dict(kind="beat", s=3.2, kicker="2001–2010", big=f"{c10[0]} of {c10[1]}", line="stations were warmer than their own <em>1961–1990</em> average. Every one.", sfx="hit", cardTop=300),
-        dict(kind="run", to=idx(Y1), s=2.2, ease="out"),
-        dict(kind="beat", s=3.2, kicker=f"{Y1 - 9}–{Y1} · {hot['name']}, {PROV.get(hot['prov'], hot['prov'])}", big=c1(hot["an"][Y1]), line="above its 1961–1990 average: the most of any station", focus=[hot["id"]], cardTop=700),
-        dict(kind="summary", s=5.0),
+        dict(kind="run", to=3, s=3.0, ease="linear"),
+        dict(kind="run", to=idx(1980), s=7.4, ease="linear"),
+        dict(kind="run", to=idx(1980), s=2.7, ease="linear"),   # hold on 1971–80 while the narration says 6%
+        dict(kind="run", to=idx(2010), s=1.1, ease="inout", riser=True),
+        dict(kind="beat", s=6.0, kicker="2001–2010", big=f"{c10[0]} of {c10[1]}", line="stations were warmer than their own <em>1961–1990</em> average. Every one.", sfx="hit", cardTop=300),
+        dict(kind="run", to=idx(Y1), s=2.3, ease="out"),
+        dict(kind="beat", s=7.5, kicker=f"{Y1 - 9}–{Y1} · {hot['name']}, {PROV.get(hot['prov'], hot['prov'])}", big=c1(hot["an"][Y1]), line="above its 1961–1990 average: the most of any station", focus=[hot["id"]], cardTop=700),
+        dict(kind="summary", s=9.4),
         dict(kind="loop", s=0.8),
     ],
     summary=dict(kicker=f"{Y1 - 9}–{Y1}", big=f"{c20[0]} of {c20[1]}", line="long-running weather stations were <em>warmer</em> than their own 1961–1990 average",

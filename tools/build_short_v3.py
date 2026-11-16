@@ -44,10 +44,20 @@ for fr, kind in cues:
     if n > 0: mix[i0:i0 + n] += x[:n]
     if kind == "hit":                              # duck the bed under the hit
         d = min(int(1.2 * 48000), len(mix) - i0); mix[i0:i0 + d] -= bed[i0:i0 + d] * np.linspace(0.6, 0, d)[:, None]
+# ---- optional voiceover (cfg "voice": path from repo root, already timed to the plan): music ducks under the voice
+VOICE = cfg.get("voice")
+if VOICE:
+    vo = load(ROOT / VOICE); vo = vo / max(1e-9, np.abs(vo).max()) * 0.9
+    if len(vo) < len(mix): vo = np.pad(vo, ((0, len(mix) - len(vo)), (0, 0)))
+    vo = vo[:len(mix)]
+    env = np.abs(vo).mean(1); w = int(0.25 * 48000); env = np.convolve(env, np.ones(w) / w, "same")   # smoothed level
+    talk = np.clip(env / max(1e-9, np.percentile(env[env > 0], 60)), 0, 1)[:, None]
+    mix = mix * (0.45 - 0.25 * talk) + vo          # music sits well under the voice, comes up slightly in the pauses
 # loop: fade the last 0.25 s into the first 0.25 s level so the audio seam is soft
-k = int(0.25 * 48000); mix[-k:] *= np.linspace(1, 0.35, k)[:, None]; mix[:k] *= np.linspace(0.35, 1, k)[:, None]
+k = int(0.25 * 48000); mix[-k:] *= np.linspace(1, 0.35, k)[:, None]
+if not VOICE: mix[:k] *= np.linspace(0.35, 1, k)[:, None]   # never fade the first spoken word
 (OUT / "mix_raw.f32").write_bytes(mix.astype(np.float32).tobytes())
-run("ffmpeg", "-y", "-v", "error", "-f", "f32le", "-ar", "48000", "-ac", "2", "-i", str(OUT / "mix_raw.f32"), "-af", "loudnorm=I=-21:TP=-3:LRA=7" if STYLE == "calm" else "loudnorm=I=-16:TP=-1.5:LRA=9", "-ar", "48000", str(OUT / "mix.wav"))
+run("ffmpeg", "-y", "-v", "error", "-f", "f32le", "-ar", "48000", "-ac", "2", "-i", str(OUT / "mix_raw.f32"), "-af", "loudnorm=I=-16:TP=-1.5:LRA=9" if VOICE else "loudnorm=I=-21:TP=-3:LRA=7" if STYLE == "calm" else "loudnorm=I=-16:TP=-1.5:LRA=9", "-ar", "48000", str(OUT / "mix.wav"))
 (OUT / "mix_raw.f32").unlink()
 final = OUT / f"{ID}_1080x1920.mp4"
 run("ffmpeg", "-y", "-v", "error", "-i", str(V), "-i", str(OUT / "mix.wav"), "-map", "0:v", "-map", "1:a", "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-shortest", "-movflags", "+faststart", str(final))
@@ -65,8 +75,10 @@ strip = lambda s: __import__("re").sub(r"<[^>]+>", "", s)
 caps = [((0, round(cfg["hook"]["seconds"] * fps)), strip(cfg["hook"]["question"]))]
 caps += [((a, b), t) for t, a, b in runs(lambda r: r["annotation"]) if t]
 caps.sort(key=lambda c: c[0][0])
-(OUT / f"{ID}.srt").write_text("".join(f"{i}\n{ts(a)} --> {ts(b)}\n{t}\n\n" for i, ((a, b), t) in enumerate(caps, 1)))
-tr = ["# On-screen text transcript (no narration; original music and sound effects)", ""] + [f"[{ts(a)[3:8]}–{ts(b)[3:8]}] {t}" for (a, b), t in caps]
+VSRT = (ROOT / VOICE).with_suffix(".srt") if VOICE else None
+if VSRT and VSRT.exists(): shutil.copy(VSRT, OUT / f"{ID}.srt")       # captions = the spoken words
+else: (OUT / f"{ID}.srt").write_text("".join(f"{i}\n{ts(a)} --> {ts(b)}\n{t}\n\n" for i, ((a, b), t) in enumerate(caps, 1)))
+tr = ["# On-screen text transcript (" + ("voiceover by the channel; captions in the .srt" if VOICE else "no narration") + "; original music and sound effects)", ""] + [f"[{ts(a)[3:8]}–{ts(b)[3:8]}] {t}" for (a, b), t in caps]
 tr += ["", cfg.get("between") or f"Between cards, the year counts up and the #1 {cfg.get('noun', 'country')} and its published value for that year are shown.", f"Footer: {strip(cfg['note'])}",
        "", "Sound cues (frame: kind): " + ", ".join(f"{f}: {k}" for f, k in cues)]
 (OUT / "transcript.md").write_text("\n".join(tr) + "\n")

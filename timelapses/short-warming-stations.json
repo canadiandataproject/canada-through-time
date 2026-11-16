@@ -19,32 +19,38 @@
  "kicker": "Long-running weather stations · 10-year average",
  "between": "Between cards, the 10-year window steps forward one year at a time; each dot is a station coloured by its 10-year average minus its own 1961–1990 average, and the counter shows how many were warmer.",
  "hook": {
-  "seconds": 3.2,
+  "seconds": 3.0,
   "question": "How many of Canada’s weather stations have <em>warmed</em>?"
  },
  "plan": [
   {
    "kind": "run",
    "to": 3,
-   "s": 3.2,
+   "s": 3.0,
    "ease": "linear"
   },
   {
    "kind": "run",
-   "to": 76,
-   "s": 9.5,
+   "to": 71,
+   "s": 7.4,
+   "ease": "linear"
+  },
+  {
+   "kind": "run",
+   "to": 71,
+   "s": 2.7,
    "ease": "linear"
   },
   {
    "kind": "run",
    "to": 101,
-   "s": 5.0,
+   "s": 1.1,
    "ease": "inout",
    "riser": true
   },
   {
    "kind": "beat",
-   "s": 3.2,
+   "s": 6.0,
    "kicker": "2001–2010",
    "big": "263 of 263",
    "line": "stations were warmer than their own <em>1961–1990</em> average. Every one.",
@@ -54,12 +60,12 @@
   {
    "kind": "run",
    "to": 111,
-   "s": 2.2,
+   "s": 2.3,
    "ease": "out"
   },
   {
    "kind": "beat",
-   "s": 3.2,
+   "s": 7.5,
    "kicker": "2011–2020 · Inuvik, N.W.T.",
    "big": "+3.2 °C",
    "line": "above its 1961–1990 average: the most of any station",
@@ -70,7 +76,7 @@
   },
   {
    "kind": "summary",
-   "s": 5.0
+   "s": 9.4
   },
   {
    "kind": "loop",
@@ -552,5 +558,6 @@
     -0.614
    ]
   ]
- }
+ },
+ "voice": "audio/voice/short-warming-stations.wav"
 }

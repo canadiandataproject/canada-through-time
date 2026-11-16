@@ -24,7 +24,7 @@
  "kicker": "Glacier mass balance · running total · WGMS",
  "between": "Between cards, the year counts up and each glacier’s line extends to its running total for that year, labelled with the published-years sum.",
  "hook": {
-  "seconds": 3.2,
+  "seconds": 3.4,
   "question": "How much ice have Canada’s <em>glaciers</em> lost?"
  },
  "yearSub": "Running total, metres of water equivalent, from each glacier’s first measured year",
@@ -76,18 +76,18 @@
   {
    "kind": "run",
    "to": 3,
-   "s": 3.2,
+   "s": 3.4,
    "ease": "linear"
   },
   {
    "kind": "run",
    "to": 40,
-   "s": 8.0,
+   "s": 4.8,
    "ease": "linear"
   },
   {
    "kind": "beat",
-   "s": 3.2,
+   "s": 2.2,
    "kicker": "Peyto · 1966–2000",
    "big": "−18.2 m",
    "line": "lost in its first 35 years of measurement",
@@ -100,19 +100,19 @@
   {
    "kind": "run",
    "to": 62,
-   "s": 5.0,
+   "s": 0.8,
    "ease": "linear",
    "riser": true
   },
   {
    "kind": "run",
    "to": 63,
-   "s": 1.2,
+   "s": 0.3,
    "ease": "out"
   },
   {
    "kind": "beat",
-   "s": 3.4,
+   "s": 7.9,
    "kicker": "2023 · one year",
    "big": "−4.4 m",
    "line": "<em>Helm</em>’s biggest one-year loss measured since 1975. The biggest ever measured at <em>Place</em> and <em>Peyto</em> too",
@@ -127,12 +127,12 @@
   {
    "kind": "run",
    "to": 65,
-   "s": 1.4,
+   "s": 1.7,
    "ease": "out"
   },
   {
    "kind": "beat",
-   "s": 3.6,
+   "s": 4.1,
    "kicker": "Peyto · 2001–2025",
    "big": "−30.3 m",
    "line": "in the next 25 years: <em>more</em> than in the 35 before",
@@ -144,7 +144,7 @@
   },
   {
    "kind": "summary",
-   "s": 5.0
+   "s": 8.7
   },
   {
    "kind": "loop",
@@ -249,5 +249,6 @@
    -10.57,
    -20.41
   ]
- }
+ },
+ "voice": "audio/voice/short-glaciers.wav"
 }
