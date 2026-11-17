@@ -70,32 +70,16 @@ function build() {
   addEventListener('resize', () => { if (!el.hidden) fit(); });
 }
 let timer = null, CLZ = null;
-// Sideways drag on the map travels through the years (temperature, precipitation, forests) at the whole-Canada view; zoomed in,
-// or with Shift held, drag moves the map. Two fingers always pinch and move it.
-function bindScrub(mapBox) {
-  const hud = document.createElement('div'); hud.className = 'cl-scrub'; hud.hidden = true; mapBox.appendChild(hud);
-  let g = null; const pts = new Set();
-  const fitZ = () => { const box = mapBox.getBoundingClientRect(); return Math.log2(Math.min(box.width / 5400, box.height / 4600) * 0.98); };
-  const ok = e => (S.mode === 'temp' || S.mode === 'precip' || S.mode === 'forest' || S.mode === 'sprawl') && !e.shiftKey && e.button === 0 && pts.size === 1 && (S.mode === 'sprawl' || CLZ == null || CLZ <= fitZ() + 0.35);
-  mapBox.addEventListener('pointerdown', e => { pts.add(e.pointerId); g = ok(e) ? { id: e.pointerId, x0: e.clientX, y0: e.clientY, y: S.y, on: false } : null; }, true);
-  mapBox.addEventListener('pointermove', e => { if (!g || e.pointerId !== g.id) return; if (pts.size > 1) { g = null; hud.hidden = true; return; }
-    const dx = e.clientX - g.x0, dy = e.clientY - g.y0;
-    if (!g.on) { if (Math.abs(dx) > 9 && Math.abs(dx) > Math.abs(dy) * 1.2) { g.on = true; if (S.playing) togglePlay(); try { mapBox.setPointerCapture(e.pointerId); } catch (x) {} hud.hidden = false; } else return; }
-    e.stopPropagation(); e.preventDefault();
-    const [a, b] = range(), per = Math.max(8, Math.min(26, mapBox.clientWidth * 0.8 / (b - a))), y = Math.max(a, Math.min(b, Math.round(g.y + dx / per)));
-    const r = mapBox.getBoundingClientRect(); hud.style.left = Math.max(80, Math.min(r.width - 80, e.clientX - r.left)) + 'px'; hud.style.top = Math.max(40, e.clientY - r.top - 96) + 'px';
-    hud.textContent = S.mode === 'sprawl' ? (SP.epochs.filter(e => e <= y).at(-1) ?? y) : S.mode === 'forest' || !S.avg ? y : `${y - 9}–${y}`; if (y !== S.y) { S.y = y; render(true); } }, true);
-  const end = e => { pts.delete(e.pointerId); if (g && e.pointerId === g.id) { if (g.on) { e.stopPropagation(); hud.hidden = true; } g = null; } };
-  mapBox.addEventListener('pointerup', end, true); mapBox.addEventListener('pointercancel', end, true);
-}
 function togglePlay() { S.playing = !S.playing; clearInterval(timer);
   if (S.playing && S.mode === 'move') { const last = WL.birds.reduce((m, b) => Math.max(m, b.last), 0); if (S.wd >= last) S.wd = 0; timer = setInterval(() => { if (S.mode !== 'move' || S.wd >= last) { S.playing = false; clearInterval(timer); render(); return; } S.wd = Math.min(last, S.wd + 2); render(true); }, 70); }
   else if (S.playing) { const [y0, y1] = range(); if (S.y >= y1) S.y = Math.max(y0, 1900); timer = setInterval(() => { const [, b] = range(); if (S.y >= b) { S.playing = false; clearInterval(timer); render(); return; } S.y++; render(true); }, 160); }
   render(true); }
 const range = () => S.mode === 'precip' ? [1900, A.p_years[1]] : S.mode === 'temp' ? [1900, A.t_years[1]] : S.mode === 'forest' ? F.years : S.mode === 'sprawl' ? [1975, 2020] : [1900, 2020];
 
+const clampTo = (v, b) => !b ? v : { ...v, target: [Math.max(b[0], Math.min(b[2], v.target[0])), Math.max(b[1], Math.min(b[3], v.target[1])), 0] };   // keep the view's centre over the mapped area
+let PANB = null;
 function fit() { if (!deckI) return; const box = el.querySelector('#cl-map').getBoundingClientRect(), b = S.mode === 'move' ? [4900, 2100, 9300, 5300] : [3700, 300, 9100, 4900];   // km, StatCan Lambert: all of Canada
-  const z = Math.log2(Math.min(box.width / (b[2] - b[0]), box.height / (b[3] - b[1])) * 0.98);
+  const z = Math.log2(Math.min(box.width / (b[2] - b[0]), box.height / (b[3] - b[1])) * 0.98); PANB = b;
   deckI.setProps({ initialViewState: { target: [(b[0] + b[2]) / 2, (b[1] + b[3]) / 2 - 150, 0], zoom: z, minZoom: z - 0.5, maxZoom: z + 5 } }); }
 
 // ---------------------------------------------------------------- data views
@@ -272,7 +256,7 @@ function detail() {
 }
 
 function drawMap() {
-  const spc = el.querySelector('#cl-sprawl'); if (spc) spc.hidden = S.mode !== 'sprawl'; if (S.mode === 'sprawl') { drawSprawl(); deckI?.setProps({ layers: [] }); return; }
+  const spc = el.querySelector('#cl-sprawl'); if (spc) spc.hidden = S.mode !== 'sprawl'; el.querySelector('#cl-map .mapbtns')?.toggleAttribute('hidden', S.mode === 'sprawl'); if (S.mode === 'sprawl') { drawSprawl(); deckI?.setProps({ layers: [] }); return; }
   const key = [S.mode, S.y, S.avg, S.st, S.gl, PAL.page, S.wd, S.wb].join('|');
   const land = new GeoJsonLayer({ id: 'land', data: PROV, filled: true, stroked: true, getFillColor: [...PAL.land, 255], getLineColor: [...PAL.line, 120], lineWidthUnits: 'pixels', getLineWidth: 0.8, updateTriggers: { getFillColor: key, getLineColor: key } });
   const lakes = new GeoJsonLayer({ id: 'lakes', data: LAKES, filled: true, stroked: false, getFillColor: [...PAL.water, 255], updateTriggers: { getFillColor: key } });
@@ -452,11 +436,11 @@ async function open(opts = {}) {
     PROV = km(p); LAKES = km(l); S.y = A.t_years[1]; });
   await ready; await readHash();
   if (opts.mode) S.mode = opts.mode;
-  if (!deckI) { bindScrub(el.querySelector('#cl-map')); bindScrub(el.querySelector('#cl-sprawl')); addEventListener('resize', () => S.mode === 'sprawl' && drawSprawl()); }
-  if (!deckI) deckI = new Deck({ parent: el.querySelector('#cl-map'), views: new OrthographicView({ flipY: false }), controller: { doubleClickZoom: true }, onViewStateChange: ({ viewState }) => { CLZ = viewState.zoom; }, initialViewState: { target: [6400, 2400, 0], zoom: -3 },
+  if (!deckI) addEventListener('resize', () => S.mode === 'sprawl' && drawSprawl());
+  if (!deckI) deckI = new Deck({ parent: el.querySelector('#cl-map'), views: new OrthographicView({ flipY: false }), controller: { doubleClickZoom: true }, onViewStateChange: ({ viewState }) => { CLZ = viewState.zoom; return clampTo(viewState, PANB); }, initialViewState: { target: [6400, 2400, 0], zoom: -3 },
     getCursor: ({ isHovering }) => isHovering ? 'pointer' : 'grab', onHover: tip,
     onClick: ({ object }) => { if (!object) return; if (object.wbird) { S.wb = object.wbird.id; render(); return; } if (object.b) S.gl = object.id; else S.st = object.s.id; render(); }, style: { position: 'absolute', inset: 0 } });
-  (window.__decks ||= {}).cl = deckI;
+  (window.__decks ||= {}).cl = deckI; window.MAPBTNS?.(el.querySelector('#cl-map'), () => deckI, fit);
   render(); requestAnimationFrame(fit);
 }
 function close() { S.playing = false; clearInterval(timer); el.hidden = true; document.body.classList.remove('nb-on'); history.replaceState(null, '', prevHash || location.pathname + location.search); dispatchEvent(new Event('nb-close')); }

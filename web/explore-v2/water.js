@@ -52,8 +52,10 @@ let timer = null;
 function togglePlay() { S.playing = !S.playing; clearInterval(timer);
   if (S.playing) { if (S.i == null || S.i >= W.in_effect.length - 1) S.i = 0; timer = setInterval(() => { if (S.i >= W.in_effect.length - 1) { S.playing = false; clearInterval(timer); S.i = null; render(); return; } S.i++; render(true); }, 110); }
   render(true); }
+const clampTo = (v, b) => !b ? v : { ...v, target: [Math.max(b[0], Math.min(b[2], v.target[0])), Math.max(b[1], Math.min(b[3], v.target[1])), 0] };   // keep the view's centre over the mapped area
+let PANB = null;
 function fit() { if (!deckI) return; const box = el.querySelector('#wa-map').getBoundingClientRect(), b = [3900, 700, 8900, 2900];   // km, StatCan Lambert: the provinces, where the advisories are
-  const z = Math.log2(Math.min(box.width / (b[2] - b[0]), box.height / (b[3] - b[1])) * 0.98);
+  const z = Math.log2(Math.min(box.width / (b[2] - b[0]), box.height / (b[3] - b[1])) * 0.98); PANB = b;
   deckI.setProps({ initialViewState: { target: [(b[0] + b[2]) / 2, (b[1] + b[3]) / 2, 0], zoom: z, minZoom: z - 0.5, maxZoom: z + 6 } }); }
 
 function render(fast) {
@@ -135,10 +137,10 @@ async function open(opts = {}) {
     PROV = km(p); LAKES = km(l); });
   await ready; readHash();
   if (opts.sel) S.sel = opts.sel;
-  if (!deckI) deckI = new Deck({ parent: el.querySelector('#wa-map'), views: new OrthographicView({ flipY: false }), controller: { doubleClickZoom: true }, initialViewState: { target: [6400, 1800, 0], zoom: -3 },
+  if (!deckI) deckI = new Deck({ parent: el.querySelector('#wa-map'), views: new OrthographicView({ flipY: false }), controller: { doubleClickZoom: true }, onViewStateChange: ({ viewState }) => clampTo(viewState, PANB), initialViewState: { target: [6400, 1800, 0], zoom: -3 },
     getCursor: ({ isHovering }) => isHovering ? 'pointer' : 'grab', onHover: tip,
     onClick: ({ object }) => { if (!object) return; S.sel = object.a.id; render(); }, style: { position: 'absolute', inset: 0 } });
-  (window.__decks ||= {}).wa = deckI;
+  (window.__decks ||= {}).wa = deckI; window.MAPBTNS?.(el.querySelector('#wa-map'), () => deckI, fit);
   render(); requestAnimationFrame(fit);
 }
 function close() { S.playing = false; clearInterval(timer); el.hidden = true; document.body.classList.remove('nb-on'); history.replaceState(null, '', prevHash || location.pathname + location.search); dispatchEvent(new Event('nb-close')); }

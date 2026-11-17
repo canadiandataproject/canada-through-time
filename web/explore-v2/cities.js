@@ -154,10 +154,12 @@ function onClick(e) {
 }
 function setCity(id) { S.cma = id; S.tract = null; render(); fit(); }
 
+const clampTo = (v, b) => !b ? v : { ...v, target: [Math.max(b[0], Math.min(b[2], v.target[0])), Math.max(b[1], Math.min(b[3], v.target[1])), 0] };   // keep the view's centre over the mapped area
+let PANB = null;
 function fit() {
   const b = CORE[S.cma], B = BBOX[S.cma], box = el.querySelector('#nb-map').getBoundingClientRect(); if (!b || !deckI) return;
   const zf = k => Math.log2(Math.min(box.width / (k[2] - k[0]), box.height / (k[3] - k[1])) * 0.9), z = zf(b), zAll = zf(B);
-  ZOOM.fit = z; ZOOM.z = z;
+  ZOOM.fit = z; ZOOM.z = z; PANB = B;
   deckI.setProps({ initialViewState: { target: [(b[0] + b[2]) / 2, (b[1] + b[3]) / 2, 0], zoom: z, minZoom: zAll - 1, maxZoom: z + 5, transitionDuration: 0 } });
 }
 function flyTo(id) {
@@ -286,12 +288,12 @@ async function open(opts = {}) {
   if (opts.city) { const c = CITIES.find(x => x.code === opts.city || x.name.toLowerCase().startsWith(String(opts.city).toLowerCase())); if (c) { S.cma = c.id; S.tract = null; } }
   if (opts.m && MK[opts.m]) S.m = opts.m;
   if (opts.sub) { if (MK[S.m].sub === 'vm' && VM_SUB.some(v => v[0] === opts.sub)) S.vm = opts.sub; else if (MK[S.m].sub === 'pob' && P.pob_names[opts.sub]) S.pob = opts.sub; }
-  if (!deckI) deckI = new Deck({ parent: el.querySelector('#nb-map'), views: new OrthographicView({ flipY: false }), controller: { doubleClickZoom: true, inertia: true },
+  if (!deckI) deckI = new Deck({ parent: el.querySelector('#nb-map'), views: new OrthographicView({ flipY: false }), controller: { doubleClickZoom: true, inertia: 250 },
     initialViewState: { target: [0, 0, 0], zoom: 0 }, getCursor: ({ isHovering }) => isHovering ? 'pointer' : 'grab',
     onHover: tip, onClick: ({ object }) => { if (!object) return; S.tract = object.properties.DGUID; render(); },
-    onViewStateChange: ({ viewState }) => { const band = v => (v - ZOOM.fit > 1.4 ? 2 : v - ZOOM.fit > 0.6 ? 1 : 0), was = band(ZOOM.z); ZOOM.z = viewState.zoom; if (band(ZOOM.z) !== was) requestAnimationFrame(() => drawMap(MK[S.m], domain(MK[S.m]))); },
+    onViewStateChange: ({ viewState }) => { viewState = clampTo(viewState, PANB); const band = v => (v - ZOOM.fit > 1.4 ? 2 : v - ZOOM.fit > 0.6 ? 1 : 0), was = band(ZOOM.z); ZOOM.z = viewState.zoom; if (band(ZOOM.z) !== was) requestAnimationFrame(() => drawMap(MK[S.m], domain(MK[S.m]))); return viewState; },
     style: { position: 'absolute', inset: 0 } });
-  (window.__decks ||= {}).nb = deckI;
+  (window.__decks ||= {}).nb = deckI; window.MAPBTNS?.(el.querySelector('#nb-map'), () => deckI, fit);
   render(); requestAnimationFrame(fit);
 }
 function close() { el.hidden = true; document.body.classList.remove('nb-on'); history.replaceState(null, '', prevHash || location.pathname + location.search); dispatchEvent(new Event('nb-close')); }

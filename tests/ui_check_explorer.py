@@ -57,7 +57,8 @@ def main():
             # extreme pan is clamped
             v = pg.evaluate("CTX.boundView({...CTX.getView(), target:[99999, -99999, 0], zoom: -99})")
             f = pg.evaluate("CTX.fitView()")
-            check(f"{label}: pan and zoom are clamped near Canada", abs(v["target"][0] - f["target"][0]) <= 2600 * 1.01 and v["zoom"] >= f["zoom"] - 0.33)
+            lim = pg.evaluate("0.45 * document.getElementById('map').clientWidth / 2 ** CTX.fitView().zoom")   # half a screen at the fitted zoom
+            check(f"{label}: pan and zoom are clamped near Canada", abs(v["target"][0] - f["target"][0]) <= lim * 1.01 and v["zoom"] >= f["zoom"] - 0.33, f"{abs(v['target'][0] - f['target'][0]):.0f} km vs {lim:.0f}")
             pg.wait_for_timeout(1500)   # let wheel inertia / pinch settle before resetting
             pg.click("[data-act=reset]")
             pg.wait_for_timeout(1200)
