@@ -1,10 +1,13 @@
 name: Schedule Shorts in Buffer
-# Runs when shorts2/queue.json changes on any branch, or by hand from the Actions tab.
+# Runs when shorts2/queue.json changes, twice a day (to retry posts that hit Buffer's 10-post limit), or by hand.
+# Lives on main: edit the queue on main.
 # The Buffer key is the encrypted repository secret BUFFER_KEY (Settings → Secrets and variables → Actions); it never
 # appears in the repo or in logs.
 on:
   push:
     paths: ["shorts2/queue.json"]
+  schedule:
+    - cron: "17 14,2 * * *"   # 8:17 AM and 8:17 PM Edmonton (UTC-6)
   workflow_dispatch:
 permissions:
   contents: write

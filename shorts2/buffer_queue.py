@@ -70,6 +70,11 @@ def main():
     if mode != "post":
         sys.exit(1 if problems else 0)
     changed = False
+    for e in qd["shorts"]:   # Buffer's free plan holds 10 queued posts per channel: retry those once slots free up
+        for site, err in list(e.get("errors", {}).items()):
+            if "limit reached" in err and e.get("status", {}).get(site) == "error":
+                e["status"][site] = "pending"; del e["errors"][site]; changed = True
+        if not e.get("errors"): e.pop("errors", None)
     for e in qd["shorts"]:
         st = e.setdefault("status", {})
         if not any(st.get(s, "pending") == "pending" for s in e["when"]): continue
