@@ -113,7 +113,7 @@ function drawMap() {
     updateTriggers: { getRadius: key, getFillColor: key, getLineColor: key, getLineWidth: key }, transitions: { getRadius: 150 } });
   const sel = data.filter(d => d.a.id === S.sel);
   const lab = new TextLayer({ id: 'wa-lab', data: sel, getPosition: d => d.a.xy, getText: d => d.a.community, getSize: 13, getColor: [...PAL.ink, 255], getPixelOffset: [10, 0], getTextAnchor: 'start', getAlignmentBaseline: 'center',
-    fontFamily: 'IBM Plex Sans, sans-serif', fontWeight: 600, outlineWidth: 4, outlineColor: [...PAL.halo, 230], fontSettings: { sdf: true }, characterSet: 'auto', updateTriggers: { getText: key } });
+    fontFamily: (getComputedStyle(document.body).getPropertyValue('--font-ui').split(',')[0].replace(/"/g, '').trim() || 'serif'), fontWeight: 600, outlineWidth: 4, outlineColor: [...PAL.halo, 230], fontSettings: { sdf: true }, characterSet: 'auto', updateTriggers: { getText: key } });
   deckI.setProps({ layers: [land, lakes, dots, lab] });
   el.querySelector('#wa-map').style.background = `rgb(${PAL.water})`;
 }

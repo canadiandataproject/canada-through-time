@@ -35,7 +35,7 @@ async function picture(info) {
   const img = await crop(await loadImg(await snap(d)));
   const leg = legendOf(info.deck);
   const W = 1600, H = 1000, head = 150, foot = 64, c = document.createElement('canvas'); c.width = W; c.height = H;
-  const g = c.getContext('2d'), page = css('--page') || '#efeadb', ink = css('--ink-1') || '#1f1d14', ink3 = css('--ink-3') || '#777', acc = css('--accent') || '#b8472f';
+  const g = c.getContext('2d'), page = css('--page') || '#D5DADB', ink = css('--ink-1') || '#111619', ink3 = css('--ink-3') || '#777', acc = css('--accent') || '#B0123A';
   g.fillStyle = page; g.fillRect(0, 0, W, H);
   // the map, scaled to fit between the title and the footer
   const aw = W - 80, ah = H - head - foot - 20, k = Math.min(aw / img.width, ah / img.height), iw = img.width * k, ih = img.height * k;

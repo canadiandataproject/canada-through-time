@@ -5,6 +5,15 @@
 const { ClipExtension } = deck;
 const { Deck, OrbitView, GeoJsonLayer, ColumnLayer, TextLayer, ArcLayer, PathLayer, ScatterplotLayer, LineLayer, LightingEffect, AmbientLight, DirectionalLight, COORDINATE_SYSTEM } = deck;
 const CART = COORDINATE_SYSTEM.CARTESIAN;
+// Lens (optional, additive): draws a layer only inside a screen-space circle, so the ring on screen and the clipped
+// pixels always match, flat or tilted. lensPx = [x, y from the bottom, radius] in device pixels.
+class LensExtension extends deck.LayerExtension {
+  getShaders() { return { modules: [{ name: 'lens', fs: 'layout(std140) uniform lensUniforms { vec4 c; } lens;\n', uniformTypes: { c: 'vec4<f32>' } }],
+    inject: { 'fs:DECKGL_FILTER_COLOR': 'if (distance(gl_FragCoord.xy, lens.c.xy) > lens.c.z) discard;' } }; }
+  draw() { this.setShaderModuleProps({ lens: { c: this.props.lensPx } }); }
+}
+LensExtension.defaultProps = { lensPx: [0, 0, 0, 0] }; LensExtension.extensionName = 'LensExtension';
+const LENS_EXT = [new LensExtension()];
 const Q = new URLSearchParams(location.search);
 const CREATOR = new URLSearchParams(location.search).has('creator');   // the timelapse maker is for making the channel's videos, not for visitors
 const FIRST_HASH = location.hash.slice(1);
@@ -19,21 +28,23 @@ if (VERT && Q.get('render') == null && innerWidth !== 720) {   // preview: show 
   document.body.innerHTML = ''; document.body.style.background = '#1c1c1c'; document.body.appendChild(f); await new Promise(() => {}); }
 const V = 's';                                 // composition: Night Lanterns
 // Palettes: the visitor picks one (map-control button); the choice is kept in the link (?p=) and remembered on this device.
-const RELEASE = 2;   // the first two are the proposed public themes; the rest stay in review builds for comparison
-const PALETTES = [['ember', 'Field Paper · Ember', 'light'], ['aurora', 'Aurora Night', 'dark'],
+const RELEASE = 3;   // the first three are the proposed public themes (Highway signs is the default); the rest stay in review builds for comparison
+const PALETTES = [['signs', 'Highway signs', 'dark'], ['ember', 'Field Paper · Ember', 'light'], ['aurora', 'Aurora Night', 'dark'],
   ['field', 'Field Paper (original)', 'light'], ['lichen', 'Lichen', 'light'], ['heather', 'Heather', 'light'], ['dusk', 'Tuscan Dusk', 'dark'], ['glacier', 'Glacier', 'dark'], ['vintage', 'Deep Vintage', 'dark']];
 const PALS = PALETTES.map(p => p[0]).concat('paper');
 let savedPal = null; try { savedPal = localStorage.getItem('ctt-palette'); } catch (e) { /* storage unavailable */ }
-const PAL = PALS.includes(Q.get('p')) ? Q.get('p') : PALS.includes(savedPal) ? savedPal : 'ember';
+const PAL = PALS.includes(Q.get('p')) ? Q.get('p') : PALS.includes(savedPal) ? savedPal : 'signs';
 const LIGHT = ['ember', 'field', 'lichen', 'heather', 'paper'].includes(PAL);
 const TRUE_COL = !['vintage', 'paper', 'glacier'].includes(PAL);   // neutral light so map fills match legend colours
-const PAL_SW = {"ember": ["#EFEADB", "#E3D594", "#978B37", "#3A370D", "#9687C4", "#B8472F"], "lichen": ["#ECEFEA", "#B3E0D2", "#3A948D", "#003840", "#C28562", "#B8472F"], "heather": ["#F1ECE6", "#E7CEE4", "#A372A6", "#44234C", "#8BA669", "#B8472F"], "aurora": ["#0B1720", "#184258", "#62B995", "#FEF2C5", "#B07750", "#D99B68"], "field": ["#EFEADB", "#F4EDBF", "#AEA048", "#423F15", "#A295CB", "#8A2B0E"], "dusk": ["#1A1619", "#4C2A49", "#C5857F", "#FFEACA", "#63908A", "#E35336"], "glacier": ["#0E1520", "#1F4A70", "#58A8D0", "#E4F5FB", "#B07B2A", "#F2B84B"], "vintage": ["#10222A", "#4A2E28", "#C25A41", "#FBE9D0", "#6F9796", "#E64833"]};   // page, low, mid, high, "less", accent
+const PAL_SW = {"signs": ["#0D2620", "#4A7F6A", "#A9CF84", "#FFF4B0", "#4A82C8", "#F4D03F"], "ember": ["#EFEADB", "#E3D594", "#978B37", "#3A370D", "#9687C4", "#B8472F"], "lichen": ["#ECEFEA", "#B3E0D2", "#3A948D", "#003840", "#C28562", "#B8472F"], "heather": ["#F1ECE6", "#E7CEE4", "#A372A6", "#44234C", "#8BA669", "#B8472F"], "aurora": ["#0B1720", "#184258", "#62B995", "#FEF2C5", "#B07750", "#D99B68"], "field": ["#EFEADB", "#F4EDBF", "#AEA048", "#423F15", "#A295CB", "#8A2B0E"], "dusk": ["#1A1619", "#4C2A49", "#C5857F", "#FFEACA", "#63908A", "#E35336"], "glacier": ["#0E1520", "#1F4A70", "#58A8D0", "#E4F5FB", "#B07B2A", "#F2B84B"], "vintage": ["#10222A", "#4A2E28", "#C25A41", "#FBE9D0", "#6F9796", "#E64833"]};   // page, low, mid, high, "less", accent
 let savedTx = null; try { savedTx = localStorage.getItem('ctt-surface'); } catch (e) { /* storage unavailable */ }
 const SURFACES = [['none', 'Plain'], ['paper', 'Paper grain'], ['relief', 'Shaded relief']];
 const TX = SURFACES.some(x => x[0] === Q.get('tx')) ? Q.get('tx') : SURFACES.some(x => x[0] === savedTx) ? savedTx : 'relief';
 document.body.classList.add('tx-' + TX);
-const TY = ['news', 'civic', 'grotesk'].includes(Q.get('t')) ? Q.get('t') : 'civic';   // T2: Source Serif 4 + Public Sans
+const SIGNS = PAL === 'signs';   // release identity (2026-11-17): Canadian highway-sign type and colour; visual only
+const TY = ['news', 'civic', 'grotesk', 'signs'].includes(Q.get('t')) ? Q.get('t') : SIGNS ? 'signs' : 'civic';
 document.body.classList.add('v-s', 'pal-' + PAL, 'ty-' + TY);
+if (SIGNS) document.body.classList.add('id-signs');
 
 // ---------------------------------------------------------------- tokens
 const css = getComputedStyle(document.body);
@@ -505,7 +516,7 @@ function zoomAround(v, dz, sx, sy) { const vp0 = vpFor(v); if (!vp0) return { ..
   const begin = () => { const v = at0(view), list = [...pts.values()];
     if (list.length === 1) { const vp = vpFor(v); start = { kind: 'pan', v, p: list[0], g: vp && ground(vp, ...list[0]) }; }
     else if (list.length >= 2) { const [a, b] = list, mid = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2], vp = vpFor(v); start = { kind: 'pinch', v, d: Math.hypot(a[0] - b[0], a[1] - b[1]) || 1, mid, g: vp && ground(vp, ...mid) }; } };
-  const skip = e => e.target.closest('#wipe, #mapctl, #viewbar, #palpop, #fly-lower') || state.story != null && isPhone() && false;
+  const skip = e => e.target.closest('#wipe, #lens, #mapctl, #viewbar, #palpop, #fly-lower') || state.story != null && isPhone() && false;
   mapEl.addEventListener('pointerdown', e => { lastType = e.pointerType; if (skip(e) || (e.pointerType === 'mouse' && e.button !== 0)) return; stopGlide(); if (e.pointerType === 'mouse') e.preventDefault();   // no text selection while dragging
     if (FLY) return; pts.set(e.pointerId, local(e)); try { mapEl.setPointerCapture(e.pointerId); } catch (x) {} NAV.moved = false; hist = []; begin(); });
   mapEl.addEventListener('pointermove', e => { if (!pts.has(e.pointerId) || !start) return; pts.set(e.pointerId, local(e)); const list = [...pts.values()];
@@ -631,6 +642,27 @@ function wipeLayers(m, z) {
       extensions: [new ClipExtension()], clipBounds: [-1e9, -1e9, x, 1e9], clipByInstance: false, parameters: { depthTest: false },
       updateTriggers: { getFillColor: [state.m, y0] } })];
 }
+// ---- lens layers: the same published values, for another year, drawn only inside the lens
+const lensYears = m => m.only ? [...m.only] : Array.from({ length: m.years[1] - m.years[0] + 1 }, (_, i) => m.years[0] + i);
+function lensPx() { const cv = theDeck?.getCanvas?.(); if (!cv || !state.lens) return [0, 0, 0, 0]; const k = cv.width / (cv.clientWidth || 1);
+  return [state.lens.sx * k, (cv.clientHeight - state.lens.sy) * k, state.lens.r * k, 0]; }
+function lensFill(m, z) {
+  if (!state.lens || m.kind !== 'fill') return [];
+  const y0 = state.lens.y, split = m.split(y0), feats = split ? featsSplit : featsCombined, dimC = C('land-dim');
+  const val = Object.fromEntries(geosFor(split).map(g => [g, m.value(g, y0)]));
+  return [new GeoJsonLayer({ id: 'lens-fill', data: feats, coordinateSystem: CART, filled: true, stroked: true, extruded: false, pickable: false,
+    getFillColor: f => { const v = val[f.properties.abbr]; return v == null ? dimC : m.color(v); }, getLineColor: C('boundary'), lineWidthUnits: 'pixels', getLineWidth: 1,
+    extensions: LENS_EXT, lensPx: lensPx(), parameters: { depthTest: false }, updateTriggers: { getFillColor: [state.m, y0] } })];
+}
+function lensSpikes(m, z, R0) {
+  if (!state.lens || m.kind !== 'spike') return [];
+  const y0 = state.lens.y, geos = geosFor(m.split(y0));
+  const h0 = g => ((m.height ? m.height(g, y0) : m.value(g, y0)) || 0) / 1e6 * KMPM;
+  const pts = geos.filter(g => anchor[g]).map(g => ({ k: g, p: anchor[g] }));
+  return [new ColumnLayer({ id: 'lens-spikes', data: pts, coordinateSystem: CART, diskResolution: 32, radius: R0 * 1.9, extruded: true, pickable: false,
+    getPosition: d => [d.p[0], d.p[1], z], getElevation: d => h0(d.k), getFillColor: [...C('accent'), 150], material: { ambient: 0.9, diffuse: 0.3, shininess: 0, specularColor: [0, 0, 0] },
+    extensions: LENS_EXT, lensPx: lensPx(), updateTriggers: { getElevation: [state.m, y0] } })];
+}
 function layers0() {
   const m = M[state.m], y = state.y, split = m.split(y);
   const feats = split ? featsSplit : featsCombined, geos = geosFor(split);
@@ -654,6 +686,7 @@ function layers0() {
       updateTriggers: { getFillColor: [state.m, y, state.p, twKey] }, transitions: { getFillColor: 450 } }),
     ...(TX === 'relief' && RELIEF.img ? [reliefLayer(m, z)] : []),
     ...wipeLayers(m, z),
+    ...lensFill(m, z),
     lakeLayer,
     ...(m.kind === 'fill' ? [hatchLayer(feats.filter(f => val[f.properties.abbr] == null), split, z)] : []),
     new PathLayer({ id: 'bounds', data: split ? OUT_SPLIT : OUT_COMB, coordinateSystem: CART, getPath: d => d.path.map(p => [p[0], p[1], z + 0.6]),
@@ -676,6 +709,7 @@ function layers0() {
         updateTriggers: { getElevation: [state.m, y, twKey], getFillColor: [state.m, y, twKey] }, transitions: { getElevation: 500, getFillColor: 400 } }));
     if (V === 's') L.push(new ColumnLayer({ id: 'cap', data: pts, coordinateSystem: CART, diskResolution: 32, radius: R0, extruded: false, getPosition: d => [d.p[0], d.p[1], z + h(d.k) + 0.5],
         getFillColor: [...lerpC(C('spike'), C('land'), 0.4), 255], /* lit top face so the top of each column is easy to find */ parameters: { depthTest: false }, updateTriggers: { getPosition: [state.m, y] }, transitions: { getPosition: 500 } }));
+    L.push(...lensSpikes(m, z, R0));
     L.push(...labels(pts, d => [d.p[0], d.p[1], z + h(d.k)], val, m, sel));
   } else if (m.kind === 'points') {
     L.push(...cityLayers(m, y, z));
@@ -927,6 +961,50 @@ function flashNote(t) { const h = document.getElementById('scrub-hint'); if (!h)
   b.addEventListener('pointerup', () => { drag = false; });
   b.addEventListener('keydown', e => { if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { wipeAt(Math.max(20, Math.min(mapEl.clientWidth - 20, state.wipe.sx + (e.key === 'ArrowLeft' ? -24 : 24)))); e.preventDefault(); } }); }
 
+// ---------------------------------------------------------------- lens (optional): drag a circle to see another year inside it
+const lensEl = document.createElement('div'); lensEl.id = 'lens'; lensEl.hidden = true; lensEl.tabIndex = 0;
+lensEl.setAttribute('role', 'group'); lensEl.setAttribute('aria-label', T('Lens. Arrow keys move it, plus and minus resize it, Page Up and Page Down change its year, Escape closes it.', 'Loupe. Les flèches la déplacent, plus et moins la redimensionnent, Page précédente et Page suivante changent son année, Échap la ferme.'));
+lensEl.innerHTML = `<svg aria-hidden="true"><circle class="shade"/><circle class="rim"/><circle class="hit"/></svg>
+  <div class="plate"><button data-ly="-1" aria-label="${T('Earlier year inside the lens', 'Année plus ancienne dans la loupe')}">‹</button><b></b><span>${T('inside', 'dedans')}</span><button data-ly="1" aria-label="${T('Later year inside the lens', 'Année plus récente dans la loupe')}">›</button></div>
+  <button class="grip" aria-label="${T('Resize the lens', 'Redimensionner la loupe')}">⤡</button><button class="x" aria-label="${T('Close the lens', 'Fermer la loupe')}">✕</button>`;
+mapEl.appendChild(lensEl);
+const lensOK = m => m.kind === 'fill' || m.kind === 'spike';
+let lensRAF = 0;
+function placeLens() { const L = state.lens; if (!L) return; const d = L.r * 2;
+  Object.assign(lensEl.style, { left: L.sx + 'px', top: L.sy + 'px', width: d + 'px', height: d + 'px' });
+  lensEl.querySelectorAll('circle').forEach(c => { c.setAttribute('cx', L.r + 16); c.setAttribute('cy', L.r + 16); c.setAttribute('r', L.r); });
+  cancelAnimationFrame(lensRAF); lensRAF = requestAnimationFrame(() => theDeck.setProps({ layers: layers() })); }
+function paintLens() { const m = M[state.m];
+  if (!state.lens) { lensEl.hidden = true; return; }
+  if (!lensOK(m)) { lensEl.hidden = true; return; }
+  const ys = lensYears(m); if (!ys.includes(state.lens.y)) state.lens.y = m.kind === 'fill' ? thenYear(m) : ys[0];
+  lensEl.hidden = false; lensEl.querySelector('.plate b').textContent = whenShort(m, state.lens.y); placeLens(); }
+function toggleLens() { const b = document.querySelector('[data-act=lens]');
+  if (state.lens) { state.lens = null; paintLens(); b?.classList.remove('on'); b?.setAttribute('aria-pressed', 'false'); theDeck.setProps({ layers: layers() }); return; }
+  const m = M[state.m]; if (!lensOK(m)) { flashNote(T('The lens works on coloured-province and column layers.', 'La loupe fonctionne avec les couches de provinces colorées et de colonnes.')); return; }
+  const r = Math.round(Math.min(mapEl.clientWidth, mapEl.clientHeight) * (isPhone() ? 0.22 : 0.17));
+  state.lens = { sx: mapEl.clientWidth * 0.5, sy: mapEl.clientHeight * 0.48, r, y: m.kind === 'fill' ? thenYear(m) : lensYears(m)[0] };
+  b?.classList.add('on'); b?.setAttribute('aria-pressed', 'true'); paintLens(); lensEl.focus({ preventScroll: true }); }
+function moveLens(sx, sy) { const L = state.lens; if (!L) return; L.sx = Math.max(10, Math.min(mapEl.clientWidth - 10, sx)); L.sy = Math.max(10, Math.min(mapEl.clientHeight - 10, sy)); placeLens(); }
+function sizeLens(r) { const L = state.lens; if (!L) return; L.r = Math.max(48, Math.min(Math.min(mapEl.clientWidth, mapEl.clientHeight) * 0.45, r)); placeLens(); }
+function stepLens(d) { const L = state.lens; if (!L) return; const ys = lensYears(M[state.m]), i = ys.indexOf(L.y); L.y = ys[Math.max(0, Math.min(ys.length - 1, i + d))]; paintLens(); }
+{ let mode = null, off = [0, 0];
+  const pos = e => { const r = mapEl.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+  const start = (e, md) => { mode = md; const [x, y] = pos(e); off = [state.lens.sx - x, state.lens.sy - y]; e.target.setPointerCapture?.(e.pointerId); e.stopPropagation(); e.preventDefault(); };
+  lensEl.querySelector('.hit').addEventListener('pointerdown', e => start(e, 'move'));
+  lensEl.querySelector('.grip').addEventListener('pointerdown', e => start(e, 'size'));
+  lensEl.addEventListener('pointermove', e => { if (!mode) return; const [x, y] = pos(e);
+    if (mode === 'move') moveLens(x + off[0], y + off[1]); else sizeLens(Math.hypot(x - state.lens.sx, y - state.lens.sy) - 8); e.stopPropagation(); });
+  lensEl.addEventListener('pointerup', () => { mode = null; }); lensEl.addEventListener('pointercancel', () => { mode = null; });
+  lensEl.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; e.stopPropagation();
+    if (b.dataset.ly) stepLens(+b.dataset.ly); else if (b.classList.contains('x')) { toggleLens(); document.querySelector('[data-act=lens]')?.focus(); } });
+  lensEl.addEventListener('keydown', e => { if (!state.lens || e.target.closest('.plate button, .x')) return; const L = state.lens, k = e.shiftKey ? 60 : 20;
+    const act = { ArrowLeft: () => moveLens(L.sx - k, L.sy), ArrowRight: () => moveLens(L.sx + k, L.sy), ArrowUp: () => moveLens(L.sx, L.sy - k), ArrowDown: () => moveLens(L.sx, L.sy + k),
+      '+': () => sizeLens(L.r + 12), '=': () => sizeLens(L.r + 12), '-': () => sizeLens(L.r - 12), PageUp: () => stepLens(-1), PageDown: () => stepLens(1),
+      Escape: () => { toggleLens(); document.querySelector('[data-act=lens]')?.focus(); } }[e.key];
+    if (act) { act(); e.preventDefault(); e.stopPropagation(); } });
+  addEventListener('resize', () => { if (state.lens) moveLens(state.lens.sx, state.lens.sy); }); }
+
 // ---------------------------------------------------------------- notes over the map (short messages, e.g. from the then/now button)
 { const hint = document.createElement('div'); hint.id = 'scrub-hint'; mapEl.appendChild(hint); }
 
@@ -947,6 +1025,7 @@ document.getElementById('mapctl').addEventListener('click', e => { const a = e.t
   const v = { ...view };
   if (a === 'zin' || a === 'zout') { setView(zoomAround(at0(view), a === 'zin' ? 0.6 : -0.6, mapEl.clientWidth / 2, mapEl.clientHeight / 2), 300); userMoved = true; return; }
   if (a === 'wipe') { toggleWipe(); return; }
+  if (a === 'lens') { toggleLens(); return; }
   if (a === 'fly') { flyThrough(); return; }
   if (a === 'tilt') v.rotationX = isPhone() ? (Math.abs(v.rotationX - fitView().rotationX) < 3 ? (fitView().rotationX > 60 ? 40 : 70) : fitView().rotationX) : v.rotationX > 10 ? 0 : fitView().rotationX; if (a === 'reset') { Object.assign(v, fitView()); userMoved = false; } else userMoved = true;
   view = { ...boundView(v), transitionDuration: 500, transitionInterpolator: new deck.LinearInterpolator(['target', 'zoom', 'rotationX', 'rotationOrbit']) };
@@ -1508,6 +1587,7 @@ function update() {
   const m = M[state.m];
   if (state.wipe) { if (m.kind !== 'fill') { state.wipe = null; document.querySelector('[data-act=wipe]')?.classList.remove('on'); } setTimeout(() => state.wipe && wipeAt(state.wipe.sx), 0); }
   state.y = clampYear(m, state.y);
+  if (state.lens) paintLens();
   const p = ((state.y - YMIN) / span * 100) + '%';
   for (const r of [yr, myr]) { r.value = state.y; r.style.setProperty('--p', p); }
   document.getElementById('tl-year').textContent = state.y; document.getElementById('myear-l').textContent = state.y;
