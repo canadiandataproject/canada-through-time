@@ -631,10 +631,10 @@ const lakeLayer = new GeoJsonLayer({ id: 'lakes', data: liftZ(lakes, PLATE + 0.5
 
 // ---------------------------------------------------------------- Whiteout / Blue hour: living context (decoration only; no statistic)
 // The sea is small stepped cubes with ripples spreading from every coast; neighbours (USA, Greenland ...) carry relief in their
-// own grey/slate shade so they read as context; the lens shows the land as a relief wireframe; five small easter eggs
-// live in the sea. None of it is pickable, none of it moves or recolours a mark that carries data, and it all stops for
+// own grey/slate shade so they read as context; the lens shows the land as a relief wireframe; five easter-egg sprites
+// stay off unless ?eggs is in the link. None of it is pickable, none of it moves or recolours a mark that carries data, and it all stops for
 // prefers-reduced-motion. Built by pipeline/build_context_layers.py from the map's own outlines and Natural Earth relief.
-const AMB = { on: ROUTE && !Q.has('nosea'), t: 0, tick: 0, ids: new Set(['sea-cubes', 'eggs']),
+const AMB = { on: ROUTE && !Q.has('nosea'), t: 0, tick: 0, ids: new Set(['sea-cubes', 'eggs']),   // eggs only with ?eggs
   still: (() => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } })() };
 const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
 const NB_RELIEF = { src: window.__DATA?.['../data/relief/relief_neighbours_8km.png'] || `${BASE}/data/relief/relief_neighbours_8km.png`, b: [1500, -900, 11000, 7500] };   // bounds: web/data/relief/relief.json → neighbours
@@ -706,7 +706,8 @@ const EGG_ART = {
 };
 const EGG_PAL = LIGHT ? { W: '#FFFFFF', s: '#DCE4EE', O: '#22314F', h: '#5A6B88', P: '#F2A7B8', d: '#5E6E86', K: '#0B1A3D', S: '#3B4A63', R: '#E0283A', N: '#A8B6C8', T: '#F1E7C8', w: '#A9BCD3', C: '#BFD3FF', M: '#55647B', Y: '#1E3CFF', b: 'rgba(30,60,255,.14)' }
   : { W: '#F2F8FF', s: '#C9D9EC', O: '#030A1A', h: '#8A9CBB', P: '#F2A7B8', d: '#5E7090', K: '#020814', S: '#5D6F8E', R: '#FF4A5C', N: '#A9BAD4', T: '#F1E7C8', w: '#4E78B8', C: '#BDEBFF', M: '#C9D6EA', Y: '#BDEBFF', b: 'rgba(189,235,255,.17)' };
-const EGG_ATLAS = (() => { if (!AMB.on) return null; const SC = 4, PAD = 2, map = {}; let x = 0, H = 0;
+const EGGS_ON = AMB.on && Q.has('eggs');   // off by default (Tyson, 2026-11-17); kept for a possible opt-in 'find the polar bears' game
+const EGG_ATLAS = (() => { if (!EGGS_ON) return null; const SC = 4, PAD = 2, map = {}; let x = 0, H = 0;
   const arts = Object.entries(EGG_ART).flatMap(([k, rows]) => [[k, rows, false], [k + '-l', rows, true]]);
   for (const [, rows] of arts) { x += (Math.max(...rows.map(r => r.length)) + 2 * PAD) * SC; H = Math.max(H, (rows.length + 2 * PAD) * SC); }
   const cv = document.createElement('canvas'); cv.width = x; cv.height = H; const g = cv.getContext('2d'); x = 0;
