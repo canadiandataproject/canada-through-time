@@ -1,5 +1,5 @@
 {
- "note": "Edit and push to schedule. status per site: pending -> scheduled (or error). Times are Edmonton local. Run by .github/workflows/schedule-shorts.yml with the BUFFER_KEY repo secret. First run 2026-11-17.",
+ "note": "MOVED: the live queue is shorts2/queue.json on the main branch (the scheduling workflow runs there). This copy is not used.",
  "shorts": [
   {
    "num": "17",
