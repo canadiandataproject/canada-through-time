@@ -1,0 +1,58 @@
+{
+ "version": 1,
+ "fps": 30,
+ "surface": "relief",
+ "credit": "The Canadian Data Project",
+ "format": "9x16",
+ "motion": "smooth",
+ "id": "route-gas-hours",
+ "title": "Gasoline in hours of work",
+ "layer": "gash",
+ "place": "BC",
+ "from": 1997,
+ "to": 2025,
+ "subtitle": "Hours of work at the median hourly wage to buy the same gasoline, each province against its own 1997 (1.00).",
+ "intro": 2.6,
+ "perYear": 0.55,
+ "hold": 0.8,
+ "outro": 3.5,
+ "camera": "push",
+ "theme": "bluehour",
+ "hook": [
+  "Is a tank of gas harder to pay for",
+  "than it was in 1997?"
+ ],
+ "annotations": [
+  {
+   "year": 2008,
+   "text": "Above ×1.00: pump prices outran wages. Below: wages won"
+  },
+  {
+   "year": 2022,
+   "text": "Each province is compared with its own 1997, not with the others"
+  }
+ ],
+ "summary": {
+  "seconds": 6.5,
+  "items": [
+   {
+    "big": "×1.39",
+    "kicker": "British Columbia, 2025 vs 1997",
+    "text": "39% more hours of work for the same gas",
+    "scope": "period"
+   },
+   {
+    "big": "×1.11",
+    "kicker": "Canada",
+    "text": "11% more hours than in 1997",
+    "scope": "period"
+   },
+   {
+    "big": "×0.93",
+    "kicker": "Saskatchewan",
+    "text": "7% fewer: wages outran the pump",
+    "scope": "period"
+   }
+  ]
+ }
+}

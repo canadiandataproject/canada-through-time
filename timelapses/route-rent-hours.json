@@ -1,0 +1,59 @@
+{
+ "version": 1,
+ "fps": 30,
+ "surface": "relief",
+ "credit": "The Canadian Data Project",
+ "format": "9x16",
+ "motion": "smooth",
+ "id": "route-rent-hours",
+ "title": "Rent in hours of work",
+ "layer": "renth",
+ "place": null,
+ "from": 1997,
+ "to": 2025,
+ "subtitle": "Hours of work at the province's median hourly wage to pay one month of the average two-bedroom rent, CMHC October survey.",
+ "city": "Vancouver",
+ "intro": 2.6,
+ "perYear": 0.55,
+ "hold": 0.8,
+ "outro": 3.5,
+ "camera": "push",
+ "theme": "whiteout",
+ "hook": [
+  "How many hours do you work",
+  "just to pay one month of rent?"
+ ],
+ "annotations": [
+  {
+   "year": 2008,
+   "text": "Average two-bedroom rent, existing tenants included: new leases are often higher"
+  },
+  {
+   "year": 2020,
+   "text": "Wages are each province's median hourly wage"
+  }
+ ],
+ "summary": {
+  "seconds": 6.5,
+  "items": [
+   {
+    "big": "73 h",
+    "kicker": "Vancouver, October 2025",
+    "text": "about 9 eight-hour days a month (1997: 53 h)",
+    "scope": "year"
+   },
+   {
+    "big": "+25 h",
+    "kicker": "Kelowna, 1997 → 2025",
+    "text": "40 h → 65 h, the biggest jump of 33 cities",
+    "scope": "period"
+   },
+   {
+    "big": "33 h",
+    "kicker": "Saguenay, October 2025",
+    "text": "the lowest of the cities measured",
+    "scope": "year"
+   }
+  ]
+ }
+}

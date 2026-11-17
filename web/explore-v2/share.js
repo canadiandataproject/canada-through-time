@@ -41,8 +41,9 @@ async function picture(info) {
   const aw = W - 80, ah = H - head - foot - 20, k = Math.min(aw / img.width, ah / img.height), iw = img.width * k, ih = img.height * k;
   g.drawImage(img, (W - iw) / 2, head + (ah - ih) / 2 + 6, iw, ih);
   const disp = (getComputedStyle(document.body).getPropertyValue('--font-display') || 'Georgia').trim(), ui = (getComputedStyle(document.body).getPropertyValue('--font-ui') || 'sans-serif').trim();
-  g.fillStyle = acc; g.font = `600 22px ${ui}`; g.fillText(SITE.toUpperCase(), 48, 56);
-  g.fillStyle = ink; g.font = `500 50px ${disp}`; let title = info.title; while (g.measureText(title).width > W - 96 && title.length > 10) title = title.slice(0, -2); if (title !== info.title) title += '…'; g.fillText(title, 48, 112);
+  const route = document.body.classList.contains('id-route');   // Whiteout / Blue hour: sentence case, condensed display title
+  g.fillStyle = acc; g.font = `600 22px ${ui}`; g.fillText(route ? SITE : SITE.toUpperCase(), 48, 56);
+  g.fillStyle = ink; g.font = route ? `760 56px ${disp}` : `500 50px ${disp}`; if (route && 'fontStretch' in g) g.fontStretch = 'condensed'; let title = info.title; while (g.measureText(title).width > W - 96 && title.length > 10) title = title.slice(0, -2); if (title !== info.title) title += '…'; g.fillText(title, 48, 112); if ('fontStretch' in g) g.fontStretch = 'normal';
   if (info.sub) { g.fillStyle = ink3; g.font = `400 24px ${ui}`; g.fillText(info.sub.slice(0, 110), 48, 142); }
   if (leg) drawLegend(g, leg, 48, H - foot - 92, ui, ink, ink3, page);
   g.fillStyle = ink3; g.font = `400 20px ${ui}`; g.fillText(`Data: ${info.source || 'see the About page'}`, 48, H - 26);

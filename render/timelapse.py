@@ -10,7 +10,7 @@ only published annual values (no interpolation between years). Output folder exp
   sources.json (registry entries, raw-file fingerprints and code revision), poster.png.
 """
 from __future__ import annotations
-import argparse, base64, functools, hashlib, http.server, json, subprocess, sys, threading, time
+import argparse, base64, functools, hashlib, http.server, json, os, subprocess, sys, threading, time
 from pathlib import Path
 import yaml
 from playwright.sync_api import sync_playwright
@@ -30,7 +30,7 @@ def main() -> None:
     srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), functools.partial(Quiet, directory=str(ROOT / "web"))); threading.Thread(target=srv.serve_forever, daemon=True).start()
     vert = cfg.get("format") == "9x16"
     cw, ch, ow, oh = (720, 1280, 1080, 1920) if vert else (a.css_width, a.css_width * 9 // 16, 1920, 1080); scale = ow / cw
-    url = f"http://127.0.0.1:{srv.server_address[1]}/{a.build}/index.html?studio={token}&render=1&p={cfg.get('theme', 'ember')}&tx={cfg.get('surface', 'relief')}"
+    url = f"http://127.0.0.1:{srv.server_address[1]}/{a.build}/index.html?studio={token}&render=1&p={cfg.get('theme', 'ember')}&tx={cfg.get('surface', 'relief')}" + (f"&ss={os.environ['CTT_SS']}" if os.environ.get('CTT_SS') else '')
     with sync_playwright() as p:
         b = p.chromium.launch(executable_path="/usr/bin/google-chrome", args=CHROME)
         page = b.new_page(viewport={"width": cw, "height": ch}, device_scale_factor=scale); errors: list[str] = []
