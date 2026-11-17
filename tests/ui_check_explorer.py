@@ -146,7 +146,7 @@ def main():
                   const bx = L.props.data.map(d => { const [x, y] = vp.project(L.props.getPosition(d)), o = L.props.getPixelOffset(d), w = L.props.getText(d).length * 8.4 / 2; return [x - w, y + o[1] - 8, x + w, y + o[1] + 8]; });
                   let n = 0; for (let i = 0; i < bx.length; i++) for (let j = i + 1; j < bx.length; j++) if (!(bx[i][2] < bx[j][0] || bx[i][0] > bx[j][2] || bx[i][3] < bx[j][1] || bx[i][1] > bx[j][3])) n++; return n; })()""")
                 check("province value labels do not overlap on a dollar measure (desktop)", ov == 0, f"{ov} overlapping pairs, {pg.evaluate('CTX.state.valHidden')} values hidden")
-                check("palette picker lists nine palettes and three map surfaces", pg.locator("#palpop [data-pal]").count() == 9 and pg.locator("#palpop [data-tx]").count() == 3)
+                check("palette picker lists eleven palettes and three map surfaces", pg.locator("#palpop [data-pal]").count() == 11 and pg.locator("#palpop [data-tx]").count() == 3)
                 pg.evaluate("CTX.state.m='fed'; CTX.state.y=2025; CTX.update()")
                 acc = pg.evaluate("[getComputedStyle(document.querySelector('#layers .plates .opt.on')).backgroundColor, getComputedStyle(document.body).getPropertyValue('--accent').trim()]")
                 check("interface accent is not used on the election layer", acc[0] != "rgb(184, 71, 47)", str(acc))

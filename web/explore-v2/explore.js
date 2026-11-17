@@ -28,23 +28,27 @@ if (VERT && Q.get('render') == null && innerWidth !== 720) {   // preview: show 
   document.body.innerHTML = ''; document.body.style.background = '#1c1c1c'; document.body.appendChild(f); await new Promise(() => {}); }
 const V = 's';                                 // composition: Night Lanterns
 // Palettes: the visitor picks one (map-control button); the choice is kept in the link (?p=) and remembered on this device.
-const RELEASE = 3;   // the first three are the proposed public themes (Highway signs is the default); the rest stay in review builds for comparison
-const PALETTES = [['signs', 'Highway signs', 'dark'], ['ember', 'Field Paper · Ember', 'light'], ['aurora', 'Aurora Night', 'dark'],
+const RELEASE = 2;   // Whiteout (light) and Blue hour (dark) are the public pair; the rest stay in review builds for comparison
+const PALETTES = [['whiteout', 'Whiteout', 'light'], ['bluehour', 'Blue hour', 'dark'], ['signs', 'Highway signs', 'dark'], ['ember', 'Field Paper · Ember', 'light'], ['aurora', 'Aurora Night', 'dark'],
   ['field', 'Field Paper (original)', 'light'], ['lichen', 'Lichen', 'light'], ['heather', 'Heather', 'light'], ['dusk', 'Tuscan Dusk', 'dark'], ['glacier', 'Glacier', 'dark'], ['vintage', 'Deep Vintage', 'dark']];
 const PALS = PALETTES.map(p => p[0]).concat('paper');
 let savedPal = null; try { savedPal = localStorage.getItem('ctt-palette'); } catch (e) { /* storage unavailable */ }
-const PAL = PALS.includes(Q.get('p')) ? Q.get('p') : PALS.includes(savedPal) ? savedPal : 'signs';
-const LIGHT = ['ember', 'field', 'lichen', 'heather', 'paper'].includes(PAL);
+const SYS_DARK = (() => { try { return matchMedia('(prefers-color-scheme: dark)').matches; } catch (e) { return false; } })();
+const PAL = PALS.includes(Q.get('p')) ? Q.get('p') : PALS.includes(savedPal) ? savedPal : SYS_DARK ? 'bluehour' : 'whiteout';   // follows the device's light/dark setting until the visitor picks
+const LIGHT = ['whiteout', 'ember', 'field', 'lichen', 'heather', 'paper'].includes(PAL);
 const TRUE_COL = !['vintage', 'paper', 'glacier'].includes(PAL);   // neutral light so map fills match legend colours
-const PAL_SW = {"signs": ["#0D2620", "#4A7F6A", "#A9CF84", "#FFF4B0", "#4A82C8", "#F4D03F"], "ember": ["#EFEADB", "#E3D594", "#978B37", "#3A370D", "#9687C4", "#B8472F"], "lichen": ["#ECEFEA", "#B3E0D2", "#3A948D", "#003840", "#C28562", "#B8472F"], "heather": ["#F1ECE6", "#E7CEE4", "#A372A6", "#44234C", "#8BA669", "#B8472F"], "aurora": ["#0B1720", "#184258", "#62B995", "#FEF2C5", "#B07750", "#D99B68"], "field": ["#EFEADB", "#F4EDBF", "#AEA048", "#423F15", "#A295CB", "#8A2B0E"], "dusk": ["#1A1619", "#4C2A49", "#C5857F", "#FFEACA", "#63908A", "#E35336"], "glacier": ["#0E1520", "#1F4A70", "#58A8D0", "#E4F5FB", "#B07B2A", "#F2B84B"], "vintage": ["#10222A", "#4A2E28", "#C25A41", "#FBE9D0", "#6F9796", "#E64833"]};   // page, low, mid, high, "less", accent
+const PAL_SW = {"whiteout": ["#E3E9F0", "#D6E2F5", "#5F86E6", "#12207A", "#D9799F", "#1E3CFF"], "bluehour": ["#0B1A3D", "#3E63A0", "#8FBDF2", "#F2FAFF", "#F09AC4", "#BDEBFF"], "signs": ["#0D2620", "#4A7F6A", "#A9CF84", "#FFF4B0", "#4A82C8", "#F4D03F"], "ember": ["#EFEADB", "#E3D594", "#978B37", "#3A370D", "#9687C4", "#B8472F"], "lichen": ["#ECEFEA", "#B3E0D2", "#3A948D", "#003840", "#C28562", "#B8472F"], "heather": ["#F1ECE6", "#E7CEE4", "#A372A6", "#44234C", "#8BA669", "#B8472F"], "aurora": ["#0B1720", "#184258", "#62B995", "#FEF2C5", "#B07750", "#D99B68"], "field": ["#EFEADB", "#F4EDBF", "#AEA048", "#423F15", "#A295CB", "#8A2B0E"], "dusk": ["#1A1619", "#4C2A49", "#C5857F", "#FFEACA", "#63908A", "#E35336"], "glacier": ["#0E1520", "#1F4A70", "#58A8D0", "#E4F5FB", "#B07B2A", "#F2B84B"], "vintage": ["#10222A", "#4A2E28", "#C25A41", "#FBE9D0", "#6F9796", "#E64833"]};   // page, low, mid, high, "less", accent
 let savedTx = null; try { savedTx = localStorage.getItem('ctt-surface'); } catch (e) { /* storage unavailable */ }
 const SURFACES = [['none', 'Plain'], ['paper', 'Paper grain'], ['relief', 'Shaded relief']];
 const TX = SURFACES.some(x => x[0] === Q.get('tx')) ? Q.get('tx') : SURFACES.some(x => x[0] === savedTx) ? savedTx : 'relief';
 document.body.classList.add('tx-' + TX);
-const SIGNS = PAL === 'signs';   // release identity (2026-11-17): Canadian highway-sign type and colour; visual only
-const TY = ['news', 'civic', 'grotesk', 'signs'].includes(Q.get('t')) ? Q.get('t') : SIGNS ? 'signs' : 'civic';
+const SIGNS = PAL === 'signs';   // review identity (2026-11-17, superseded): Canadian highway-sign type and colour; visual only
+const ROUTE = PAL === 'whiteout' || PAL === 'bluehour';   // release identity (2026-11-17): Whiteout / Blue hour, one interface in two modes; visual only
+const TY = ['news', 'civic', 'grotesk', 'signs', 'route'].includes(Q.get('t')) ? Q.get('t') : ROUTE ? 'route' : SIGNS ? 'signs' : 'civic';
 document.body.classList.add('v-s', 'pal-' + PAL, 'ty-' + TY);
 if (SIGNS) document.body.classList.add('id-signs');
+if (ROUTE) document.body.classList.add('id-route');
+window.CTT_MODE = { pal: PAL, route: ROUTE, light: ['whiteout', 'ember', 'field', 'lichen', 'heather', 'paper'].includes(PAL) };
 
 // ---------------------------------------------------------------- tokens
 const css = getComputedStyle(document.body);
@@ -625,7 +629,111 @@ const liftZ = (fc, z) => ({ ...fc, features: fc.features.map(f => ({ ...f, geome
 const lakeLayer = new GeoJsonLayer({ id: 'lakes', data: liftZ(lakes, PLATE + 0.5), coordinateSystem: CART, filled: true, stroked: true, getFillColor: C('ocean'), getLineColor: [...C('coast'), 90],
   lineWidthUnits: 'pixels', getLineWidth: 0.6, parameters: { depthTest: false } });
 
-function layers() { const L = layers0(); return STUDIO ? L.map(l => l.clone({ transitions: {} })) : L; }   // studio frames are exact: no time-based tweens
+// ---------------------------------------------------------------- Whiteout / Blue hour: living context (decoration only; no statistic)
+// The sea is small stepped cubes with ripples spreading from every coast; neighbours (USA, Greenland ...) carry relief in their
+// own grey/slate shade so they read as context; the lens shows the land as a relief wireframe; five small easter eggs
+// live in the sea. None of it is pickable, none of it moves or recolours a mark that carries data, and it all stops for
+// prefers-reduced-motion. Built by pipeline/build_context_layers.py from the map's own outlines and Natural Earth relief.
+const AMB = { on: ROUTE && !Q.has('nosea'), t: 0, tick: 0, ids: new Set(['sea-cubes', 'eggs']),
+  still: (() => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } })() };
+const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+const NB_RELIEF = { src: window.__DATA?.['../data/relief/relief_neighbours_8km.png'] || `${BASE}/data/relief/relief_neighbours_8km.png`, b: [1500, -900, 11000, 7500] };   // bounds: web/data/relief/relief.json → neighbours
+let LAST_L = null;
+function ambientRefresh() { if (!LAST_L) return; try { theDeck.setProps({ layers: LAST_L = LAST_L.map(l => AMB.ids.has(l.id) ? (l.id === 'sea-cubes' ? seaLayer() : eggLayer()) || l : l) }); } catch (e) { /* deck not ready */ } }
+function ambientRebuild() { try { theDeck.setProps({ layers: layers() }); } catch (e) { /* deck not ready; the first update() includes it */ } }
+if (AMB.on) {
+  J('../data/explorer/sea_cells.json').then(g => { const codes = b64(g.data), cells = [];
+    // one texel per cell: R = code (0 Canada, 1 neighbour, 2+ sea distance), G = fade towards the grid edge. The cubes, ripples
+    // and stepping are drawn per pixel on the GPU (SeaExtension), so the sea costs one textured quad, not 70,000 columns.
+    const cv = document.createElement('canvas'); cv.width = g.nx; cv.height = g.ny; const cx = cv.getContext('2d'), img = cx.createImageData(g.nx, g.ny);
+    for (let j = 0; j < g.ny; j++) for (let i = 0; i < g.nx; i++) { const k = j * g.nx + i, e = Math.min(1, Math.min(i, g.nx - 1 - i, j, g.ny - 1 - j) / 30) ** 1.5;
+      img.data.set([codes[k], Math.round(e * 255), 0, 255], k * 4); }
+    cx.putImageData(img, 0, 0);
+    AMB.sea = { cv, nx: g.nx, ny: g.ny, b: [g.x0_km, g.y1_km - g.ny * g.cell_km, g.x0_km + g.nx * g.cell_km, g.y1_km] }; ambientRebuild(); }).catch(e => console.warn('sea', e));
+  const im = new Image(); im.onload = () => { NB_RELIEF.img = im; ambientRebuild(); }; im.src = NB_RELIEF.src;
+  if (!AMB.still && !STUDIO) { const t0 = performance.now();
+    setInterval(() => { if (document.hidden || !LAST_L || document.body.classList.contains('home-on') || ['nb', 'cl', 'mn', 'wa', 'rc', 'ab'].some(k => { const e = document.getElementById(k); return e && !e.hidden; })) return; AMB.t = (performance.now() - t0) / 1000; AMB.tick++; ambientRefresh(); }, 320); }
+}
+class SeaExtension extends deck.LayerExtension {
+  getShaders() { return { modules: [{ name: 'sea', fs: 'layout(std140) uniform seaUniforms {\n  vec4 t;\n  vec4 dims;\n  vec4 c1;\n  vec4 c2;\n  vec4 c3;\n  vec4 c4;\n  vec4 side;\n} sea;\n',
+      uniformTypes: { t: 'vec4<f32>', dims: 'vec4<f32>', c1: 'vec4<f32>', c2: 'vec4<f32>', c3: 'vec4<f32>', c4: 'vec4<f32>', side: 'vec4<f32>' } }],
+    inject: { 'fs:DECKGL_FILTER_COLOR': `
+      float code = floor(color.r * 255.0 + 0.5); float fade = color.g;
+      if (code < 1.5) discard;
+      vec2 gc = geometry.uv * sea.dims.xy; vec2 ci = floor(gc); vec2 f = fract(gc);
+      float d = code - 2.0, i = ci.x, j = ci.y, t = sea.t.x;
+      float w = 1.2 * sin(d * 1.15 - t * 1.1) * exp(-d / 9.0) + 0.36 * sin(i * 0.21 + j * 0.09 + t * 0.32) + 0.2 * sin(-i * 0.07 + j * 0.31 - t * 0.23);
+      float lv = clamp(floor((w + 1.6) / 3.2 * 4.0), 0.0, 3.0);
+      vec3 top = lv < 0.5 ? sea.c1.rgb : lv < 1.5 ? sea.c2.rgb : lv < 2.5 ? sea.c3.rgb : sea.c4.rgb;
+      float fy = sea.dims.z > 0.5 ? 1.0 - f.y : f.y;                     // 0 at the cell's south edge
+      vec2 px = fwidth(gc);                                                // one screen pixel, in cells
+      float show = 1.0 - smoothstep(0.34, 0.6, max(px.x, px.y));          // cube detail fades out when cells get tiny (no moiré)
+      float g = max(0.11, px.x), sideH = 0.14 + lv * 0.07;
+      float gapX = smoothstep(1.0 - g - px.x, 1.0 - g, f.x), gapY = smoothstep(1.0 - g * 0.7 - px.y, 1.0 - g * 0.7, fy);
+      float side = 1.0 - smoothstep(sideH - px.y, sideH + px.y, fy);
+      vec3 rgb = mix(top, sea.side.rgb, side * show);
+      rgb = mix(rgb, mix(sea.side.rgb, top, 0.2), max(gapX, gapY) * show);
+      color = vec4(rgb, fade);` } }; }
+  draw() { this.setShaderModuleProps({ sea: this.props.seaU }); }
+}
+SeaExtension.defaultProps = { seaU: {} }; SeaExtension.extensionName = 'SeaExtension';
+const SEA_EXT = [new SeaExtension()];
+function seaLayer() { const S = AMB.sea; if (!S) return null; const v = n => [...C(n).map(x => x / 255), 1];
+  const [l, b, r, t] = S.b;
+  return new deck.BitmapLayer({ id: 'sea-cubes', image: S.cv, coordinateSystem: CART, bounds: [[l, b, -0.5], [l, t, -0.5], [r, t, -0.5], [r, b, -0.5]], pickable: false,
+    textureParameters: { minFilter: 'nearest', magFilter: 'nearest', mipmapFilter: undefined }, parameters: { depthTest: false },
+    extensions: SEA_EXT, seaU: { t: [AMB.t, 0, 0, 0], dims: [S.nx, S.ny, SEA_FLIP, 0], c1: v('vox-1'), c2: v('vox-2'), c3: v('vox-3'), c4: v('vox-4'), side: v('vox-side') } }); }
+const SEA_FLIP = 1;   // texture rows run north → south while uv.y runs south → north
+function nbReliefLayer() { if (!NB_RELIEF.img) return null; const [l, b, r, t] = NB_RELIEF.b;
+  return new deck.BitmapLayer({ id: 'nb-relief', image: NB_RELIEF.img, coordinateSystem: CART, bounds: [[l, b, 0.3], [l, t, 0.3], [r, t, 0.3], [r, b, 0.3]],
+    opacity: LIGHT ? 0.6 : 0.72, parameters: { depthTest: false }, pickable: false }); }
+// lens: the land as a relief wireframe (the hillshade's light and dark as a gentle bump, not elevation)
+const WIRE = { lines: null, loading: false };
+function wireLayer() {
+  if (!AMB.on || !state.lens) return null;
+  if (!WIRE.lines) { if (!WIRE.loading) { WIRE.loading = true; J('../data/explorer/lens_wire.json').then(w => { const a = new Int16Array(b64(w.xyz).buffer), out = []; let k = 0;
+      for (const n of w.lens) { const p = []; for (let q = 0; q < n; q++, k += 3) p.push([a[k], a[k + 1], a[k + 2]]); out.push(p); } WIRE.lines = out; ambientRebuild(); }).catch(e => console.warn('wire', e)); } return null; }
+  return new PathLayer({ id: 'lens-wire', data: WIRE.lines, coordinateSystem: CART, getPath: d => d.map(p => [p[0], p[1], PLATE + 2 + p[2] * 0.22]), getColor: [...C('wire'), LIGHT ? 120 : 140],
+    widthUnits: 'pixels', getWidth: 1, pickable: false, extensions: LENS_EXT, lensPx: lensPx(), parameters: { depthTest: false } }); }
+// easter eggs: fine pixel sprites (1 px ink outline so they read when small), drawn once into an atlas
+const EGG_ART = {
+  bear: ["                     WW  WW     ", "                    WWWWWWWW    ", "         WWWWWW     WWWWWWWWW   ", "      WWWWWWWWWWW  WWWWWWKWWWW  ", "     WWWWWWWWWWWWWWWWWWWWWWWWWW ", "    sWWWWWWWWWWWWWWWWWWWWWWWWWWK", "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~", " ~  ~    ~   ~    ~   ~    ~  ~ "],
+  sub: ["             KK                    ", "             K                     ", "           hhhhhh                  ", "          SSSSSSSS                 ", "          SSRSSSSS                 ", "    hhhhhhhhhhhhhhhhhhhhhhhhhh     ", "  SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS  ", "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~", " ~  ~   ~    ~    ~   ~  ~   ~  ~  "],
+  ufo: ["          CCCC          ", "        CCCCCCCC        ", "       CCCCCCCCCC       ", "   hhhhhhhhhhhhhhhhhh   ", " MMMMMMMMMMMMMMMMMMMMMM ", "MMYMMMMYMMMMYMMMMYMMMMYM", " MMMMMMMMMMMMMMMMMMMMMM ", "      KKKKKKKKKKKK      "],
+  ufobeam: ["          CCCC          ", "        CCCCCCCC        ", "       CCCCCCCCCC       ", "   hhhhhhhhhhhhhhhhhh   ", " MMMMMMMMMMMMMMMMMMMMMM ", "MMYMMMMYMMMMYMMMMYMMMMYM", " MMMMMMMMMMMMMMMMMMMMMM ", "      KKKKKKKKKKKK      ", "       bbbbbbbbbb       ", "      bbbbbbbbbbbb      ", "      bbbbbbbbbbbb      ", "     bbbbbbbbbbbbbb     ", "     bbbbbbbbbbbbbb     ", "    bbbbbbbbbbbbbbbb    ", "    bbbbbbbbbbbbbbbb    ", "   bbbWWKKWWWWWWbbbbb   ", "   bbbWWKKWWWWKKWWWWbb  ", "   bbbWWWWWWWKKWWWWPbb  ", "   bbbWWWWWWWWWWWbbbbb  ", "   bbbbKbbKbbKbbKbbbbb  "],
+  narwhal: ["TTTTTTT                        ", "       TTT   NNNNNNNN      NN  ", "          NNNNNNNNNNNNN   NNN  ", "         NNKNNNNdNNNdNNNNNNN   ", "         NNNNNNNNNNNNNNNNNN    ", "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~", "  ~   ~    ~   ~    ~    ~   ~ "],
+  orca: ["     K                     K    ", "     KK                    KK   ", "    KKK                   KKK   ", "    KKKK                  KKKK  ", "   KKKKKK                KKKKK  ", "  KKKKKKKWW             KKKKKKWW", "~~~~~~~~~~~~~~       ~~~~~~~~~~~~", " ~   ~    ~  ~        ~   ~   ~ "],
+};
+const EGG_PAL = LIGHT ? { W: '#FFFFFF', s: '#DCE4EE', O: '#22314F', h: '#5A6B88', P: '#F2A7B8', d: '#5E6E86', K: '#0B1A3D', S: '#3B4A63', R: '#E0283A', N: '#A8B6C8', T: '#F1E7C8', w: '#A9BCD3', C: '#BFD3FF', M: '#55647B', Y: '#1E3CFF', b: 'rgba(30,60,255,.14)' }
+  : { W: '#F2F8FF', s: '#C9D9EC', O: '#030A1A', h: '#8A9CBB', P: '#F2A7B8', d: '#5E7090', K: '#020814', S: '#5D6F8E', R: '#FF4A5C', N: '#A9BAD4', T: '#F1E7C8', w: '#4E78B8', C: '#BDEBFF', M: '#C9D6EA', Y: '#BDEBFF', b: 'rgba(189,235,255,.17)' };
+const EGG_ATLAS = (() => { if (!AMB.on) return null; const SC = 4, PAD = 2, map = {}; let x = 0, H = 0;
+  const arts = Object.entries(EGG_ART).flatMap(([k, rows]) => [[k, rows, false], [k + '-l', rows, true]]);
+  for (const [, rows] of arts) { x += (Math.max(...rows.map(r => r.length)) + 2 * PAD) * SC; H = Math.max(H, (rows.length + 2 * PAD) * SC); }
+  const cv = document.createElement('canvas'); cv.width = x; cv.height = H; const g = cv.getContext('2d'); x = 0;
+  for (const [k, rows0, flip] of arts) { const n = Math.max(...rows0.map(r => r.length)), rows = rows0.map(r => { r = r.padEnd(n); return flip ? [...r].reverse().join('') : r; });
+    const w = (n + 2 * PAD) * SC, h = (rows.length + 2 * PAD) * SC, solid = (i, j) => j >= 0 && j < rows.length && i >= 0 && i < n && !' ~b'.includes(rows[j][i]);
+    const px = (i, j, c) => { g.fillStyle = c; g.fillRect(x + (i + PAD) * SC, (j + PAD) * SC, SC, SC); };
+    for (let j = 0; j < rows.length; j++) for (let i = 0; i < n; i++) { const ch = rows[j][i]; if (ch === '~') px(i, j, EGG_PAL.w); if (ch === 'b') px(i, j, EGG_PAL.b); }
+    for (let j = -1; j <= rows.length; j++) for (let i = -1; i <= n; i++) if (!solid(i, j) && [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [1, 1], [-1, 1], [1, -1]].some(([a, b]) => solid(i + a, j + b))) px(i, j, EGG_PAL.O);
+    for (let j = 0; j < rows.length; j++) for (let i = 0; i < n; i++) if (solid(i, j)) px(i, j, EGG_PAL[rows[j][i]]);
+    map[k] = { x, y: 0, width: w, height: h, anchorY: h * 0.7 }; x += w; }
+  return { url: cv.toDataURL(), map }; })();
+const EGG_AT = { bear: LCC(-78.6, 66.6), subA: LCC(-152, 71.7), subB: LCC(-133, 70.3), ufo: LCC(-94, 46.6), narwhal: LCC(-66, 73.6), orcaA: LCC(-128.6, 49.4), orcaB: LCC(-131.5, 52.6) };
+function eggState(t) {
+  const out = [], lerp = (a, b, k) => [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k], pp = (p, q) => (t % p) / p, tri = k => k < .5 ? k * 2 : 2 - k * 2;
+  { const a = pp(240) * 2 * Math.PI, c = EGG_AT.bear; out.push({ icon: Math.cos(a) > 0 ? 'bear-l' : 'bear', p: [c[0] + Math.sin(a) * 45, c[1] + Math.cos(a) * 30], a: 255, n: 32 }); }   // laps of Foxe Basin, at the top of Hudson Bay (the bay itself sits under Ontario's label)
+  { const k = pp(220), e = tri(k), surf = (k % .5) / .5; out.push({ icon: k < .5 ? 'sub-l' : 'sub', p: lerp(EGG_AT.subB, EGG_AT.subA, e), a: Math.round(255 * Math.min(1, Math.max(0.0, Math.abs(Math.sin(surf * Math.PI)) * 1.6))), n: 36 }); }   // Beaufort shelf, dives at each end
+  { const k = pp(42), c = EGG_AT.ufo, bob = Math.sin(t * 1.3) * 10, beam = k > .55 && k < .78, away = k > .78 ? (k - .78) / .22 : 0;
+    out.push({ icon: beam ? 'ufobeam' : 'ufo', p: [c[0] + away * 600, c[1] + away * 200], z: 90 + bob + away * 400, a: Math.round(255 * (1 - away)), n: beam ? 24 : 24, top: beam }); }   // hovers, beams up a cow, leaves
+  { const k = pp(50); const a = k < .35 ? Math.sin(k / .35 * Math.PI) : 0; if (a > 0.02) { const c = EGG_AT.narwhal, s = Math.floor(t / 50) % 4; out.push({ icon: s % 2 ? 'narwhal-l' : 'narwhal', p: [c[0] + [0, 120, -90, 60][s], c[1] + [0, -60, 50, 90][s]], a: Math.round(255 * Math.min(1, a * 1.5)), n: 31 }); } }   // surfaces now and then
+  { const k = pp(170), e = tri(k); out.push({ icon: k < .5 ? 'orca' : 'orca-l', p: lerp(EGG_AT.orcaA, EGG_AT.orcaB, e), a: 255, n: 32 }); }   // two fins off Vancouver Island
+  return out; }
+function eggLayer() { if (!EGG_ATLAS) return null; const PX = isPhone() ? 1.8 : 2.2;
+  return new deck.IconLayer({ id: 'eggs', data: eggState(AMB.t), coordinateSystem: CART, iconAtlas: EGG_ATLAS.url, iconMapping: EGG_ATLAS.map, getIcon: d => d.icon, pickable: false,
+    getPosition: d => [d.p[0], d.p[1], d.z ?? 14], sizeUnits: 'pixels', getSize: d => EGG_ATLAS.map[d.icon].height / 4 * PX, getColor: d => [255, 255, 255, d.a],
+    textureParameters: { minFilter: 'nearest', magFilter: 'nearest' }, alphaCutoff: 0.01, parameters: { depthTest: false }, updateTriggers: { getSize: [PX] } }); }
+
+function layers() { const L = layers0(); LAST_L = L; return STUDIO ? L.map(l => l.clone({ transitions: {} })) : L; }   // studio frames are exact: no time-based tweens
 // Timelapse motion: TW = { ya, yb, k } places the playhead between two published years. Only mark geometry and colour
 // glide between the two published values; every printed number is the published value for the year on screen.
 let TW = null;
@@ -678,7 +786,7 @@ function layers0() {
     return landC;
   };
   const z = PLATE;
-  const L = [...seaLayers(), neighbour,
+  const L = [...seaLayers(), ...(AMB.on ? [seaLayer()].filter(Boolean) : []), neighbour, ...(AMB.on ? [nbReliefLayer()].filter(Boolean) : []),
     new GeoJsonLayer({ id: 'land', data: feats, coordinateSystem: CART, filled: true, stroked: !PLATE, extruded: !!PLATE, pickable: true,
       getElevation: z, getFillColor: fillColor, getLineColor: C('boundary'), lineWidthUnits: 'pixels', getLineWidth: 1,
       // TRUE_COL: lit top face = ambient 0.91 + diffuse 0.285 × 0.6 × 0.527 ≈ 1.00, so a province matches its legend swatch
@@ -691,6 +799,7 @@ function layers0() {
     ...(m.kind === 'fill' ? [hatchLayer(feats.filter(f => val[f.properties.abbr] == null), split, z)] : []),
     new PathLayer({ id: 'bounds', data: split ? OUT_SPLIT : OUT_COMB, coordinateSystem: CART, getPath: d => d.path.map(p => [p[0], p[1], z + 0.6]),
       getColor: [...C('boundary'), 200], widthUnits: 'pixels', getWidth: V === 's' ? 1 : 0.9, jointRounded: true, parameters: { depthTest: false } }),
+    ...(AMB.on ? [wireLayer(), STUDIO ? null : eggLayer()].filter(Boolean) : []),
   ];
   if (sel) { const sp = (split ? OUT_SPLIT : OUT_COMB).filter(d => d.abbr === sel);
     L.push(new PathLayer({ id: 'sel-halo', data: sp, coordinateSystem: CART, getPath: d => d.path.map(p => [p[0], p[1], z + 0.8]), getColor: [...C('halo'), 230], widthUnits: 'pixels', getWidth: 6, jointRounded: true, parameters: { depthTest: false } }),
@@ -1726,7 +1835,7 @@ if (STUDIO) { const SC = b64d(STUDIO), m = M[SC.layer]; state.m = SC.layer; stat
   const smooth = SC.motion !== 'stepped', clamp01 = x => Math.max(0, Math.min(1, x)), FADE = 9;
   const annWin = (SC.annotations || []).map(a => { const i = years.findIndex(y => y >= a.year); if (i < 0) return null; const hold = a.hold || Math.max(2, Math.round(2.4 / SC.perYear)); return { text: a.text, f0: nI + i * per, f1: Math.min(fS, nI + (i + hold) * per) }; }).filter(Boolean);
   annWin.forEach((a, k) => { const nx = annWin[k + 1]; if (nx && a.f1 > nx.f0) a.f1 = nx.f0; });   // a note fades out before the next one starts
-  const renderFrame = f => { f = Math.max(0, Math.min(N - 1, Math.round(f))); if (!base) base = fitView();
+  const renderFrame = f => { f = Math.max(0, Math.min(N - 1, Math.round(f))); if (!base) base = fitView(); AMB.t = f / fps;   // the cube sea moves with the frame number, so renders repeat exactly
     const c = (f - nI) / per, i = f < nI ? 0 : Math.min(years.length - 1, Math.floor(c)), y = years[i], out = f >= N - nO, intro = f < nI, sum = nS > 0 && f >= fS && !out;
     // playhead: each year's published value sits at the middle of that year's time slot; marks glide linearly between neighbours
     if (smooth) { const u = Math.max(0, Math.min(years.length - 1, c - 0.5)), j = Math.min(years.length - 2, Math.floor(u)); TW = years.length > 1 ? { ya: years[j], yb: years[j + 1], k: u - j } : null; }
@@ -1744,7 +1853,7 @@ if (STUDIO) { const SC = b64d(STUDIO), m = M[SC.layer]; state.m = SC.layer; stat
     document.body.classList.toggle('st-intro', intro); document.body.classList.toggle('st-outro', out);
     stage.querySelector('#st-bar i').style.width = (clamp01((f - nI + 1) / (years.length * per)) * 100) + '%';
     return { frame: f, year: y, phase: intro ? 'intro' : out ? 'outro' : sum ? 'summary' : 'run', title: SC.title, finding: intro ? '' : document.getElementById('finding').innerText, annotation: A && aEl.style.opacity > 0.5 ? A.text : '', between: smooth && TW ? [TW.ya, TW.yb, +TW.k.toFixed(3)] : null }; };
-  window.CTT = { get ready() { return window.READY === true && (TX !== 'relief' || !!RELIEF.img); }, frameCount: N, fps, renderFrame, config: SC, years };
+  window.CTT = { get ready() { return window.READY === true && (TX !== 'relief' || !!RELIEF.img) && (!AMB.on || (!!AMB.sea && !!NB_RELIEF.img)); }, frameCount: N, fps, renderFrame, config: SC, years };
   if (Q.get('render') == null) { // preview: plays in real time, with a scrubber
     const ctl = document.createElement('div'); ctl.id = 'st-ctl'; ctl.innerHTML = `<button aria-label="Play or pause">❚❚</button><input type="range" min="0" max="${N - 1}" value="0" aria-label="Position"><span></span><em>Preview · ${Math.round(N / fps)} s${VERT ? '' : ' · export with render/timelapse.py'}</em>`;
     document.getElementById('app').appendChild(ctl); const rng = ctl.querySelector('input'), btn = ctl.querySelector('button'), lab = ctl.querySelector('span'); let playing = true, f0 = 0, t0 = performance.now();

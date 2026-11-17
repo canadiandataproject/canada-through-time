@@ -13,5 +13,20 @@
  ],
  "flat_grey": 205.1,
  "raw_sha256": "aff6ec6905554ed489087edf46e61cbf68c810fe99f2a1d2cddda7e986a540a2",
- "note": "Generalised shaded relief for physical-geography context. It does not represent the selected statistic. The 3 km grid adds no detail beyond the 2 arc-minute source."
+ "note": "Generalised shaded relief for physical-geography context. It does not represent the selected statistic. The 3 km grid adds no detail beyond the 2 arc-minute source.",
+ "neighbours": {
+  "file": "relief_neighbours_8km.png",
+  "bounds_km": [
+   1500.0,
+   -900.0,
+   11000.0,
+   7500.0
+  ],
+  "cell_km": 8.0,
+  "size": [
+   1187,
+   1050
+  ],
+  "note": "Same source and stretch, clipped to the neighbouring countries drawn on the map. Context only."
+ }
 }

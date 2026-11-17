@@ -14,6 +14,7 @@ bar.id = 'shell';
 bar.innerHTML = `<button class="brand" data-shell-home aria-label="Home"><span class="glyph" aria-hidden="true"><i></i><i></i><i></i></span><span class="bt">Canada <em>Through Time</em></span></button>
   <nav class="worlds" aria-label="Sections">${WORLDS.map(([k, l, s, ic]) => `<button data-world="${k}" aria-label="${l}"><svg viewBox="0 0 24 24" aria-hidden="true">${ic}</svg><span class="lg">${l}</span><span class="sm">${s}</span></button>`).join('')}</nav>
   <button class="find" data-shell-search aria-label="Search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><span>${T("Search places, topics, years", "Chercher un lieu, un sujet, une année")}</span><kbd>/</kbd></button>
+  <button class="modeswitch" data-shell-mode aria-label="${T("Switch light or dark", "Passer en clair ou en sombre")}" title="${T("Light or dark", "Clair ou sombre")}"><span class="m-l"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg></span><span class="m-d"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg></span></button>
   <button class="lang" data-shell-lang aria-label="${T("Français", "English")}" lang="${T("fr", "en")}">${T("FR", "EN")}</button>
   <button class="about" data-shell-about>${T("About", "À propos")}</button>
   <button class="qhelp" data-shell-help aria-label="${T("How to use this page", "Comment utiliser cette page")}" title="${T("How to use this page", "Comment utiliser cette page")}">?</button>`;
@@ -29,7 +30,10 @@ async function go(k, opts) {
   if (k === 'map') { mark('map'); return; }
   mark(k); await API[k]()?.open(opts);
 }
+// light / dark: Whiteout and Blue hour are one interface in two modes. Kept in the link (?p=) and on this device, like the palette picker.
 bar.addEventListener('click', e => {
+  if (e.target.closest('[data-shell-mode]')) { const next = document.body.classList.contains('pal-bluehour') ? 'whiteout' : 'bluehour', u = new URL(location.href); u.searchParams.set('p', next);
+    try { localStorage.setItem('ctt-palette', next); } catch (er) { /* storage unavailable */ } location.replace(u.toString()); return; }
   if (e.target.closest('[data-shell-lang]')) { window.setLang(window.LANG === 'fr' ? 'en' : 'fr'); return; }
   const w = e.target.closest('[data-world]'); if (w) { go(w.dataset.world); return; }
   if (e.target.closest('[data-shell-about]')) { window.CTX2?.closeHome?.(); closeAll('ab'); mark('ab'); window.ABOUT?.open(); return; }

@@ -72,7 +72,7 @@ def main():
     for name, src in code.items():
         (OUT / name).write_text(src)
     # favicon: the three rising bars from the top bar
-    (OUT / "favicon.svg").write_text('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="#23201a"/><rect x="7" y="17" width="5" height="9" rx="1.5" fill="#c4512f" opacity=".7"/><rect x="13.5" y="11" width="5" height="15" rx="1.5" fill="#c4512f" opacity=".85"/><rect x="20" y="5" width="5" height="21" rx="1.5" fill="#c4512f"/></svg>')
+    (OUT / "favicon.svg").write_text('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="#0B1A3D"/><rect x="7" y="17" width="5" height="9" rx="1.5" fill="#BDEBFF" opacity=".7"/><rect x="13.5" y="11" width="5" height="15" rx="1.5" fill="#BDEBFF" opacity=".85"/><rect x="20" y="5" width="5" height="21" rx="1.5" fill="#BDEBFF"/></svg>')
     (OUT / ".nojekyll").write_text("")   # GitHub Pages: serve files as they are
     if (ROOT / "dist/share.png").exists():
         shutil.copy2(ROOT / "dist/share.png", OUT / "share.png")

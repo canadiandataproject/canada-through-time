@@ -373,6 +373,7 @@ sources:
     limitations:
       - "Physical-geography context only. The relief does not represent any statistic shown on the map."
       - "A cartographic hillshade generalised for 1:50m; Natural Earth embossed small islands by hand. Not suitable for measuring elevation."
+      - "Also resampled to an 8 km grid over the neighbouring countries drawn on the map (USA, Greenland and others) and shown in a separate grey/slate shade as context (pipeline/build_context_layers.py). The lens wireframe uses the Canada layer's light and dark as a gentle bump; it is not elevation."
       - "Resampled to a 3 km grid in the map projection and clipped to the province outlines (pipeline/build_relief.py). Resampling adds no detail: the source cell is 2 arc-minutes (about 3.7 km north–south and roughly 1.3–2.4 km east–west across Canada), and it was itself downsampled and generalised by Natural Earth."
 
   statcan_17100005:
