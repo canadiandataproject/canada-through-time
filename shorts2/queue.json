@@ -1,17 +1,44 @@
 {
- "note": "Edit and push to schedule. status per site: pending -> scheduled (or error). Times are Edmonton local. Run by .github/workflows/schedule-shorts.yml with the BUFFER_KEY repo secret.",
+ "note": "Edit and push to schedule. status per site: pending -> scheduled (or error). Times are Edmonton local. Run by .github/workflows/schedule-shorts.yml with the BUFFER_KEY repo secret. First run 2026-11-17.",
  "shorts": [
-  {"num": "17", "media": "short-17-alberta-tripled.mp4",
-   "when": {"youtube": "2026-11-19T13:30", "x": "2026-11-19T13:30", "tiktok": "2026-11-24T19:00"},
-   "tiktok": {"title": "Alberta tripled: 1.67M → 5.10M people",
-              "caption": "Alberta had 1.67M people in 1971. Now 5.10M. ×3.06, the fastest growth of any province or territory. When did your family arrive? 🏔️\n\nFree explorer, link in bio.\n\n#alberta #canada #population #dataviz"}},
-  {"num": "18", "media": "short-18-rent-hours.mp4",
-   "when": {"youtube": "2026-11-20T13:30", "x": "2026-11-20T13:30", "tiktok": "2026-11-25T19:00"},
-   "tiktok": {"title": "Rent in hours of work: Vancouver 73 hours a month",
-              "caption": "How many hours do you work just to pay one month of rent? Vancouver: 73. Kelowna went from 40 to 65 since 1997. What's yours? 🏠\n\nFree explorer, link in bio.\n\n#rent #canada #housing #dataviz"}},
-  {"num": "19", "media": "short-19-gas-hours.mp4",
-   "when": {"youtube": "2026-11-21T13:30", "x": "2026-11-21T13:30", "tiktok": "2026-11-26T19:00"},
-   "tiktok": {"title": "Is gas harder to pay for than in 1997?",
-              "caption": "Same gas, counted in hours of work. B.C.: 39% more than in 1997. Saskatchewan: 7% less. Does that match the pump? ⛽\n\nFree explorer, link in bio.\n\n#gas #canada #bc #dataviz"}}
+  {
+   "num": "17",
+   "media": "short-17-alberta-tripled.mp4",
+   "when": {
+    "youtube": "2026-11-19T13:30",
+    "x": "2026-11-19T13:30",
+    "tiktok": "2026-11-24T19:00"
+   },
+   "tiktok": {
+    "title": "Alberta tripled: 1.67M → 5.10M people",
+    "caption": "Alberta had 1.67M people in 1971. Now 5.10M. ×3.06, the fastest growth of any province or territory. When did your family arrive? 🏔️\n\nFree explorer, link in bio.\n\n#alberta #canada #population #dataviz"
+   }
+  },
+  {
+   "num": "18",
+   "media": "short-18-rent-hours.mp4",
+   "when": {
+    "youtube": "2026-11-20T13:30",
+    "x": "2026-11-20T13:30",
+    "tiktok": "2026-11-25T19:00"
+   },
+   "tiktok": {
+    "title": "Rent in hours of work: Vancouver 73 hours a month",
+    "caption": "How many hours do you work just to pay one month of rent? Vancouver: 73. Kelowna went from 40 to 65 since 1997. What's yours? 🏠\n\nFree explorer, link in bio.\n\n#rent #canada #housing #dataviz"
+   }
+  },
+  {
+   "num": "19",
+   "media": "short-19-gas-hours.mp4",
+   "when": {
+    "youtube": "2026-11-21T13:30",
+    "x": "2026-11-21T13:30",
+    "tiktok": "2026-11-26T19:00"
+   },
+   "tiktok": {
+    "title": "Is gas harder to pay for than in 1997?",
+    "caption": "Same gas, counted in hours of work. B.C.: 39% more than in 1997. Saskatchewan: 7% less. Does that match the pump? ⛽\n\nFree explorer, link in bio.\n\n#gas #canada #bc #dataviz"
+   }
+  }
  ]
 }
