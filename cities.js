@@ -317,7 +317,7 @@ async function shareCard(id) {
   const rows = ROWS.map(([k, l]) => { const mm = MK[k]; if (!mm) return null; const tv = mm.get(a, null), cv = mm.get(c, null); return tv == null || cv == null ? null : [l, tv, cv, mm.f]; }).filter(Boolean).slice(0, 5);
   const W = 1080, H = 1350, cv = document.createElement('canvas'); cv.width = W; cv.height = H; const g = cv.getContext('2d');
   const C = n => getComputedStyle(document.body).getPropertyValue(n).trim();
-  const page = C('--page') || '#F3EEE3', ink = C('--ink-1') || '#1D2326', ink3 = C('--ink-3') || '#62686A', acc = C('--accent') || '#C2402A', land = C('--land') || '#FBF8F1';
+  const page = C('--page') || '#D5DADB', ink = C('--ink-1') || '#111619', ink3 = C('--ink-3') || '#62686A', acc = C('--accent') || '#B0123A', land = C('--land') || '#E8ECEC';
   const seq = [1, 2, 3, 4, 5].map(i => C('--seq-' + i));
   await document.fonts.ready;
   const serif = getComputedStyle(document.body).fontFamily || 'serif';

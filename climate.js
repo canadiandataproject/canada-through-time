@@ -31,7 +31,7 @@ const hex = h => { h = h.replace('#', ''); return [0, 2, 4].map(i => parseInt(h.
 const lerp = (a, b, t) => a.map((x, i) => Math.round(x + (b[i] - x) * t));
 const rampAt = (st, t) => { t = Math.max(0, Math.min(1, t)) * (st.length - 1); const i = Math.min(st.length - 2, Math.floor(t)); return lerp(st[i], st[i + 1], t - i); };
 let PAL;
-function pal() { PAL = { seq: [1, 2, 3, 4, 5].map(i => hex(css('--seq-' + i))), dec: [1, 2, 3].map(i => hex(css('--dec-' + i))), neu: hex(css('--neutral')), land: hex(css('--land')), line: hex(css('--boundary')),
+function pal() { PAL = { seq: [1, 2, 3, 4, 5].map(i => hex(css('--warm-' + i) || css('--seq-' + i))), dec: [1, 2, 3].map(i => hex(css('--dec-' + i))), neu: hex(css('--neutral')), land: hex(css('--land')), line: hex(css('--boundary')),
   water: hex(css('--ocean')), sel: hex(css('--select')), ink: hex(css('--ink-1')), halo: hex(css('--halo')), page: css('--page') };
 }
 const DOM = { temp: 2.5, precip: 30, trend: 0.4 };
@@ -267,7 +267,7 @@ function drawMap() {
     marks = [new ScatterplotLayer({ id: 'gl', data: G.glaciers, pickable: true, getPosition: g => g.xy, radiusUnits: 'pixels', getRadius: g => 4 + Math.sqrt(g.n) * 1.1, stroked: true, lineWidthUnits: 'pixels',
         getLineWidth: g => g.id === S.gl ? 3 : 1.2, getFillColor: g => [...regionCol(g), 230], getLineColor: g => g.id === S.gl ? [...PAL.sel, 255] : [...PAL.ink, 200], updateTriggers: { getLineWidth: key, getLineColor: key, getFillColor: key } }),
       new TextLayer({ id: 'gl-lab', data: G.glaciers.filter(g => g.n >= 40 || g.id === S.gl), getPosition: g => g.xy, getText: g => g.name.replace(' Ice Cap', ''), getSize: 12, getColor: [...PAL.ink, 255], getPixelOffset: g => ({ Helm: [-10, 8], White: [10, 9], Meighen: [10, -7] })[g.name.replace(' Ice Cap', '')] || [10, 0], getTextAnchor: g => g.name === 'Helm' ? 'end' : 'start', getAlignmentBaseline: 'center',
-        fontFamily: 'IBM Plex Sans, sans-serif', fontWeight: 600, outlineWidth: 4, outlineColor: [...PAL.halo, 230], fontSettings: { sdf: true }, characterSet: 'auto', updateTriggers: { getColor: key } })];
+        fontFamily: (getComputedStyle(document.body).getPropertyValue('--font-ui').split(',')[0].replace(/"/g, '').trim() || 'serif'), fontWeight: 600, outlineWidth: 4, outlineColor: [...PAL.halo, 230], fontSettings: { sdf: true }, characterSet: 'auto', updateTriggers: { getColor: key } })];
   } else {
     const rows = stationRows(), data = rows.map(([s, v]) => ({ s, v })).sort((a, b) => (a.v == null) - (b.v == null) || Math.abs(a.v ?? 0) - Math.abs(b.v ?? 0)).reverse();
     marks = [new ScatterplotLayer({ id: 'st', data, pickable: true, getPosition: d => d.s.xy, radiusUnits: 'pixels', getRadius: d => d.s.id === S.st ? 7 : d.v == null ? 2.2 : 4.6, stroked: true, lineWidthUnits: 'pixels',
@@ -401,7 +401,7 @@ function moveMarks() {
     new ScatterplotLayer({ id: 'w-now', data: now, pickable: true, getPosition: o => [o.d[1], o.d[2]], radiusUnits: 'pixels', getRadius: o => o.wbird.id === S.wb ? 7 : 5, stroked: true, lineWidthUnits: 'pixels', getLineWidth: 1.5,
       getFillColor: o => birdCol(o.wbird), getLineColor: [...PAL.halo, 230], updateTriggers: { getFillColor: k, getRadius: k, getLineColor: k } }),
     new TextLayer({ id: 'w-lab', data: [{ p: WL.colony, t: TT('Seymour Island colony', 'Colonie de l’île Seymour') }], getPosition: d => d.p, getText: d => d.t, getSize: 12, getColor: [...PAL.ink, 255], getPixelOffset: [10, 0], getTextAnchor: 'start', getAlignmentBaseline: 'center',
-      fontFamily: 'IBM Plex Sans, sans-serif', fontWeight: 600, outlineWidth: 4, outlineColor: [...PAL.halo, 230], fontSettings: { sdf: true }, characterSet: 'auto', updateTriggers: { getColor: k } }),
+      fontFamily: (getComputedStyle(document.body).getPropertyValue('--font-ui').split(',')[0].replace(/"/g, '').trim() || 'serif'), fontWeight: 600, outlineWidth: 4, outlineColor: [...PAL.halo, 230], fontSettings: { sdf: true }, characterSet: 'auto', updateTriggers: { getColor: k } }),
   ];
 }
 function moveSide() {
