@@ -1599,16 +1599,15 @@ body.studio #lens { display: none !important; }
 
 /* ================================================================== ROUTE (2026-11-17) — release identity, visual only
  * One interface, two atmospheres: Whiteout (light) and Blue hour (dark). Glass controls over a living map, condensed display
- * type (Bricolage Grotesque, width 80), Familjen Grotesk for the interface, IBM Plex Mono for figures. The sea is small
+ * type: Funnel Display (titles), Funnel Sans (interface), Martian Mono (figures); chosen by Tyson 2026-11-17. The sea is small
  * stepped cubes; neighbours are relief in a grey/slate shade so they read as context, not part of the interactive map.
  * Deliberately avoids: serif headlines, tiny letter-spaced capitals, hairline-ruled magazine pages, off-white paper, orange. */
-@font-face { font-family: "Bricolage Grotesque"; font-weight: 200 800; font-stretch: 75% 100%; font-display: swap; src: url(fonts/bricolage-grotesque-latin-standard-normal.woff2) format("woff2"); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
-@font-face { font-family: "Bricolage Grotesque"; font-weight: 200 800; font-stretch: 75% 100%; font-display: swap; src: url(fonts/bricolage-grotesque-latin-ext-standard-normal.woff2) format("woff2"); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
-@font-face { font-family: "Familjen Grotesk"; font-weight: 400 700; font-display: swap; src: url(fonts/familjen-grotesk-latin-wght-normal.woff2) format("woff2"); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
-@font-face { font-family: "Familjen Grotesk"; font-weight: 400 700; font-display: swap; src: url(fonts/familjen-grotesk-latin-ext-wght-normal.woff2) format("woff2"); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
-@font-face { font-family: "Plex Figures"; font-weight: 400; src: url(fonts/ibm-plex-mono-latin-400-normal.woff2) format("woff2"); }
-@font-face { font-family: "Plex Figures"; font-weight: 500; src: url(fonts/ibm-plex-mono-latin-500-normal.woff2) format("woff2"); }
-@font-face { font-family: "Plex Figures"; font-weight: 600 900; src: url(fonts/ibm-plex-mono-latin-600-normal.woff2) format("woff2"); }
+@font-face { font-family: "Funnel Display"; font-weight: 300 800; font-display: swap; src: url(fonts/funnel-display-latin-wght-normal.woff2) format("woff2"); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: "Funnel Display"; font-weight: 300 800; font-display: swap; src: url(fonts/funnel-display-latin-ext-wght-normal.woff2) format("woff2"); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: "Funnel Sans"; font-weight: 300 800; font-display: swap; src: url(fonts/funnel-sans-latin-wght-normal.woff2) format("woff2"); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: "Funnel Sans"; font-weight: 300 800; font-display: swap; src: url(fonts/funnel-sans-latin-ext-wght-normal.woff2) format("woff2"); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: "Martian Mono"; font-weight: 100 800; font-display: swap; src: url(fonts/martian-mono-latin-wght-normal.woff2) format("woff2"); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: "Martian Mono"; font-weight: 100 800; font-display: swap; src: url(fonts/martian-mono-latin-ext-wght-normal.woff2) format("woff2"); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
 
 .pal-whiteout {
   --page: #E3E9F0; --sky-a: #F6F9FC; --sky-b: #E6ECF2; --sky-c: #D8E0E9; --vig: rgba(40,60,100,.10);
@@ -1634,10 +1633,10 @@ body.studio #lens { display: none !important; }
   --vox-1: #11264F; --vox-2: #162E5C; --vox-3: #1D3A6E; --vox-4: #2C5190; --vox-side: #08163A; --wire: #D7F1FF;
   --cat-1: #8FBDF2; --cat-2: #F09AC4; --cat-3: #7FE0C4; --cat-4: #C9A7F5; --cat-5: #F5E3A1; --cat-6: #9EE3E0; --cat-7: #E6EEF8; --cat-8: #B9C7F0;
 }
-.v-s.ty-route { --font-display: "Bricolage Grotesque", "Familjen Grotesk", system-ui; --font-ui: "Familjen Grotesk", system-ui; --font-year: "Plex Figures", ui-monospace, monospace;
-  --font-value: "Bricolage Grotesque", system-ui; --font-mono: "Plex Figures", ui-monospace, monospace; --w-title: 760; --w-year: 500; --w-place: 760; }
+.v-s.ty-route { --font-display: "Funnel Display", "Funnel Sans", system-ui; --font-ui: "Funnel Sans", system-ui; --font-year: "Martian Mono", ui-monospace, monospace;
+  --font-value: "Funnel Display", system-ui; --font-mono: "Martian Mono", ui-monospace, monospace; --w-title: 640; --w-year: 450; --w-place: 640; }
 .id-route { font-family: var(--font-ui); }
-.id-route :is(h1, h2, #r-title, .place, .hero .v, #home h1, .world h1, .world h2, #journey .jcard h1, .hworld .wt, .hgap .gt) { font-family: var(--font-display); font-stretch: 80%; font-weight: 760; letter-spacing: -.018em; }
+.id-route :is(h1, h2, #r-title, .place, .hero .v, #home h1, .world h1, .world h2, #journey .jcard h1, .hworld .wt, .hgap .gt) { font-family: var(--font-display);  font-weight: 640; letter-spacing: -.03em; }
 .id-route ::selection { background: var(--accent); color: var(--on-accent); }
 .id-route :focus-visible { outline: 3px solid var(--accent) !important; outline-offset: 2px; }
 /* no small letter-spaced capitals anywhere: sentence case, medium weight */
@@ -1645,8 +1644,8 @@ body.studio #lens { display: none !important; }
 
 /* shell: a glass bar floating over the map; worlds are pills */
 .id-route #shell { background: var(--glass); color: var(--ink-1); backdrop-filter: blur(16px) saturate(1.2); -webkit-backdrop-filter: blur(16px) saturate(1.2); box-shadow: 0 1px 0 var(--glass-line), var(--glass-shadow); }
-.id-route #shell .bt { font: 760 24px/1 var(--font-display); font-stretch: 80%; letter-spacing: -.018em; }
-.id-route #shell .bt em { font: 500 14.5px/1 var(--font-ui); font-style: normal; opacity: .8; margin-left: 4px; letter-spacing: 0; font-stretch: 100%; }
+.id-route #shell .bt { font: 640 24px/1 var(--font-display);  letter-spacing: -.03em; }
+.id-route #shell .bt em { font: 500 14.5px/1 var(--font-ui); font-style: normal; opacity: .8; margin-left: 4px; letter-spacing: 0;  }
 .id-route #shell .glyph { display: none; }
 .id-route #shell .worlds { height: auto; padding: 4px; gap: 2px; border-radius: 999px; background: var(--glass); box-shadow: inset 0 0 0 1px var(--glass-line); }
 .id-route #shell .worlds button { height: 34px; border-radius: 999px; padding: 0 14px; opacity: 1; color: var(--ink-2); font-weight: 600; font-size: 14px; }
@@ -1666,14 +1665,14 @@ body.studio #lens { display: none !important; }
 .id-route #shell .modeswitch svg { width: 15px; height: 15px; stroke-width: 2; }
 
 /* map page */
-body.v-s.ty-route #r-title { font: 760 72px/.88 var(--font-display); font-stretch: 80%; letter-spacing: -.018em; }
-body.v-s.ty-route #yearhero { font: 500 30px/1 var(--font-mono); font-variant-numeric: lining-nums tabular-nums; color: var(--accent-ink); letter-spacing: 0; margin: 8px 0 0; font-style: normal; }
+body.v-s.ty-route #r-title { font: 640 64px/.92 var(--font-display);  letter-spacing: -.03em; }
+body.v-s.ty-route #yearhero { font: 450 26px/1 var(--font-mono); font-variant-numeric: lining-nums tabular-nums; color: var(--accent-ink); letter-spacing: 0; margin: 8px 0 0; font-style: normal; }
 @media (max-width: 1100px) { body.v-s.ty-route #r-title { font-size: 30px; line-height: 1; } body.v-s.ty-route #yearhero { font-size: 22px; margin: 0 0 0 .35em; } }
 body.studio.v-s.ty-route #r-title { font-size: 64px; } body.studio.v-s.ty-route #yearhero { font-size: 44px; }
 .id-route #finding { font-size: 16px; }
 .id-route #finding em { font-family: var(--font-mono); font-weight: 500; font-style: normal; }
 .id-route .place { font-size: 46px; line-height: .95; }
-.id-route .hero .v { font-family: var(--font-display); font-stretch: 80%; font-weight: 760; font-size: 64px; letter-spacing: -.02em; }
+.id-route .hero .v { font-family: var(--font-display);  font-weight: 640; font-size: 56px; letter-spacing: -.02em; }
 .id-route #layers .tab { font-size: 14px; padding: 6px 12px; border-radius: 999px; border: 0; color: var(--ink-2); }
 .id-route #layers .tab.on, .id-route #layers .tab:hover { color: var(--on-pill); background: var(--pill); }
 .id-route #layers .tabs { gap: 2px; padding: 4px; border-radius: 999px; background: var(--glass); box-shadow: inset 0 0 0 1px var(--glass-line); width: max-content; max-width: 100%; }
@@ -1689,7 +1688,7 @@ body.studio.v-s.ty-route #r-title { font-size: 64px; } body.studio.v-s.ty-route 
 .id-route #viewbar button { color: var(--ink-2); font-weight: 600; border-radius: 999px; }
 .id-route #viewbar button.on { background: var(--pill); color: var(--on-pill); }
 .id-route #play { background: var(--pill); color: var(--on-pill); }
-.id-route #tl-year { font: 500 32px/1 var(--font-mono); }
+.id-route #tl-year { font: 450 28px/1 var(--font-mono); }
 .id-route #tl-ticks span { font: 400 12.5px var(--font-mono); font-style: normal; }
 .id-route #tour .t-card, .id-route #sharepop, .id-route #palpop { background: var(--glass-2); color: var(--ink-1); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); box-shadow: 0 0 0 1px var(--glass-line), 0 20px 50px rgba(0,0,0,.25); border-radius: 16px; }
 .id-route .world { font-family: var(--font-ui); }
@@ -1702,10 +1701,10 @@ body.studio.v-s.ty-route #r-title { font-size: 64px; } body.studio.v-s.ty-route 
 .id-route #home .hgap:not(.small):not(.hrc) { order: 4; } .id-route #home .hgaps { order: 5; } .id-route #home .hrc { order: 6; } .id-route #home .hjourney { order: 7; }
 .id-route #home > .hin > .hq2 { order: 8; } .id-route #home .hgrid { order: 9; } .id-route #home .hfoot { order: 10; }
 .id-route #home .hkick { color: var(--accent-ink); }
-.id-route #home h1 { font-size: clamp(56px, 8.4vw, 116px); line-height: .88; margin: 14px 0 16px; }
+.id-route #home h1 { font-size: clamp(48px, 7vw, 92px); line-height: .92; margin: 14px 0 16px; }
 .id-route #home .hhead p { font: 500 19px/1.45 var(--font-ui); color: var(--ink-2); }
 .id-route #home .hlife { margin: 28px 0 22px; padding: 22px 24px 20px; background: var(--glass-2); border: 0; border-radius: 22px; box-shadow: 0 0 0 1px var(--glass-line), var(--glass-shadow); color: var(--ink-1); }
-.id-route #home .hlife .hq2 { font: 760 32px/1 var(--font-display) !important; font-stretch: 80% !important; letter-spacing: -.018em !important; color: var(--ink-1); margin-bottom: 4px; }
+.id-route #home .hlife .hq2 { font: 640 32px/1 var(--font-display) !important;  letter-spacing: -.03em !important; color: var(--ink-1); margin-bottom: 4px; }
 .id-route #home .hlin input, .id-route #home .hlin select { background: var(--panel); color: var(--ink-1); border: 0; box-shadow: inset 0 0 0 1px var(--glass-line); border-radius: 999px; font: 600 16px var(--font-ui); padding: 9px 14px; }
 .id-route #home .hlrow .hlv b { color: var(--accent-ink); font-family: var(--font-mono); }
 .id-route #home .hplace-go button, .id-route .hgo { background: var(--accent); color: var(--on-accent); border: 0; border-radius: 999px; font-weight: 650; }
@@ -1716,7 +1715,7 @@ body.studio.v-s.ty-route #r-title { font-size: 64px; } body.studio.v-s.ty-route 
 .id-route .hworld::before { content: none; }
 .id-route .hworld:hover { transform: translateY(-2px); box-shadow: 0 0 0 2px var(--accent), var(--glass-shadow); }
 .id-route .hworld svg { width: 32px; height: 32px; stroke: var(--accent-ink); }
-.id-route .hworld .wt { font-size: 30px; line-height: .95; }
+.id-route .hworld .wt { font-size: 25px; line-height: 1; }
 .id-route .hworld .wd { color: var(--ink-2); opacity: 1; }
 .id-route .hworld .wf { color: var(--ink-3); opacity: 1; }
 .id-route .hworld .wgo, .id-route .hgap .wgo { color: var(--accent-ink); font-weight: 700; }
@@ -1733,7 +1732,7 @@ body.studio.v-s.ty-route #r-title { font-size: 64px; } body.studio.v-s.ty-route 
 .id-route .hcard { background: var(--glass); border: 0; border-radius: 18px; box-shadow: 0 0 0 1px var(--glass-line); }
 .id-route .hcard:hover { box-shadow: 0 0 0 2px var(--accent); transform: none; }
 .id-route .hcard .hq { font: 600 17px/1.25 var(--font-ui); }
-.id-route .hcard .hbig { font: 760 34px/1 var(--font-display); font-stretch: 80%; color: var(--accent-ink); }
+.id-route .hcard .hbig { font: 640 34px/1 var(--font-display);  color: var(--accent-ink); }
 @media (max-width: 1100px) { .id-route #home h1 { font-size: 56px; } .id-route .hworld { min-height: 0; } .id-route .hworld .wt { font-size: 24px; } }
 
 /* guided journey title cards */
@@ -1759,7 +1758,7 @@ body.studio.v-s.ty-route #r-title { font-size: 64px; } body.studio.v-s.ty-route 
 @media (max-width: 900px) {
   .id-route #shell { gap: 6px; padding: 0 8px; }
   .id-route #shell .worlds { margin-left: 0; gap: 0; padding: 3px; }
-  .id-route #shell .worlds button { padding: 0 6px; font-size: 12px; height: 40px; border-radius: 14px; }
+  .id-route #shell .worlds button { padding: 0 5px; font-size: 11.5px; height: 40px; border-radius: 14px; }
   .id-route #shell .find kbd { display: none; }
   .id-route #shell .modeswitch span { width: 26px; height: 26px; }
   .id-route #r-title { font-size: 46px; }
@@ -1767,8 +1766,24 @@ body.studio.v-s.ty-route #r-title { font-size: 64px; } body.studio.v-s.ty-route 
 }
 @media (max-width: 420px) { .id-route #shell .brand { display: none; } .id-route #shell .lang { min-width: 32px; } }
 .id-route #lens:focus-visible { outline: none !important; }
-body.studio.v-s.ty-route #r-title + #yearhero::before { content: none; } body.studio.v-s.ty-route #yearhero { margin-left: 0; }
+body.studio.v-s.ty-route #r-title + #yearhero::before { content: none; } body.studio.v-s.ty-route #yearhero { margin-left: .28em; } body.studio.st-vert.v-s.ty-route #r-title { font-size: 58px; }
 /* phone: the light/dark switch becomes one button that shows the mode it switches to */
 @media (max-width: 900px) { .pal-whiteout #shell .modeswitch .m-l, .pal-bluehour #shell .modeswitch .m-d { display: none; } .id-route #shell .modeswitch { padding: 2px; } }
 @media (max-width: 900px) { .id-route #shell { gap: 4px; padding: 0 6px; } .id-route #shell .lang { min-width: 32px; height: 32px; font-size: 12px; } .id-route #shell .qhelp { width: 30px; height: 30px; flex: none; }
   .id-route #shell .sharebtn { width: 34px !important; height: 34px !important; padding: 0 !important; } .id-route #shell .modeswitch span { width: 26px; height: 26px; } }
+
+/* leader-line callout: a number tied to its place */
+#callout { position: absolute; inset: 0; pointer-events: none; z-index: 3; }
+#callout[hidden] { display: none; }
+#callout svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+#callout path { fill: none; stroke: var(--ink-1); stroke-width: 1.4; }
+#callout circle { fill: var(--accent); stroke: var(--ink-1); stroke-width: 1.2; }
+#callout .cl-box { position: absolute; display: flex; flex-direction: column; gap: 3px; padding: 0 2px 7px; white-space: nowrap; text-shadow: 0 0 6px var(--page), 0 0 2px var(--page); }
+#callout b { font: 640 26px/1 var(--font-display);  letter-spacing: -.03em; color: var(--ink-1); }
+#callout .cl-v { font: 450 17px/1.1 var(--font-mono); color: var(--ink-1); font-variant-numeric: tabular-nums; }
+#callout small { font: 500 13px/1.2 var(--font-ui); color: var(--ink-2); }
+@media (max-width: 1100px) { #callout b { font-size: 20px; } #callout .cl-v { font-size: 16px; } }
+body.studio.st-vert #callout b { font-size: 30px; } body.studio.st-vert #callout .cl-v { font-size: 22px; }
+
+#lens .plate .lv { font: 450 12.5px/1 var(--font-mono, monospace); padding: 0 6px 0 0; } #lens .plate .lv[hidden] { display: none; }
+.id-route #lens .plate .lv { color: var(--accent-ink); }

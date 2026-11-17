@@ -491,7 +491,7 @@ let view = fitView(), userMoved = false, lastLabelView = null, relabel = null;
 const theDeck = new Deck({
   parent: mapEl, views: new OrbitView({ orbitAxis: 'Z', fovy: V === 's' ? 38 : 22 }),
   controller: false,   // navigation is handled below (grab-the-ground pan, anchored zoom, pinch); deck's orbit pan drifts on a tilted map
-  onAfterRender: () => { if (!STUDIO && view !== lastLabelView) { lastLabelView = view; clearTimeout(relabel); relabel = setTimeout(() => theDeck.setProps({ layers: layers() }), 120); } },
+  onAfterRender: () => { if (ROUTE) paintCallout(); if (!STUDIO && view !== lastLabelView) { lastLabelView = view; clearTimeout(relabel); relabel = setTimeout(() => theDeck.setProps({ layers: layers() }), 120); } },
   viewState: view, onViewStateChange: ({ viewState, interactionState }) => { view = interactionState?.inTransition ? viewState : boundView(at0(viewState)); },
   effects: [new LightingEffect(V === 's'
     ? (TRUE_COL ? { a: new AmbientLight({ color: [255, 255, 255], intensity: 1.0 }), k: new DirectionalLight({ color: [255, 255, 255], intensity: 0.6, direction: [4, -7, -5] }) }
@@ -767,7 +767,8 @@ function lensSpikes(m, z, R0) {
   const y0 = state.lens.y, geos = geosFor(m.split(y0));
   const h0 = g => ((m.height ? m.height(g, y0) : m.value(g, y0)) || 0) / 1e6 * KMPM;
   const pts = geos.filter(g => anchor[g]).map(g => ({ k: g, p: anchor[g] }));
-  return [new ColumnLayer({ id: 'lens-spikes', data: pts, coordinateSystem: CART, diskResolution: 32, radius: R0 * 1.9, extruded: true, pickable: false,
+  return [new ColumnLayer({ id: 'lens-spikes', data: pts, coordinateSystem: CART, diskResolution: ROUTE ? 12 : 32, radius: R0 * 1.9, extruded: true, pickable: false,
+    ...(ROUTE ? { filled: false, wireframe: true, getLineColor: [...C('wire'), 235] } : {}),   // Whiteout / Blue hour: the other year as a wire cage
     getPosition: d => [d.p[0], d.p[1], z], getElevation: d => h0(d.k), getFillColor: [...C('accent'), 150], material: { ambient: 0.9, diffuse: 0.3, shininess: 0, specularColor: [0, 0, 0] },
     extensions: LENS_EXT, lensPx: lensPx(), updateTriggers: { getElevation: [state.m, y0] } })];
 }
@@ -832,7 +833,7 @@ function layers0() {
 }
 function cityLayers(m, y, z) {
   const data = MAPPED.map(c => ({ ...c, v: m.cityValue(c, y) }));
-  const sc = state.city, halo = [...C('halo'), 240], phone = isPhone();
+  const sc = state.city, halo = [...C('halo'), 240], phone = isPhone() && !STUDIO;   // videos label every city that fits
   const shown = data.filter(d => d.v != null);
   const vmax = Math.max(1, ...shown.map(d => d.v));   // collision priority must stay within [-1000, 1000]
   const prio = d => d.name === sc ? 1000 : d.name === state.hoverCity ? 950 : (BIG.has(d.name) ? 500 : 0) + Math.round(d.v / vmax * 400);
@@ -1074,7 +1075,7 @@ function flashNote(t) { const h = document.getElementById('scrub-hint'); if (!h)
 const lensEl = document.createElement('div'); lensEl.id = 'lens'; lensEl.hidden = true; lensEl.tabIndex = 0;
 lensEl.setAttribute('role', 'group'); lensEl.setAttribute('aria-label', T('Lens. Arrow keys move it, plus and minus resize it, Page Up and Page Down change its year, Escape closes it.', 'Loupe. Les flèches la déplacent, plus et moins la redimensionnent, Page précédente et Page suivante changent son année, Échap la ferme.'));
 lensEl.innerHTML = `<svg aria-hidden="true"><circle class="shade"/><circle class="rim"/><circle class="hit"/></svg>
-  <div class="plate"><button data-ly="-1" aria-label="${T('Earlier year inside the lens', 'Année plus ancienne dans la loupe')}">‹</button><b></b><span>${T('inside', 'dedans')}</span><button data-ly="1" aria-label="${T('Later year inside the lens', 'Année plus récente dans la loupe')}">›</button></div>
+  <div class="plate"><button data-ly="-1" aria-label="${T('Earlier year inside the lens', 'Année plus ancienne dans la loupe')}">‹</button><b></b><span>${T('inside', 'dedans')}</span><span class="lv" aria-live="polite"></span><button data-ly="1" aria-label="${T('Later year inside the lens', 'Année plus récente dans la loupe')}">›</button></div>
   <button class="grip" aria-label="${T('Resize the lens', 'Redimensionner la loupe')}">⤡</button><button class="x" aria-label="${T('Close the lens', 'Fermer la loupe')}">✕</button>`;
 mapEl.appendChild(lensEl);
 const lensOK = m => m.kind === 'fill' || m.kind === 'spike';
@@ -1082,7 +1083,53 @@ let lensRAF = 0;
 function placeLens() { const L = state.lens; if (!L) return; const d = L.r * 2;
   Object.assign(lensEl.style, { left: L.sx + 'px', top: L.sy + 'px', width: d + 'px', height: d + 'px' });
   lensEl.querySelectorAll('circle').forEach(c => { c.setAttribute('cx', L.r + 16); c.setAttribute('cy', L.r + 16); c.setAttribute('r', L.r); });
-  cancelAnimationFrame(lensRAF); lensRAF = requestAnimationFrame(() => theDeck.setProps({ layers: layers() })); }
+  cancelAnimationFrame(lensRAF); lensRAF = requestAnimationFrame(() => { theDeck.setProps({ layers: layers() }); lensReadout(); }); }
+// lens read-out: the other year's published value for the province under the lens centre
+function lensReadout() { const L = state.lens, el = lensEl.querySelector('.lv'); if (!L || !el) return; const m = M[state.m]; let g = null;
+  try { g = theDeck.pickObject({ x: L.sx, y: L.sy, radius: 2, layerIds: ['land'] })?.object?.properties?.abbr || null; } catch (e) { /* not ready */ }
+  if (g && (g === 'NT' || g === 'NU') && !m.split(L.y)) g = 'NT+NU';
+  if (g === 'NT+NU' && m.split(L.y)) g = null;
+  const v = g ? m.value(g, L.y) : null;
+  el.textContent = g ? `${g.replace('NT+NU', 'NT·NU')} ${v == null ? '—' : m.fmt(v)}` : ''; el.hidden = !g; }
+// ---------------------------------------------------------------- leader-line callout (Whiteout / Blue hour)
+// The chosen province's number, tied by a line to the top of its column (count layers): the
+// published value for the first year and for the year on screen. Shown for a selected province; on people-type
+// layers with nothing selected, for the province that grew most. Reads the same values as the map; nothing new.
+const callEl = document.createElement('div'); callEl.id = 'callout'; callEl.hidden = true; callEl.setAttribute('aria-hidden', 'true');
+callEl.innerHTML = '<svg><path/><circle r="4"/></svg><div class="cl-box"><b></b><span class="cl-v"></span><small></small></div>';
+mapEl.appendChild(callEl);
+let callKey = '';
+function calloutTarget() {
+  if (!ROUTE || state.lens || state.wipe || state.story != null) return null;
+  const m = M[state.m]; if (!m || m.kind !== 'spike' || m.colorBy || typeof m.value !== 'function') return null;   // counts only: 'then → now' reads true for them
+  const y = state.y, y0 = thenYear(m), split = m.split(y), geos = geosFor(split).filter(g => anchor[g]);
+  let g = state.p && (geos.includes(state.p) ? state.p : (state.p === 'NT' || state.p === 'NU') && !split ? 'NT+NU' : null);
+  if (!g && m.kind === 'spike' && !m.colorBy && !isPhone()) { let best = 0; for (const k of geos) { const a = m.value(k, y0), b = m.value(k, y); if (a > 0 && b > 0 && b / a > best) { best = b / a; g = k; } } }
+  if (!g) return null;
+  const v1 = m.value(g, y); if (v1 == null) return null;
+  const v0 = y0 < y ? m.value(g, y0) : null;
+  const h = m.kind === 'spike' ? ((m.height ? m.height(g, y) : v1) || 0) / 1e6 * KMPM : 0;
+  return { g, m, y, y0, v0, v1, pos: [anchor[g][0], anchor[g][1], PLATE + h] };
+}
+function paintCallout() {
+  const T = calloutTarget(); let vp = null; try { vp = theDeck.getViewports()[0]; } catch (e) { /* not ready */ }
+  if (!T || !vp) { callEl.hidden = true; callKey = ''; return; }
+  const key = `${T.g}|${state.m}|${T.y}|${window.LANG}`;
+  if (key !== callKey) { callKey = key; const fr = window.LANG === 'fr';
+    callEl.querySelector('b').textContent = NAMES[T.g] || T.g;
+    callEl.querySelector('.cl-v').textContent = T.v0 != null ? `${T.m.fmt(T.v0)} → ${T.m.fmt(T.v1)}` : T.m.fmt(T.v1);
+    callEl.querySelector('small').textContent = T.v0 != null && T.m.kind === 'spike' && T.v0 > 0 && T.v1 > 0 ? (fr ? `×${(T.v1 / T.v0).toFixed(2)} depuis ${T.y0}` : `×${(T.v1 / T.v0).toFixed(2)} since ${T.y0}`) : T.v0 != null ? `${T.y0} → ${T.y}` : String(T.y); }
+  const [x, y] = vp.project(T.pos), box = callEl.querySelector('.cl-box');
+  const W = isPhone() ? mapEl.clientWidth : Math.min(mapEl.clientWidth, (document.getElementById('sheet')?.getBoundingClientRect().left || mapEl.clientWidth) - 12);
+  callEl.hidden = false; const bw = box.offsetWidth, bh = box.offsetHeight;
+  if (!(x > 0 && x < W && y > 0 && y < mapEl.clientHeight)) { callEl.hidden = true; return; }
+  let right = x + 70 + bw < W - 8, lx = right ? x + 70 : x - 70 - bw, ly = Math.max(70, y - 96);
+  if (lx < 8) { right = true; lx = Math.max(8, x + 40); }
+  box.style.left = lx + 'px'; box.style.top = (ly - bh) + 'px';
+  const kx = right ? lx : lx + bw, ex = right ? lx + bw : lx;
+  callEl.querySelector('path').setAttribute('d', `M${x},${y}L${kx},${ly}L${ex},${ly}`);
+  const c = callEl.querySelector('circle'); c.setAttribute('cx', x); c.setAttribute('cy', y);
+}
 function paintLens() { const m = M[state.m];
   if (!state.lens) { lensEl.hidden = true; return; }
   if (!lensOK(m)) { lensEl.hidden = true; return; }
@@ -1840,7 +1887,7 @@ if (STUDIO) { const SC = b64d(STUDIO), m = M[SC.layer]; state.m = SC.layer; stat
     // playhead: each year's published value sits at the middle of that year's time slot; marks glide linearly between neighbours
     if (smooth) { const u = Math.max(0, Math.min(years.length - 1, c - 0.5)), j = Math.min(years.length - 2, Math.floor(u)); TW = years.length > 1 ? { ya: years[j], yb: years[j + 1], k: u - j } : null; }
     view = cam(N > 1 ? f / (N - 1) : 0); theDeck.setProps({ viewState: view, controller: false, useDevicePixels: +Q.get('ss') || Math.max(2, devicePixelRatio) });   // supersample the map for video
-    if (y !== lastY) { state.y = y; lastY = y; state.m = SC.layer; state.p = SC.place || null; update(); document.getElementById('r-title').textContent = SC.title; }
+    if (y !== lastY) { state.y = y; lastY = y; state.m = SC.layer; state.p = SC.place || null; if (SC.city) state.city = SC.city; update(); document.getElementById('r-title').textContent = SC.title; }
     // one draw per frame: deck applies new layers on its next animation frame, so explicit redraws only repeat work (the old path is kept behind ?draws=2 for comparison)
     const dr = +Q.get('draws') || 0; if (dr >= 2) theDeck.redraw('studio'); theDeck.setProps({ layers: layers() }); if (dr >= 1) theDeck.redraw('studio');   // default: deck draws once on the next animation frame, which the renderer waits for
     // text fades are tied to the frame number (never to a clock), so a frame always looks the same
