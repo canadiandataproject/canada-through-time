@@ -422,7 +422,7 @@ function fitView() {
   let r;
   const rb = phone ? (document.getElementById('reading')?.getBoundingClientRect().bottom || 290) + 6 : 0;
   if (VERT) r = [10, w - 104, 492, h - 408];
-  else if (V === 's') r = phone ? [0, w, Math.min(rb, h * 0.55), h - Math.min(window.__sheetH || PEEK, h * 0.5)] : STUDIO ? [430, w - 44, 64, h - 118] : [420, w - 410, 230, h - 120];
+  else if (V === 's') r = phone ? [0, w, Math.min(rb, h * 0.55), h - Math.min(window.__sheetH || PEEK, h * 0.5) - 100] : STUDIO ? [430, w - 44, 64, h - 118] : [420, w - 410, 230, h - 226];   // bottom: stop above the view bar and map buttons
   else r = phone ? [6, w - 6, 10, h - 20] : [10, w - 300, 20, h - 10];
   const [x0, x1, y0, y1] = [r[0], Math.max(r[1], r[0] + 240), r[2], Math.max(r[3], r[2] + 200)];
   // phones open close to top-down (rotationX 90 = straight down here): at 390 px wide a tilted map loses half its height
@@ -460,29 +460,80 @@ function measureFit(v, w, h, [x0, x1, y0, y1], topAlign) {
   return v;
 }
 // Zoom and pan bounds: the country can never shrink below ~80% of its fitted size, and its centre stays near the frame.
-const ZOOM_OUT = 0.32, ZOOM_IN = 4, PAN_KM = [2600, 1800];
+const ZOOM_OUT = 0.32, ZOOM_IN = 4;
+const CAN_BOX = (() => { const xs = FIT_PTS.map(p => p[0]), ys = FIT_PTS.map(p => p[1]); return [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)]; })();   // km
 function boundView(v) {
   const f = fitView(), zoom = Math.max(f.zoom - ZOOM_OUT, Math.min(f.zoom + ZOOM_IN, v.zoom));
   const slack = 2 ** (zoom - f.zoom);   // allow more panning when zoomed in
-  const tx = Math.max(f.target[0] - PAN_KM[0] * slack, Math.min(f.target[0] + PAN_KM[0] * slack, v.target[0]));
-  const ty = Math.max(f.target[1] - PAN_KM[1] * slack, Math.min(f.target[1] + PAN_KM[1] * slack, v.target[1]));
+  // the centre of the view may wander further when zoomed in, but never off Canada's outline box
+  const kmx = 0.45 * (mapEl.clientWidth || innerWidth) / 2 ** f.zoom * slack, kmy = 0.45 * (mapEl.clientHeight || innerHeight) / 2 ** f.zoom * slack;   // up to ~half a screen at the fitted zoom
+  const mx = 0.3 * (mapEl.clientWidth || innerWidth) / 2 ** zoom, my = 0.3 * (mapEl.clientHeight || innerHeight) / 2 ** zoom;   // Canada's box plus ~a third of the screen: some of Canada always stays in view
+  const tx = Math.max(Math.max(CAN_BOX[0] - mx, f.target[0] - kmx), Math.min(Math.min(CAN_BOX[1] + mx, f.target[0] + kmx), v.target[0]));
+  const ty = Math.max(Math.max(CAN_BOX[2] - my, f.target[1] - kmy), Math.min(Math.min(CAN_BOX[3] + my, f.target[1] + kmy), v.target[1]));
   return { ...v, zoom, target: [tx, ty, v.target[2] || 0], minZoom: f.zoom - ZOOM_OUT, maxZoom: f.zoom + ZOOM_IN, rotationX: Math.max(0, Math.min(70, v.rotationX)) };
 }
 let view = fitView(), userMoved = false, lastLabelView = null, relabel = null;
 const theDeck = new Deck({
   parent: mapEl, views: new OrbitView({ orbitAxis: 'Z', fovy: V === 's' ? 38 : 22 }),
-  controller: { dragMode: 'pan', inertia: true, scrollZoom: { smooth: true, speed: 0.02 } },
+  controller: false,   // navigation is handled below (grab-the-ground pan, anchored zoom, pinch); deck's orbit pan drifts on a tilted map
   onAfterRender: () => { if (!STUDIO && view !== lastLabelView) { lastLabelView = view; clearTimeout(relabel); relabel = setTimeout(() => theDeck.setProps({ layers: layers() }), 120); } },
-  viewState: view, onViewStateChange: ({ viewState, interactionState }) => { if (interactionState?.isDragging || interactionState?.isZooming || interactionState?.isPanning) userMoved = true; view = interactionState?.inTransition ? viewState : boundView(viewState); if (!interactionState?.inTransition) theDeck.setProps({ viewState: view }); },
+  viewState: view, onViewStateChange: ({ viewState, interactionState }) => { view = interactionState?.inTransition ? viewState : boundView(at0(viewState)); },
   effects: [new LightingEffect(V === 's'
     ? (TRUE_COL ? { a: new AmbientLight({ color: [255, 255, 255], intensity: 1.0 }), k: new DirectionalLight({ color: [255, 255, 255], intensity: 0.6, direction: [4, -7, -5] }) }
        : { a: new AmbientLight({ color: [225, 225, 245], intensity: 0.62 }), k: new DirectionalLight({ color: [255, 230, 196], intensity: 1.35, direction: [4, -7, -5] }) })
     : { a: new AmbientLight({ color: [255, 255, 255], intensity: 1.0 }), k: new DirectionalLight({ color: [255, 255, 255], intensity: 0.25, direction: [-3, -6, -7] }) })],
   parameters: { clearColor: [0, 0, 0, 0] },
-  getCursor: ({ isHovering, isDragging }) => isDragging ? 'grabbing' : isHovering ? 'pointer' : 'grab',
+  getCursor: ({ isHovering }) => NAV.dragging ? 'grabbing' : isHovering ? 'pointer' : 'grab',
   onHover: info => tooltip(info), onClick: info => click(info),
 });
 (window.__decks ||= {}).map = theDeck;   // for the share button's picture
+// ---------------------------------------------------------------- map navigation
+// One finger or the mouse: the ground under the pointer follows it exactly (computed on the z = 0 plane, so a tilted map
+// never drifts or slides). Wheel or trackpad: zoom toward the pointer. Two fingers: pinch to zoom, move to pan. Double-click or
+// double-tap: zoom in there. A quick flick keeps gliding briefly. Bounds keep Canada on screen. No gesture changes the year.
+const NAV = { dragging: false, moved: false, glide: 0 };
+const ORBIT = new OrbitView({ orbitAxis: 'Z', fovy: V === 's' ? 38 : 22 });
+const vpFor = v => { try { return ORBIT.makeViewport({ width: mapEl.clientWidth, height: mapEl.clientHeight, viewState: v }); } catch (e) { return null; } };
+const at0 = v => ({ ...v, target: [v.target[0], v.target[1], 0] });
+function setView(v, ms = 0) { view = ms ? { ...boundView(at0(v)), transitionDuration: ms, transitionEasing: t => 1 - Math.pow(1 - t, 3), transitionInterpolator: new deck.LinearInterpolator(['target', 'zoom', 'rotationX', 'rotationOrbit']) } : boundView(at0(v)); theDeck.setProps({ viewState: view }); }
+function zoomAround(v, dz, sx, sy) { const vp0 = vpFor(v); if (!vp0) return { ...v, zoom: v.zoom + dz }; const g0 = ground(vp0, sx, sy);
+  const f = fitView(), z = Math.max(f.zoom - ZOOM_OUT, Math.min(f.zoom + ZOOM_IN, v.zoom + dz)), v1 = { ...v, zoom: z }, vp1 = vpFor(v1); if (!vp1) return v1;
+  const g1 = ground(vp1, sx, sy); return { ...v1, target: [v.target[0] + g0[0] - g1[0], v.target[1] + g0[1] - g1[1], 0] }; }
+{ const pts = new Map(); let start = null, hist = [], lastTap = 0, lastType = 'mouse';
+  const local = e => { const r = mapEl.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+  const stopGlide = () => { cancelAnimationFrame(NAV.glide); NAV.glide = 0; };
+  const begin = () => { const v = at0(view), list = [...pts.values()];
+    if (list.length === 1) { const vp = vpFor(v); start = { kind: 'pan', v, p: list[0], g: vp && ground(vp, ...list[0]) }; }
+    else if (list.length >= 2) { const [a, b] = list, mid = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2], vp = vpFor(v); start = { kind: 'pinch', v, d: Math.hypot(a[0] - b[0], a[1] - b[1]) || 1, mid, g: vp && ground(vp, ...mid) }; } };
+  const skip = e => e.target.closest('#wipe, #mapctl, #viewbar, #palpop, #fly-lower') || state.story != null && isPhone() && false;
+  mapEl.addEventListener('pointerdown', e => { lastType = e.pointerType; if (skip(e) || (e.pointerType === 'mouse' && e.button !== 0)) return; stopGlide(); if (e.pointerType === 'mouse') e.preventDefault();   // no text selection while dragging
+    if (FLY) return; pts.set(e.pointerId, local(e)); try { mapEl.setPointerCapture(e.pointerId); } catch (x) {} NAV.moved = false; hist = []; begin(); });
+  mapEl.addEventListener('pointermove', e => { if (!pts.has(e.pointerId) || !start) return; pts.set(e.pointerId, local(e)); const list = [...pts.values()];
+    if (start.kind === 'pan' && list.length === 1) { const p = list[0]; if (!NAV.moved && Math.hypot(p[0] - start.p[0], p[1] - start.p[1]) < 4) return;
+      NAV.moved = NAV.dragging = true; userMoved = true; const vp = vpFor(start.v); if (!vp || !start.g) return; const g = ground(vp, ...p);
+      setView({ ...start.v, target: [start.v.target[0] + start.g[0] - g[0], start.v.target[1] + start.g[1] - g[1], 0] });
+      hist.push([performance.now(), view.target[0], view.target[1]]); if (hist.length > 6) hist.shift(); }
+    else if (start.kind === 'pinch' && list.length >= 2) { const [a, b] = list, d = Math.hypot(a[0] - b[0], a[1] - b[1]) || 1, mid = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+      NAV.moved = NAV.dragging = true; userMoved = true; const f = fitView(), z = Math.max(f.zoom - ZOOM_OUT, Math.min(f.zoom + ZOOM_IN, start.v.zoom + Math.log2(d / start.d)));
+      const v1 = { ...start.v, zoom: z }, vp1 = vpFor(v1); if (!vp1 || !start.g) return; const g = ground(vp1, ...mid);
+      setView({ ...v1, target: [start.v.target[0] + start.g[0] - g[0], start.v.target[1] + start.g[1] - g[1], 0] }); } }, { passive: true });
+  const end = e => { if (!pts.has(e.pointerId)) return; pts.delete(e.pointerId); try { mapEl.releasePointerCapture(e.pointerId); } catch (x) {}
+    if (pts.size) { begin(); return; }   // one finger lifted from a pinch: keep panning with the other
+    const wasPan = start?.kind === 'pan'; start = null; NAV.dragging = false; theDeck.setProps({});
+    if (NAV.moved && wasPan && hist.length >= 2) { const a = hist[0], b = hist.at(-1), dt = Math.max(16, b[0] - a[0]);
+      if (performance.now() - b[0] < 80) { let vx = (b[1] - a[1]) / dt, vy = (b[2] - a[2]) / dt; let t0 = performance.now();
+        const step = t => { const dtt = t - t0; t0 = t; vx *= Math.pow(0.992, dtt); vy *= Math.pow(0.992, dtt); if (Math.hypot(vx, vy) < 0.004) { NAV.glide = 0; return; }
+          setView({ ...view, target: [view.target[0] + vx * dtt, view.target[1] + vy * dtt, 0] }); NAV.glide = requestAnimationFrame(step); };
+        NAV.glide = requestAnimationFrame(step); } }
+    if (!NAV.moved && e.pointerType !== 'mouse') { const now = performance.now(); if (now - lastTap < 300) { const p = local(e); setView(zoomAround(at0(view), 1, ...p), 350); userMoved = true; lastTap = 0; } else lastTap = now; }
+    setTimeout(() => { NAV.moved = false; }, 0); };
+  mapEl.addEventListener('pointerup', end); mapEl.addEventListener('pointercancel', end);
+  mapEl.addEventListener('mousedown', e => { if (!skip(e)) e.preventDefault(); });   // Chrome starts text selection on mousedown, not pointerdown
+  mapEl.addEventListener('dblclick', e => { if (skip(e) || lastType !== 'mouse') return; e.preventDefault(); setView(zoomAround(at0(view), 1, ...local(e)), 350); userMoved = true; });
+  mapEl.addEventListener('wheel', e => { if (skip(e) || FLY) return; e.preventDefault(); stopGlide();
+    const unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 400 : 1, k = e.ctrlKey ? 0.012 : 0.0022;   // ctrlKey: trackpad pinch
+    const dz = Math.max(-0.6, Math.min(0.6, -e.deltaY * unit * k)); setView(zoomAround(at0(view), dz, ...local(e))); userMoved = true; }, { passive: false });
+  mapEl.style.touchAction = 'none'; }
 
 const tt = document.getElementById('tooltip');
 function tooltip(info) {
@@ -501,6 +552,7 @@ function tooltip(info) {
   tt.style.left = Math.min(info.x + 14, innerWidth - 290) + 'px'; tt.style.top = (info.y + 14) + 'px';
 }
 function click(info) {
+  if (NAV.moved || NAV.dragging) return;
   const o = info.object; if (!o) return;
   if (o.title) { openEvent(o); return; }
   if (o.geo && o.xy) { state.city = state.city === o.name ? null : o.name; update(); if (isPhone() && state.city) setSheet(1); return; }
@@ -875,48 +927,8 @@ function flashNote(t) { const h = document.getElementById('scrub-hint'); if (!h)
   b.addEventListener('pointerup', () => { drag = false; });
   b.addEventListener('keydown', e => { if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { wipeAt(Math.max(20, Math.min(mapEl.clientWidth - 20, state.wipe.sx + (e.key === 'ArrowLeft' ? -24 : 24)))); e.preventDefault(); } }); }
 
-// ---------------------------------------------------------------- drag the map through time
-// At the whole-Canada view, a sideways drag anywhere on the map travels through the years (the year grows under your finger)
-// and an up/down swipe moves to the next or previous layer in the same section. Zoomed in, or with Shift held, drag moves the
-// map as before; two fingers always pinch and move it. Keyboard and the timeline slider still work everywhere.
-{ const hud = document.createElement('div'); hud.id = 'scrub-hud'; hud.hidden = true; hud.innerHTML = '<div class="sh-ticks"></div><b class="sh-y"></b><span class="sh-m"></span>'; mapEl.appendChild(hud);
-  const hint = document.createElement('div'); hint.id = 'scrub-hint'; mapEl.appendChild(hint);
-  const pts = new Map(); let g = null, raf = 0;
-  const atFit = () => view.zoom <= fitView().zoom + 0.35;
-  const sibs = () => { const sec = SEC_OF[M[state.m].group]; return MEASURES.filter(m => SEC_OF[m.group] === sec); };
-  const showHint = () => { try { if (localStorage.getItem('ct.scrubHint') || STUDIO) return; } catch (e) {}
-    hint.textContent = isPhone() ? T('Drag sideways on the map to travel through time · swipe up or down to change layer', 'Glissez de côté sur la carte pour voyager dans le temps · vers le haut ou le bas pour changer de couche')
-      : T('Drag sideways on the map to travel through time · swipe up or down to change layer · Shift-drag moves the map', 'Glissez de côté pour voyager dans le temps · vers le haut ou le bas pour changer de couche · Maj-glisser déplace la carte');
-    hint.classList.add('on'); setTimeout(() => hint.classList.remove('on'), 6500); };
-  setTimeout(showHint, 2500);
-  const ticks = (m, y) => { const [a, b] = m.years, n = b - a; let h = '';
-    for (let k = -8; k <= 8; k++) { const yy = y + k; if (yy < a || yy > b) continue; const big = yy % 10 === 0;
-      h += `<i class="${big ? 'big' : ''}${k === 0 ? ' now' : ''}" style="left:calc(50% + ${k * 14}px)"></i>${big && Math.abs(k) > 1 ? `<em style="left:calc(50% + ${k * 14}px)">${yy}</em>` : ''}`; }
-    return h; };
-  const place = () => { const w = mapEl.clientWidth; hud.style.left = Math.max(130, Math.min(w - 130, g.x)) + 'px'; hud.style.top = Math.max(70, g.y - 110) + 'px'; };
-  const paint = () => { raf = 0; if (!g) return; const m = M[state.m]; place();
-    if (g.mode === 'time') { hud.querySelector('.sh-y').textContent = state.y; hud.querySelector('.sh-ticks').innerHTML = ticks(m, state.y); hud.querySelector('.sh-m').textContent = m.label; }
-    else { const list = sibs(), i = list.findIndex(x => x.id === state.m), j = Math.max(0, Math.min(list.length - 1, i + (g.dy < -40 ? 1 : g.dy > 40 ? -1 : 0)));
-      hud.querySelector('.sh-ticks').innerHTML = '';
-      hud.querySelector('.sh-y').textContent = j === i ? '↕' : (g.dy < 0 ? '↑ ' : '↓ ') + list[j].label; hud.querySelector('.sh-m').textContent = j === i ? T('Swipe further to change layer', 'Glissez plus loin pour changer de couche') : T('Release to switch', 'Relâchez pour changer'); g.target = list[j].id; } };
-  const kill = e => { e.stopPropagation(); e.preventDefault(); };
-  mapEl.addEventListener('pointerdown', e => { pts.set(e.pointerId, e);
-    if (pts.size > 1 || e.shiftKey || e.button !== 0 || e.target.closest('#wipe') || !atFit() || state.story || document.body.classList.contains('home-on')) { g = null; hud.hidden = true; return; }
-    g = { id: e.pointerId, x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY, yr0: state.y, mode: null }; }, true);
-  mapEl.addEventListener('pointermove', e => { if (pts.has(e.pointerId)) pts.set(e.pointerId, e);
-    if (!g || e.pointerId !== g.id) return; if (pts.size > 1) { g = null; hud.hidden = true; return; }
-    const dx = e.clientX - g.x0, dy = e.clientY - g.y0, r = mapEl.getBoundingClientRect(); g.x = e.clientX - r.left; g.y = e.clientY - r.top; g.dy = dy;
-    if (!g.mode) { if (Math.abs(dx) > 9 && Math.abs(dx) > Math.abs(dy) * 1.2) g.mode = 'time'; else if (Math.abs(dy) > 14 && Math.abs(dy) > Math.abs(dx) * 1.6) g.mode = 'layer'; else return;
-      stop(); hud.hidden = false; hud.className = 'sh-' + g.mode; try { mapEl.setPointerCapture(e.pointerId); } catch (e3) {} try { localStorage.setItem('ct.scrubHint', '1'); } catch (e2) {} hint.classList.remove('on'); }
-    kill(e);
-    if (g.mode === 'time') { const m = M[state.m], span = m.years[1] - m.years[0], per = Math.max(10, Math.min(28, r.width * 0.8 / Math.max(1, span)));
-      const y = clampYear(m, Math.round(g.yr0 + dx / per)); if (y !== state.y) { state.y = y; if (navigator.vibrate && isPhone()) navigator.vibrate(4); update(); } }
-    if (!raf) raf = requestAnimationFrame(paint); }, true);
-  const end = e => { pts.delete(e.pointerId); if (!g || e.pointerId !== g.id) return; const was = g; g = null;
-    if (was.mode === 'layer') { const list = sibs(), i = list.findIndex(x => x.id === state.m); was.target = list[Math.max(0, Math.min(list.length - 1, i + (was.dy < -40 ? 1 : was.dy > 40 ? -1 : 0)))].id; }
-    if (was.mode) { kill(e); hud.hidden = true; if (was.mode === 'layer' && was.target && was.target !== state.m) { state.navQ = false; state.m = was.target; state.y = clampYear(M[state.m], state.y); update(); } } };
-  mapEl.addEventListener('pointerup', end, true); mapEl.addEventListener('pointercancel', end, true);
-  mapEl.addEventListener('click', e => { if (hud.dataset.justDragged) { kill(e); delete hud.dataset.justDragged; } }, true); }
+// ---------------------------------------------------------------- notes over the map (short messages, e.g. from the then/now button)
+{ const hint = document.createElement('div'); hint.id = 'scrub-hint'; mapEl.appendChild(hint); }
 
 // ---------------------------------------------------------------- colours and map surface
 { const pp = document.getElementById('palpop');
@@ -933,13 +945,13 @@ function flashNote(t) { const h = document.getElementById('scrub-hint'); if (!h)
 document.getElementById('mapctl').addEventListener('click', e => { const a = e.target.closest('button')?.dataset.act; if (!a) return;
   if (a === 'pal') { const pp = document.getElementById('palpop'); pp.hidden = !pp.hidden; e.target.closest('button').setAttribute('aria-expanded', String(!pp.hidden)); return; }
   const v = { ...view };
-  if (a === 'zin') v.zoom += 0.5; if (a === 'zout') v.zoom -= 0.5;
+  if (a === 'zin' || a === 'zout') { setView(zoomAround(at0(view), a === 'zin' ? 0.6 : -0.6, mapEl.clientWidth / 2, mapEl.clientHeight / 2), 300); userMoved = true; return; }
   if (a === 'wipe') { toggleWipe(); return; }
   if (a === 'fly') { flyThrough(); return; }
   if (a === 'tilt') v.rotationX = isPhone() ? (Math.abs(v.rotationX - fitView().rotationX) < 3 ? (fitView().rotationX > 60 ? 40 : 70) : fitView().rotationX) : v.rotationX > 10 ? 0 : fitView().rotationX; if (a === 'reset') { Object.assign(v, fitView()); userMoved = false; } else userMoved = true;
   view = { ...boundView(v), transitionDuration: 500, transitionInterpolator: new deck.LinearInterpolator(['target', 'zoom', 'rotationX', 'rotationOrbit']) };
   theDeck.setProps({ viewState: view }); });
-addEventListener('resize', () => { view = { ...view, ...fitView() }; theDeck.setProps({ viewState: view }); drawEras(); update(); });
+addEventListener('resize', () => { if (!userMoved && !FLY) view = { ...view, ...fitView() }; else view = boundView(at0(view)); theDeck.setProps({ viewState: view }); drawEras(); update(); });
 addEventListener('keydown', e => { if ((e.target.tagName === 'INPUT' && e.target.type !== 'range') || e.target.matches?.('[data-cmpyr], select, #palpop *')) return;
   if (e.key === 'ArrowRight') { state.y = clampYear(M[state.m], state.y + 1); stop(); update(); }
   if (e.key === 'ArrowLeft') { state.y = clampYear(M[state.m], state.y - 1); stop(); update(); }
@@ -1415,8 +1427,8 @@ const SNAP = () => [PEEK, Math.round(innerHeight * 0.45), Math.round(innerHeight
 var sheetState = 0;
 function sheetH() { return SNAP()[sheetState]; }
 function setSheet(i) { const was = sheetState; sheetState = i; sheet.dataset.state = i; window.__sheetH = SNAP()[i]; document.body.classList.toggle('sheet-up', i > 0);
-  if (isPhone() && was !== i && window.READY) { view = { ...view, ...fitView(), transitionDuration: 350, transitionInterpolator: new deck.LinearInterpolator(['target', 'zoom']) }; theDeck.setProps({ viewState: view }); } sheet.style.setProperty('--sheet-h', SNAP()[i] + 'px'); placeCtl(); }
-function placeCtl() { document.getElementById('mapctl').style.visibility = isPhone() && sheetState === 2 ? 'hidden' : ''; }
+  if (isPhone() && was !== i && window.READY && !userMoved) { view = { ...view, ...fitView(), transitionDuration: 350, transitionInterpolator: new deck.LinearInterpolator(['target', 'zoom']) }; theDeck.setProps({ viewState: view }); } sheet.style.setProperty('--sheet-h', SNAP()[i] + 'px'); document.body.style.setProperty('--sheet-h', SNAP()[i] + 'px'); placeCtl(); }
+function placeCtl() { const hide = isPhone() && sheetState === 2 ? 'hidden' : ''; document.getElementById('mapctl').style.visibility = hide; const vb = document.getElementById('viewbar'); if (vb) vb.style.visibility = hide; }
 { let y0 = null, h0 = 0;
   const grip = document.getElementById('grip');
   const down = e => { if (!isPhone()) return; y0 = e.clientY; h0 = sheet.offsetHeight; sheet.classList.add('dragging'); e.target.setPointerCapture?.(e.pointerId); };

@@ -51,7 +51,7 @@ const SCENES = [
       const [m0, n0] = w.in_effect[0], [m1, n1] = w.in_effect.at(-1);
       return T(`And some gaps are still open. In ${m0.slice(0, 4)}, ${n0} long-term drinking water advisories were in effect on First Nations public water systems. Most have since been lifted. As of ${monthName(m1)}, ${n1} remain.`,
         `Et certains écarts restent à combler. En ${m0.slice(0, 4)}, ${n0} avis à long terme sur la qualité de l’eau potable étaient en vigueur dans les réseaux publics des Premières Nations. La plupart ont été levés depuis. En ${monthName(m1)}, il en reste ${n1}.`); }, ms: 10500 },
-  { kind: 'card', end: true, t: () => T('Now it’s your turn', 'À vous maintenant'), s: () => T('Every number here links back to the table it came from. Drag the map sideways to travel through time, or start with your own life.', 'Chaque chiffre renvoie au tableau d’où il vient. Glissez la carte de côté pour voyager dans le temps, ou commencez par votre propre vie.'), ms: 0 },
+  { kind: 'card', end: true, t: () => T('Now it’s your turn', 'À vous maintenant'), s: () => T('Every number here links back to the table it came from. Press play or move the year slider to travel through time, or start with your own life.', 'Chaque chiffre renvoie au tableau d’où il vient. Appuyez sur lecture ou déplacez le curseur des années pour voyager dans le temps, ou commencez par votre propre vie.'), ms: 0 },
 ];
 
 // ---------------------------------------------------------------- player
