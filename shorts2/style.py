@@ -2,7 +2,7 @@
 
 Every new Short after the current Buffer queue uses this module for colour and type. Rules (Tyson, standing):
 no default sans, no off-white paper, no orange; no serif headlines, tiny letter-spaced capitals, hairline dividers or
-chart cards. Display: Bricolage Grotesque at width 80, weight 760. Interface text: Familjen Grotesk. Figures: IBM Plex Mono.
+chart cards. Type (Tyson's pick, 2026-11-17): Funnel Display for titles, Funnel Sans for text, Martian Mono for figures.
 Then = wireframe, now = lit solid; numbers are tied to places with leader lines; the sea is small stepped cubes.
 
     from style import MODE, font
@@ -26,13 +26,8 @@ MODE = {
 
 
 def font(kind: str, size: int, weight: int | None = None) -> ImageFont.FreeTypeFont:
-    """kind: 'display' (Bricolage, condensed), 'ui' (Familjen Grotesk), 'mono' (IBM Plex Mono, figures)."""
-    if kind == "display":
-        f = ImageFont.truetype(str(FONTS / "BricolageGrotesque-Variable.ttf"), size)
-        f.set_variation_by_axes([96, weight or 760, 80])          # opsz, wght, wdth
-        return f
-    if kind == "ui":
-        f = ImageFont.truetype(str(FONTS / "FamiljenGrotesk-Variable.ttf"), size)
-        f.set_variation_by_axes([weight or 500])
-        return f
-    return ImageFont.truetype(str(FONTS / ("IBMPlexMono-Medium.ttf" if (weight or 500) >= 500 else "IBMPlexMono-Regular.ttf")), size)
+    """kind: 'display' (Funnel Display), 'ui' (Funnel Sans), 'mono' (Martian Mono, figures)."""
+    name = {"display": "FunnelDisplay-Variable.ttf", "ui": "FunnelSans-Variable.ttf"}.get(kind, "MartianMono-Variable.ttf")
+    f = ImageFont.truetype(str(FONTS / name), size)
+    f.set_variation_by_axes([weight or {"display": 640, "ui": 500}.get(kind, 450)])
+    return f
