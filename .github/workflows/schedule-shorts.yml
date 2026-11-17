@@ -1,0 +1,35 @@
+name: Schedule Shorts in Buffer
+# Runs when shorts2/queue.json changes, twice a day (to retry posts that hit Buffer's 10-post limit), or by hand.
+# Lives on main: edit the queue on main.
+# The Buffer key is the encrypted repository secret BUFFER_KEY (Settings → Secrets and variables → Actions); it never
+# appears in the repo or in logs.
+on:
+  push:
+    paths: ["shorts2/queue.json"]
+  schedule:
+    - cron: "17 14,2 * * *"   # 8:17 AM and 8:17 PM Edmonton (UTC-6)
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency: { group: schedule-shorts, cancel-in-progress: false }
+jobs:
+  schedule:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: Schedule pending Shorts
+        env:
+          BUFFER_KEY: ${{ secrets.BUFFER_KEY }}
+        run: |
+          if [ -z "$BUFFER_KEY" ]; then echo "::error::Add the BUFFER_KEY repository secret first"; exit 1; fi
+          python3 shorts2/buffer_queue.py post
+      - name: Save post ids and status back to the queue
+        run: |
+          if ! git diff --quiet shorts2/queue.json; then
+            git config user.name "The Canadian Data Project"
+            git config user.email "357254700+canadiandataproject@users.noreply.github.com"
+            git commit -m "Buffer queue: record scheduled posts [skip ci]" shorts2/queue.json
+            git push
+          fi
