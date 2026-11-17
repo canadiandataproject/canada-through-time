@@ -36,7 +36,7 @@ def main():
     jobs += [("topic-climate-warming", "#cl=temp/2020"), ("topic-glaciers", "#cl=ice/2020")]
     shots = [("topic-federal-spending", "#mn=spend/2026"), ("topic-federal-grants", "#mn=grants/all"), ("topic-federal-contracts", "#mn=contracts/all")]
     with sync_playwright() as p:
-        b = p.chromium.launch(args=["--use-gl=swiftshader", "--enable-webgl", "--ignore-gpu-blocklist"])
+        b = p.chromium.launch(executable_path="/usr/bin/google-chrome" if Path("/usr/bin/google-chrome").exists() else None, args=["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--enable-webgl", "--ignore-gpu-blocklist"])
         pg = b.new_page(viewport={"width": 1440, "height": 900})
         pg.add_init_script("window.SHARE_HOST='canadiandataproject.github.io/canada-through-time';try{localStorage.setItem('ctt-home-seen','1');['map','nb','cl','mn'].forEach(k=>localStorage.setItem('ctt-tour-'+k,'1'))}catch(e){}")
         for name, h in jobs:
