@@ -728,7 +728,7 @@ function eggState(t) {
   { const k = pp(50); const a = k < .35 ? Math.sin(k / .35 * Math.PI) : 0; if (a > 0.02) { const c = EGG_AT.narwhal, s = Math.floor(t / 50) % 4; out.push({ icon: s % 2 ? 'narwhal-l' : 'narwhal', p: [c[0] + [0, 120, -90, 60][s], c[1] + [0, -60, 50, 90][s]], a: Math.round(255 * Math.min(1, a * 1.5)), n: 31 }); } }   // surfaces now and then
   { const k = pp(170), e = tri(k); out.push({ icon: k < .5 ? 'orca' : 'orca-l', p: lerp(EGG_AT.orcaA, EGG_AT.orcaB, e), a: 255, n: 32 }); }   // two fins off Vancouver Island
   return out; }
-function eggLayer() { if (!EGG_ATLAS) return null; const PX = isPhone() ? 1.8 : 2.2;
+function eggLayer() { if (!EGG_ATLAS) return null; const PX = isPhone() ? 1.5 : 2.2;
   return new deck.IconLayer({ id: 'eggs', data: eggState(AMB.t), coordinateSystem: CART, iconAtlas: EGG_ATLAS.url, iconMapping: EGG_ATLAS.map, getIcon: d => d.icon, pickable: false,
     getPosition: d => [d.p[0], d.p[1], d.z ?? 14], sizeUnits: 'pixels', getSize: d => EGG_ATLAS.map[d.icon].height / 4 * PX, getColor: d => [255, 255, 255, d.a],
     textureParameters: { minFilter: 'nearest', magFilter: 'nearest' }, alphaCutoff: 0.01, parameters: { depthTest: false }, updateTriggers: { getSize: [PX] } }); }

@@ -1768,3 +1768,7 @@ body.studio.v-s.ty-route #r-title { font-size: 64px; } body.studio.v-s.ty-route 
 @media (max-width: 420px) { .id-route #shell .brand { display: none; } .id-route #shell .lang { min-width: 32px; } }
 .id-route #lens:focus-visible { outline: none !important; }
 body.studio.v-s.ty-route #r-title + #yearhero::before { content: none; } body.studio.v-s.ty-route #yearhero { margin-left: 0; }
+/* phone: the light/dark switch becomes one button that shows the mode it switches to */
+@media (max-width: 900px) { .pal-whiteout #shell .modeswitch .m-l, .pal-bluehour #shell .modeswitch .m-d { display: none; } .id-route #shell .modeswitch { padding: 2px; } }
+@media (max-width: 900px) { .id-route #shell { gap: 4px; padding: 0 6px; } .id-route #shell .lang { min-width: 32px; height: 32px; font-size: 12px; } .id-route #shell .qhelp { width: 30px; height: 30px; flex: none; }
+  .id-route #shell .sharebtn { width: 34px !important; height: 34px !important; padding: 0 !important; } .id-route #shell .modeswitch span { width: 26px; height: 26px; } }
