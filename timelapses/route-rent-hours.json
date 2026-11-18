@@ -7,7 +7,7 @@
  "motion": "smooth",
  "id": "route-rent-hours",
  "title": "Rent in hours of work",
- "hookOver": 3.2,
+ "hookOver": 2.84,
  "proof": "DATA · CMHC RENTS · STATISTICS CANADA WAGES",
  "layer": "renth",
  "place": null,
@@ -17,26 +17,17 @@
  "city": "Vancouver",
  "intro": 2.6,
  "perYear": 0.55,
- "hold": 0.8,
- "outro": 3.5,
+ "hold": 3.72,
+ "outro": 2.65,
  "camera": "push",
  "theme": "whiteout",
  "hook": [
   "How many hours do you work",
   "just to pay one month of rent?"
  ],
- "annotations": [
-  {
-   "year": 2008,
-   "text": "Average two-bedroom rent, existing tenants included: new leases are often higher"
-  },
-  {
-   "year": 2020,
-   "text": "Wages are each province's median hourly wage"
-  }
- ],
+ "annotations": [],
  "summary": {
-  "seconds": 6.5,
+  "seconds": 9.11,
   "items": [
    {
     "big": "73 h",
@@ -57,5 +48,15 @@
     "scope": "year"
    }
   ]
- }
+ },
+ "clock": [
+  [
+   0,
+   0
+  ],
+  [
+   4.198,
+   29
+  ]
+ ]
 }

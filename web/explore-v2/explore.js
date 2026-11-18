@@ -1864,7 +1864,12 @@ document.addEventListener('click', e => { if (!e.target.closest('[data-studio-op
 if (STUDIO) { const SC = b64d(STUDIO), m = M[SC.layer]; state.m = SC.layer; state.p = SC.place || null; state.story = null; state.q = null; state.city = null;
   const years = []; for (let y = SC.from; y <= SC.to; y++) if (!m.only || m.only.includes(y)) years.push(y);
   const fps = SC.fps || 30, nHk = Math.round((SC.hookOver || 0) * fps), nI = SC.hookOver ? 0 : Math.round(SC.intro * fps),   // hookOver: the hook sits over a map that is already moving (no still intro)
-    per = Math.max(1, Math.round(SC.perYear * fps)), nO = Math.round(SC.outro * fps), nS = SC.summary ? Math.round((SC.summary.seconds || 6) * fps) : 0, nH = Math.round((SC.hold || 0) * fps), N = nI + years.length * per + nH + nS + nO, fS = N - nO - nS;   // hold: the last year stays on screen before the summary
+    per = Math.max(1, Math.round(SC.perYear * fps)), nO = Math.round(SC.outro * fps), nS = SC.summary ? Math.round((SC.summary.seconds || 6) * fps) : 0, nH = Math.round((SC.hold || 0) * fps),
+    // clock (optional): [[seconds, yearIndex], ...] sets the year playhead piecewise, so a narrated Short can reach a year exactly when it is spoken
+    CK = SC.clock ? SC.clock.map(([t, c]) => [t * fps, c]) : null, nRun = CK ? Math.round(CK.at(-1)[0]) : years.length * per,
+    cOf = f => { if (!CK) return (f - nI) / per; const g = f - nI; if (g <= CK[0][0]) return CK[0][1]; for (let k = 1; k < CK.length; k++) if (g <= CK[k][0]) return CK[k - 1][1] + (CK[k][1] - CK[k - 1][1]) * (g - CK[k - 1][0]) / (CK[k][0] - CK[k - 1][0]); return CK.at(-1)[1]; },
+    fOfC = c => { if (!CK) return nI + c * per; for (let k = 1; k < CK.length; k++) if (c <= CK[k][1]) return nI + CK[k - 1][0] + (CK[k][0] - CK[k - 1][0]) * (c - CK[k - 1][1]) / Math.max(1e-9, CK[k][1] - CK[k - 1][1]); return nI + CK.at(-1)[0]; },
+    N = nI + nRun + nH + nS + nO, fS = N - nO - nS;   // hold: the last year stays on screen before the summary
   const stage = document.createElement('div'); stage.id = 'stage';
   const srcLine = m.src.map(x => registry[x]).map(r => `${r.publisher}${r.table_id ? ', table ' + r.table_id : ''}`).filter((x, i, a) => a.indexOf(x) === i).join(' · ');
   stage.innerHTML = `<div id="st-proof">${SC.proof ? SC.proof.replace(/[&<>]/g, '') : ''}</div><div id="st-hook"></div><div id="st-sum"></div><div id="st-sub"></div><div id="st-ann"></div><div id="st-foot"><span>Source: ${srcLine}. ${SC.motion === 'stepped' ? 'Annual published values; nothing is interpolated.' : 'Every figure shown is a published annual value. Movement between years is animation.'}</span><b>${SC.credit || ''}</b></div>
@@ -1882,10 +1887,10 @@ if (STUDIO) { const SC = b64d(STUDIO), m = M[SC.layer]; state.m = SC.layer; stat
     else if (SC.camera === 'orbit') { v.rotationOrbit = -15 + 22 * e; }
     return v; };
   const smooth = SC.motion !== 'stepped', clamp01 = x => Math.max(0, Math.min(1, x)), FADE = 9;
-  const annWin = (SC.annotations || []).map(a => { const i = years.findIndex(y => y >= a.year); if (i < 0) return null; const hold = a.hold || Math.max(2, Math.round(2.4 / SC.perYear)); return { text: a.text, f0: nI + i * per, f1: Math.min(fS, nI + (i + hold) * per) }; }).filter(Boolean);
+  const annWin = (SC.annotations || []).map(a => { const i = years.findIndex(y => y >= a.year); if (i < 0) return null; const hold = a.hold || Math.max(2, Math.round(2.4 / SC.perYear)); return { text: a.text, f0: Math.round(fOfC(i)), f1: Math.min(fS, Math.round(fOfC(i + hold))) }; }).filter(Boolean);
   annWin.forEach((a, k) => { const nx = annWin[k + 1]; if (nx && a.f1 > nx.f0) a.f1 = nx.f0; });   // a note fades out before the next one starts
   const renderFrame = f => { f = Math.max(0, Math.min(N - 1, Math.round(f))); if (!base) base = fitView(); AMB.t = f / fps;   // the cube sea moves with the frame number, so renders repeat exactly
-    const c = (f - nI) / per, i = f < nI ? 0 : Math.min(years.length - 1, Math.floor(c)), y = years[i], out = f >= N - nO, intro = f < nI, sum = nS > 0 && f >= fS && !out;
+    const c = cOf(f), i = f < nI ? 0 : Math.min(years.length - 1, Math.floor(c)), y = years[i], out = f >= N - nO, intro = f < nI, sum = nS > 0 && f >= fS && !out;
     // playhead: each year's published value sits at the middle of that year's time slot; marks glide linearly between neighbours
     if (smooth) { const u = Math.max(0, Math.min(years.length - 1, c - 0.5)), j = Math.min(years.length - 2, Math.floor(u)); TW = years.length > 1 ? { ya: years[j], yb: years[j + 1], k: u - j } : null; }
     view = cam(N > 1 ? f / (N - 1) : 0); theDeck.setProps({ viewState: view, controller: false, useDevicePixels: +Q.get('ss') || Math.max(2, devicePixelRatio) });   // supersample the map for video
@@ -1900,7 +1905,7 @@ if (STUDIO) { const SC = b64d(STUDIO), m = M[SC.layer]; state.m = SC.layer; stat
     document.getElementById('st-sub').style.opacity = kintro; document.getElementById('st-out').style.opacity = kout;
     for (const id of ['finding', 'r-meta', 'legend']) { const el = document.getElementById(id); el.style.visibility = 'visible'; el.style.opacity = VERT ? Math.min(kin, 1 - kend) : (id === 'finding' || !VERT) ? kin : 1; }
     document.body.classList.toggle('st-intro', intro); document.body.classList.toggle('st-outro', out);
-    stage.querySelector('#st-bar i').style.width = (clamp01((f - nI + 1) / (years.length * per)) * 100) + '%';
+    stage.querySelector('#st-bar i').style.width = (clamp01(CK ? cOf(f) / years.length : (f - nI + 1) / (years.length * per)) * 100) + '%';
     return { frame: f, year: y, phase: intro ? 'intro' : out ? 'outro' : sum ? 'summary' : 'run', title: SC.title, finding: intro ? '' : document.getElementById('finding').innerText, annotation: A && aEl.style.opacity > 0.5 ? A.text : '', between: smooth && TW ? [TW.ya, TW.yb, +TW.k.toFixed(3)] : null }; };
   window.CTT = { get ready() { return window.READY === true && (TX !== 'relief' || !!RELIEF.img) && (!AMB.on || (!!AMB.sea && !!NB_RELIEF.img)); }, frameCount: N, fps, renderFrame, config: SC, years };
   if (Q.get('render') == null) { // preview: plays in real time, with a scrubber

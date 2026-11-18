@@ -62,6 +62,31 @@ def make(cma, mode, ms, out):
     Path(out).write_text(json.dumps(cues, indent=1, ensure_ascii=False)); print("wrote", out, cues["duration"], "s", cues["facts"])
 
 
+def make_timed(cma, mode, ms, B, out, voice=None):
+    """Same Short, with every card and camera move timed to a narration (B: beat times in seconds from narrate_*.py:
+    city, nb, lo0..2, hi0..2, same, voice_end)."""
+    T = tracts(cma); name = NAMES[cma[-3:]].split(" - ")[0]; pop = A[cma]["v"][F.index("pop")]
+    end = round(B["voice_end"] + 0.9, 2)
+    cards = [dict(t0=0, t1=B["nb"] - 0.05, kick="How different can one city get?", big=name, sub=f"{pop / 1e6:.2f} million people" if pop >= 1e6 else f"{pop:,.0f} people"),
+             dict(t0=B["nb"] - 0.05, t1=B["lo0"] - 0.1, big=f"{len(T):,}", sub="neighbourhoods (census tracts)")]
+    cam = [dict(t=0, at="city", zoom="fit:city", dz=-1.8), dict(t=min(3.0, B["nb"]), at="city", zoom="fit:city"),
+           dict(t=B["lo0"] - 0.9, at="city", zoom="fit:city", dz=0.25)]
+    hl, measures = [], [dict(t=0, k=ms[0])]
+    for i, m in enumerate(ms):
+        (lo, klo), (hi, khi) = ext(cma, m); kick, fmt = MEAS[m]; tl, th = B[f"lo{i}"], B[f"hi{i}"]
+        tn = B[f"lo{i + 1}"] if i + 1 < len(ms) else B["same"]
+        if i: measures.append(dict(t=tl - 0.5, k=m))
+        cam += [dict(t=tl + 0.45, at=f"{m}_lo", zoom=f"fit:{m}_lo"), dict(t=max(tl + 0.6, th - 0.55), at=f"{m}_lo", zoom=f"fit:{m}_lo", dz=0.15),
+                dict(t=th + 0.4, at=f"{m}_hi", zoom=f"fit:{m}_hi"), dict(t=max(th + 0.55, tn - 0.6), at=f"{m}_hi", zoom=f"fit:{m}_hi", dz=0.15)]
+        hl += [dict(id=f"{m}_lo", t0=tl, t1=th), dict(id=f"{m}_hi", t0=th, t1=tn)]
+        cards += [dict(t0=tl, t1=th, kick=f"{kick}: lowest", big=fmt(lo)), dict(t0=th, t1=tn - 0.05, kick=f"{kick}: highest", big=fmt(hi))]
+    cam += [dict(t=B["same"] + 1.3, at="city", zoom="fit:city", dz=0.1), dict(t=end, at="city", zoom="fit:city")]
+    cards.append(dict(t0=B["same"], t1=end, big="Same city.", sub="50 cities, free map: link below"))
+    cues = dict(cma=cma, mode=mode, city=name, duration=end, measures=measures, highlights=hl, cards=cards, camera=cam,
+                facts={m: [ext(cma, m)[0][0], ext(cma, m)[1][0]] for m in ms}, tracts=len(T), pop=pop, voice=voice or "/nonexistent/none.wav", bed="steady")
+    Path(out).write_text(json.dumps(cues, indent=1, ensure_ascii=False)); print("wrote", out, end, "s")
+
+
 def ease(x): x = min(1, max(0, x)); return x * x * (3 - 2 * x)
 
 
@@ -148,6 +173,8 @@ async def run(cues, out, stills=None):
 
 
 if __name__ == "__main__":
+    if sys.argv[1] == "--make-timed":   # <cma> <mode> <m1,m2,m3> <beats.json> <key> <out-cues.json> [voice.wav]
+        make_timed(sys.argv[2], sys.argv[3], sys.argv[4].split(","), json.loads(Path(sys.argv[5]).read_text())[sys.argv[6]], sys.argv[7], sys.argv[8] if len(sys.argv) > 8 else None); sys.exit()
     if sys.argv[1] == "--make":
         make(sys.argv[2], sys.argv[3], sys.argv[4].split(","), sys.argv[5]); sys.exit()
     cues = json.loads(Path(sys.argv[1]).read_text())

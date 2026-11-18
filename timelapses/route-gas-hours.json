@@ -7,7 +7,7 @@
  "motion": "smooth",
  "id": "route-gas-hours",
  "title": "Gasoline in hours of work",
- "hookOver": 3.2,
+ "hookOver": 4.04,
  "proof": "DATA · STATISTICS CANADA PRICES AND WAGES",
  "layer": "gash",
  "place": "BC",
@@ -16,26 +16,17 @@
  "subtitle": "Hours of work at the median hourly wage to buy the same gasoline, each province against its own 1997 (1.00).",
  "intro": 2.6,
  "perYear": 0.55,
- "hold": 0.8,
- "outro": 3.5,
+ "hold": 2.74,
+ "outro": 2.42,
  "camera": "push",
  "theme": "bluehour",
  "hook": [
   "Is a tank of gas harder to pay for",
   "than it was in 1997?"
  ],
- "annotations": [
-  {
-   "year": 2008,
-   "text": "Above ×1.00: pump prices outran wages. Below: wages won"
-  },
-  {
-   "year": 2022,
-   "text": "Each province is compared with its own 1997, not with the others"
-  }
- ],
+ "annotations": [],
  "summary": {
-  "seconds": 6.5,
+  "seconds": 6.87,
   "items": [
    {
     "big": "×1.39",
@@ -56,5 +47,15 @@
     "scope": "period"
    }
   ]
- }
+ },
+ "clock": [
+  [
+   0,
+   0
+  ],
+  [
+   6.214,
+   29
+  ]
+ ]
 }

@@ -65,3 +65,18 @@ gas = dict(base, id="route-gas-hours", title="Gasoline in hours of work", hookOv
 for c in (alberta, rent, gas):
     (ROOT / "timelapses" / f"{c['id']}.json").write_text(json.dumps(c, indent=1, ensure_ascii=False))
     print("wrote", c["id"], "≈", round(c["intro"] + (c["to"] - c["from"] + 1) * c["perYear"] + c["hold"] + c["summary"]["seconds"] + c["outro"]), "s")
+
+# Narrated cut (2026-11-17): CTT_BEATS=<beats.json> times the year clock, hook, summary and outro to the voice.
+import os
+if os.environ.get("CTT_BEATS"):
+    B = json.loads(Path(os.environ["CTT_BEATS"]).read_text())
+    def voiced(c, b, clock, run_end, sum0, sum1, hook_end):
+        c.update(clock=clock, hookOver=round(hook_end, 2), hold=round(max(0, sum0 - run_end), 2), outro=round(b["voice_end"] + 0.9 - sum1, 2))
+        c["summary"]["seconds"] = round(sum1 - sum0, 2)
+    b = B["17"]; voiced(alberta, b, [[0, 0], [b["l2_start"], 0.5], [b["two"], 7.5], [b["three"], 29.5], [b["four"], 43.5], [b["five"], 56]],
+                        b["five"], b["five"], b["double_end"] + 0.35, b["l2_end"] + 0.2)
+    alberta["annotations"] = [dict(a, hold=h) for a, h in zip(alberta["annotations"], (22, 14, 11, 1, 1))]
+    b = B["18"]; voiced(rent, b, [[0, 0], [b["n73"], 29]], b["n73"], b["kel"] - 0.1, b["low_end"] + 0.4, b["q_end"] + 0.2); rent["annotations"] = []
+    b = B["19"]; voiced(gas, b, [[0, 0], [b["n39"], 29]], b["n39"], b["canada"] - 0.1, b["wages_end"] + 0.4, b["q_end"] + 0.2); gas["annotations"] = []
+    for c in (alberta, rent, gas): (ROOT / "timelapses" / f"{c['id']}.json").write_text(json.dumps(c, indent=1, ensure_ascii=False))
+    print("voiced:", {c["id"]: round(c["clock"][-1][0] + c["hold"] + c["summary"]["seconds"] + c["outro"], 2) for c in (alberta, rent, gas)})

@@ -7,7 +7,7 @@
  "motion": "smooth",
  "id": "route-alberta-tripled",
  "title": "Alberta",
- "hookOver": 3.2,
+ "hookOver": 7.59,
  "proof": "DATA · STATISTICS CANADA · TABLE 17-10-0009",
  "layer": "pop",
  "place": "AB",
@@ -16,8 +16,8 @@
  "subtitle": "People in each province and territory on July 1, 1971 to 2026. Column height shows the number of people.",
  "intro": 2.6,
  "perYear": 0.36,
- "hold": 0.8,
- "outro": 3.5,
+ "hold": 0,
+ "outro": 2.72,
  "camera": "push",
  "theme": "bluehour",
  "hook": [
@@ -27,27 +27,32 @@
  "annotations": [
   {
    "year": 1978,
-   "text": "Alberta passes 2 million people"
+   "text": "Alberta passes 2 million people",
+   "hold": 22
   },
   {
    "year": 2000,
-   "text": "Alberta passes 3 million people"
+   "text": "Alberta passes 3 million people",
+   "hold": 14
   },
   {
    "year": 2014,
-   "text": "Alberta passes 4 million people"
+   "text": "Alberta passes 4 million people",
+   "hold": 11
   },
   {
    "year": 2025,
-   "text": "Alberta passes 5 million people"
+   "text": "Alberta passes 5 million people",
+   "hold": 1
   },
   {
    "year": 2026,
-   "text": "2026 is a preliminary estimate"
+   "text": "2026 is a preliminary estimate",
+   "hold": 1
   }
  ],
  "summary": {
-  "seconds": 6,
+  "seconds": 8.88,
   "items": [
    {
     "big": "5.10M",
@@ -62,5 +67,31 @@
     "scope": "period"
    }
   ]
- }
+ },
+ "clock": [
+  [
+   0,
+   0
+  ],
+  [
+   2.76,
+   0.5
+  ],
+  [
+   8.318,
+   7.5
+  ],
+  [
+   9.915,
+   29.5
+  ],
+  [
+   11.358,
+   43.5
+  ],
+  [
+   13.248,
+   56
+  ]
+ ]
 }
