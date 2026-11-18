@@ -19,15 +19,10 @@
     "tiktok": "scheduled"
    },
    "buffer_ids": {
-    "youtube": "6afce472bb12698d1581912b",
-    "x": "6afce474fc933ac285acd781",
-    "tiktok": "6afce474f0c5ce9361a9b028"
-   },
-   "replace": [
-    "youtube",
-    "x",
-    "tiktok"
-   ]
+    "youtube": "6afd42b7bfbba0a971826386",
+    "x": "6afd42b86032c1a98f19bb88",
+    "tiktok": "6afd42b880faf674a1c5abd8"
+   }
   },
   {
    "num": "18",
@@ -47,15 +42,10 @@
     "tiktok": "scheduled"
    },
    "buffer_ids": {
-    "youtube": "6afce476bb12698d1581933f",
-    "x": "6afce476fc933ac285acd7c8",
-    "tiktok": "6afd0196bb12698d158bc3cb"
-   },
-   "replace": [
-    "youtube",
-    "x",
-    "tiktok"
-   ]
+    "youtube": "6afd42b96032c1a98f19bbc5",
+    "x": "6afd42babfbba0a971826423",
+    "tiktok": "6afd42bb8ffbb8256dc282aa"
+   }
   },
   {
    "num": "19",
@@ -75,16 +65,12 @@
     "tiktok": "error"
    },
    "buffer_ids": {
-    "youtube": "6afce4789f3765f6ab18aeb4",
-    "x": "6afce479fc933ac285acd82f"
+    "youtube": "6afd42bc747c69cf4666b72d",
+    "x": "6afd42bc8ffbb8256dc28358"
    },
    "errors": {
     "tiktok": "Scheduled posts limit reached. You have 10 scheduled posts out of 10 allowed."
-   },
-   "replace": [
-    "youtube",
-    "x"
-   ]
+   }
   },
   {
    "num": "20",
@@ -104,16 +90,12 @@
     "tiktok": "error"
    },
    "buffer_ids": {
-    "youtube": "6afd0199fc933ac285b6d4dc",
-    "x": "6afd0199aa3b065dd964c982"
+    "youtube": "6afd42be8ffbb8256dc2851f",
+    "x": "6afd42be8ffbb8256dc2854f"
    },
    "errors": {
     "tiktok": "Scheduled posts limit reached. You have 10 scheduled posts out of 10 allowed."
-   },
-   "replace": [
-    "youtube",
-    "x"
-   ]
+   }
   },
   {
    "num": "21",
@@ -133,16 +115,12 @@
     "tiktok": "error"
    },
    "buffer_ids": {
-    "youtube": "6afd022d93fa11d37dfabcb4",
-    "x": "6afd022d9f3765f6ab22afe3"
+    "youtube": "6afd42c06032c1a98f19c2e3",
+    "x": "6afd42c0747c69cf4666b90b"
    },
    "errors": {
     "tiktok": "Scheduled posts limit reached. You have 10 scheduled posts out of 10 allowed."
-   },
-   "replace": [
-    "youtube",
-    "x"
-   ]
+   }
   },
   {
    "num": "22",
@@ -162,16 +140,12 @@
     "tiktok": "error"
    },
    "buffer_ids": {
-    "youtube": "6afd022faa3b065dd964f969",
-    "x": "6afd022faa3b065dd964f9ab"
+    "youtube": "6afd42c180faf674a1c5b00c",
+    "x": "6afd42c2b116b81c993414c2"
    },
    "errors": {
     "tiktok": "Scheduled posts limit reached. You have 10 scheduled posts out of 10 allowed."
-   },
-   "replace": [
-    "youtube",
-    "x"
-   ]
+   }
   }
  ]
 }
