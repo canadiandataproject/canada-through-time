@@ -20,6 +20,7 @@ ORG = "6afa9bec49dfc7619b94264c"
 CH = {"youtube": "6afa9c26ece6dfde5fdf8b01", "x": "6afa9c4eece6dfde5fdf8e92", "tiktok": "6afb4e3cece6dfde5fe8bdfc"}
 BASE = "https://canadiandataproject.github.io/canada-through-time/media/"
 TZ = ZoneInfo("America/Edmonton")
+D = "mutation($i: DeletePostInput!){ deletePost(input:$i){ __typename ... on DeletePostSuccess { id } ... on MutationError { message } } }"
 M = "mutation($i: CreatePostInput!){ createPost(input:$i){ __typename ... on PostActionSuccess { post { id dueAt status } } ... on MutationError { message } } }"
 
 
@@ -70,6 +71,14 @@ def main():
     if mode != "post":
         sys.exit(1 if problems else 0)
     changed = False
+    for e in qd["shorts"]:   # "replace": [sites] = a new cut of the video: delete the scheduled Buffer post, then schedule it again (Buffer keeps the old file)
+        for site in e.pop("replace", []):
+            pid = e.get("buffer_ids", {}).get(site)
+            if pid:
+                r = q(D, {"i": {"id": pid}}); res = (r.get("data") or {}).get("deletePost") or {}
+                print(f'#{e["num"]} {site}: delete {pid} -> {res.get("__typename") or json.dumps(r)[:200]}')
+                e["buffer_ids"].pop(site, None)
+            e.setdefault("status", {})[site] = "pending"; e.get("errors", {}).pop(site, None); changed = True
     for e in qd["shorts"]:   # Buffer's free plan holds 10 queued posts per channel: retry those once slots free up
         for site, err in list(e.get("errors", {}).items()):
             if "limit reached" in err and e.get("status", {}).get(site) == "error":

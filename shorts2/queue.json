@@ -22,7 +22,12 @@
     "youtube": "6afce472bb12698d1581912b",
     "x": "6afce474fc933ac285acd781",
     "tiktok": "6afce474f0c5ce9361a9b028"
-   }
+   },
+   "replace": [
+    "youtube",
+    "x",
+    "tiktok"
+   ]
   },
   {
    "num": "18",
@@ -45,7 +50,12 @@
     "youtube": "6afce476bb12698d1581933f",
     "x": "6afce476fc933ac285acd7c8",
     "tiktok": "6afd0196bb12698d158bc3cb"
-   }
+   },
+   "replace": [
+    "youtube",
+    "x",
+    "tiktok"
+   ]
   },
   {
    "num": "19",
@@ -70,7 +80,11 @@
    },
    "errors": {
     "tiktok": "Scheduled posts limit reached. You have 10 scheduled posts out of 10 allowed."
-   }
+   },
+   "replace": [
+    "youtube",
+    "x"
+   ]
   },
   {
    "num": "20",
@@ -95,7 +109,11 @@
    },
    "errors": {
     "tiktok": "Scheduled posts limit reached. You have 10 scheduled posts out of 10 allowed."
-   }
+   },
+   "replace": [
+    "youtube",
+    "x"
+   ]
   },
   {
    "num": "21",
@@ -120,7 +138,11 @@
    },
    "errors": {
     "tiktok": "Scheduled posts limit reached. You have 10 scheduled posts out of 10 allowed."
-   }
+   },
+   "replace": [
+    "youtube",
+    "x"
+   ]
   },
   {
    "num": "22",
@@ -145,7 +167,11 @@
    },
    "errors": {
     "tiktok": "Scheduled posts limit reached. You have 10 scheduled posts out of 10 allowed."
-   }
+   },
+   "replace": [
+    "youtube",
+    "x"
+   ]
   }
  ]
 }

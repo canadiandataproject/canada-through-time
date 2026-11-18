@@ -25,12 +25,12 @@
   "x": "Land covered by buildings around Edmonton, from satellite images:\n\n1975: 84 km²\n2000: 117 km²\n2020: 166 km², nearly double\n\nMore was added after 2000 than in the 25 years before.\n\nSource: EU JRC GHS-BUILT-S"
  },
  "17": {
-  "title": "Alberta tripled: 1.67M → 5.10M people (1971–2026)",
+  "title": "How many people live in Alberta now? (1971–2026)",
   "desc": "Alberta had 1.67 million people on July 1, 1971. On July 1, 2026 (preliminary): 5.10 million.\n\n📊 The numbers (Statistics Canada, table 17-10-0009-01, July 1 estimates)\n• Alberta: ×3.06 since 1971, the fastest of the 13 provinces and territories\n• Passed 2 million in 1978, 3 million in 2000, 4 million in 2014, 5 million in 2025\n• Canada as a whole: ×1.90; British Columbia ×2.55\n\n💬 When did your family arrive?\n\n2026 is a preliminary estimate. Column height shows the number of people; movement between years is animation.\n\nExplore every province, every year: https://canadiandataproject.github.io/canada-through-time/#pop-2026-ab",
   "x": "Alberta had 1.67M people in 1971. Now: 5.10M. ×3.06, the fastest growth of any province or territory (Canada: ×1.90).\n\nStatCan 17-10-0009-01 · July 1, 2026 is preliminary.\nhttps://canadiandataproject.github.io/canada-through-time/#pop-2026-ab"
  },
  "18": {
-  "title": "Rent in hours of work: Vancouver 73 hours a month",
+  "title": "How many hours of work does one month of rent cost?",
   "desc": "How many hours do you work just to pay one month of rent?\n\n📊 The numbers (CMHC Rental Market Survey via Statistics Canada 34-10-0133-01; median hourly wage, 14-10-0064-01)\n• Vancouver: 73 hours a month in October 2025, about 9 eight-hour days (1997: 53 h)\n• Kelowna: 40 h → 65 h since 1997, the biggest jump of 33 cities\n• Saguenay: 33 h, the lowest measured\n• Edmonton 50 h · Calgary 60 h · Toronto 65 h · Montréal 45 h\n\n💬 How many hours is yours?\n\nAverage two-bedroom rent in purpose-built rentals, existing tenants included (new leases are often higher), divided by the province's median hourly wage.\n\nFind your city: https://canadiandataproject.github.io/canada-through-time/#renth-2025",
   "x": "One month of 2-bedroom rent, in hours of work at the median wage (Oct 2025):\nVancouver 73 h\nToronto 65 h\nCalgary 60 h\nEdmonton 50 h\nKelowna went 40 → 65 h since 1997.\n\nCMHC via StatCan.\nhttps://canadiandataproject.github.io/canada-through-time/#renth-2025"
  },
@@ -40,18 +40,18 @@
   "x": "Gas in hours of work at the median wage, 2025 vs 1997:\nB.C. ×1.39 (39% more work for the same gas)\nCanada ×1.11\nSask. ×0.93 (wages won)\n\nStatCan CPI + wages.\nhttps://canadiandataproject.github.io/canada-through-time/#gash-2025"
  },
  "20": {
-  "title": "Montréal: one city, 1,004 neighbourhoods",
-  "desc": "One zoom from Canada into every census tract in Montréal.\n\n📊 The numbers (2021 Census, Statistics Canada; neighbourhoods = census tracts with 500+ people)\n• Median household income: $23,400 to $360,000\n• Born outside Canada: 1% to 67%\n• Median age: 23 to 70\n• Montréal overall: 4.29 million people, median household income $76,000\n\n💬 Which city should we zoom into next?\n\nIncome is for 2020 (pandemic benefits included).\n\nEvery neighbourhood in 50 cities, free: https://canadiandataproject.github.io/canada-through-time/#nb=462/hhinc",
+  "title": "How different can one city get? Montréal, 1,004 neighbourhoods",
+  "desc": "Every census tract in Montréal, from the lowest to the highest.\n\n📊 The numbers (2021 Census, Statistics Canada; neighbourhoods = census tracts with 500+ people)\n• Median household income: $23,400 to $360,000\n• Born outside Canada: 1% to 67%\n• Median age: 23 to 70\n• Montréal overall: 4.29 million people, median household income $76,000\n\n💬 Which city should we zoom into next?\n\nIncome is for 2020 (pandemic benefits included).\n\nEvery neighbourhood in 50 cities, free: https://canadiandataproject.github.io/canada-through-time/#nb=462/hhinc",
   "x": "Montréal has 1,004 neighbourhoods (census tracts).\n\nMedian household income: $23,400 to $360,000\nBorn outside Canada: 1% to 67%\nMedian age: 23 to 70\n\nSame city.\n\nSource: 2021 Census, Statistics Canada\nhttps://canadiandataproject.github.io/canada-through-time/#nb=462/hhinc"
  },
  "21": {
-  "title": "Edmonton: one city, 349 neighbourhoods",
-  "desc": "One zoom from Canada into every census tract in Edmonton.\n\n📊 The numbers (2021 Census, Statistics Canada; neighbourhoods = census tracts with 500+ people)\n• Median household income: $33,600 to $172,000\n• Median age: 24 to 60\n• Households that rent: 0% to 88%\n• Edmonton overall: 1.42 million people, median household income $96,000\n\n💬 Which city should we zoom into next?\n\nIncome is for 2020 (pandemic benefits included).\n\nEvery neighbourhood in 50 cities, free: https://canadiandataproject.github.io/canada-through-time/#nb=835/hhinc",
+  "title": "How different can one city get? Edmonton, 349 neighbourhoods",
+  "desc": "Every census tract in Edmonton, from the lowest to the highest.\n\n📊 The numbers (2021 Census, Statistics Canada; neighbourhoods = census tracts with 500+ people)\n• Median household income: $33,600 to $172,000\n• Median age: 24 to 60\n• Households that rent: 0% to 88%\n• Edmonton overall: 1.42 million people, median household income $96,000\n\n💬 Which city should we zoom into next?\n\nIncome is for 2020 (pandemic benefits included).\n\nEvery neighbourhood in 50 cities, free: https://canadiandataproject.github.io/canada-through-time/#nb=835/hhinc",
   "x": "Edmonton has 349 neighbourhoods (census tracts).\n\nMedian household income: $33,600 to $172,000\nMedian age: 24 to 60\nHouseholds that rent: 0% to 88%\n\nSame city.\n\nSource: 2021 Census, Statistics Canada\nhttps://canadiandataproject.github.io/canada-through-time/#nb=835/hhinc"
  },
  "22": {
-  "title": "Vancouver: one city, 535 neighbourhoods",
-  "desc": "One zoom from Canada into every census tract in Vancouver.\n\n📊 The numbers (2021 Census, Statistics Canada; neighbourhoods = census tracts with 500+ people)\n• Median household income: $32,000 to $170,000\n• Born outside Canada: 5% to 74%\n• Median age: 30 to 68\n• Vancouver overall: 2.64 million people, median household income $90,000\n\n💬 Which city should we zoom into next?\n\nIncome is for 2020 (pandemic benefits included).\n\nEvery neighbourhood in 50 cities, free: https://canadiandataproject.github.io/canada-through-time/#nb=933/hhinc",
+  "title": "How different can one city get? Vancouver, 535 neighbourhoods",
+  "desc": "Every census tract in Vancouver, from the lowest to the highest.\n\n📊 The numbers (2021 Census, Statistics Canada; neighbourhoods = census tracts with 500+ people)\n• Median household income: $32,000 to $170,000\n• Born outside Canada: 5% to 74%\n• Median age: 30 to 68\n• Vancouver overall: 2.64 million people, median household income $90,000\n\n💬 Which city should we zoom into next?\n\nIncome is for 2020 (pandemic benefits included).\n\nEvery neighbourhood in 50 cities, free: https://canadiandataproject.github.io/canada-through-time/#nb=933/hhinc",
   "x": "Vancouver has 535 neighbourhoods (census tracts).\n\nMedian household income: $32,000 to $170,000\nBorn outside Canada: 5% to 74%\nMedian age: 30 to 68\n\nSame city.\n\nSource: 2021 Census, Statistics Canada\nhttps://canadiandataproject.github.io/canada-through-time/#nb=933/hhinc"
  }
 }
