@@ -7,7 +7,7 @@
  "motion": "smooth",
  "id": "route-rent-hours",
  "title": "Rent in hours of work",
- "hookOver": 2.84,
+ "hookOver": 2.47,
  "proof": "DATA · CMHC RENTS · STATISTICS CANADA WAGES",
  "layer": "renth",
  "place": null,
@@ -17,8 +17,8 @@
  "city": "Vancouver",
  "intro": 2.6,
  "perYear": 0.55,
- "hold": 3.72,
- "outro": 2.65,
+ "hold": 3.56,
+ "outro": 2.33,
  "camera": "push",
  "theme": "whiteout",
  "hook": [
@@ -27,7 +27,7 @@
  ],
  "annotations": [],
  "summary": {
-  "seconds": 9.11,
+  "seconds": 9.06,
   "items": [
    {
     "big": "73 h",
@@ -55,7 +55,7 @@
    0
   ],
   [
-   4.198,
+   3.674,
    29
   ]
  ]

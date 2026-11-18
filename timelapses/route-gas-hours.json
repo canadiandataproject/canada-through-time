@@ -7,7 +7,7 @@
  "motion": "smooth",
  "id": "route-gas-hours",
  "title": "Gasoline in hours of work",
- "hookOver": 4.04,
+ "hookOver": 4.05,
  "proof": "DATA · STATISTICS CANADA PRICES AND WAGES",
  "layer": "gash",
  "place": "BC",
@@ -16,8 +16,8 @@
  "subtitle": "Hours of work at the median hourly wage to buy the same gasoline, each province against its own 1997 (1.00).",
  "intro": 2.6,
  "perYear": 0.55,
- "hold": 2.74,
- "outro": 2.42,
+ "hold": 2.73,
+ "outro": 2.28,
  "camera": "push",
  "theme": "bluehour",
  "hook": [
@@ -54,7 +54,7 @@
    0
   ],
   [
-   6.214,
+   6.314,
    29
   ]
  ]
