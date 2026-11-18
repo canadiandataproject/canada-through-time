@@ -1,5 +1,5 @@
 {
- "note": "Edit and push to schedule. status per site: pending -> scheduled (or error). Times are Edmonton local. Run by .github/workflows/schedule-shorts.yml with the BUFFER_KEY repo secret. First run 2026-11-17.",
+ "note": "Edit and push to schedule. status per site: pending -> scheduled (or error). Times are Edmonton local. Run by .github/workflows/schedule-shorts.yml with the BUFFER_KEY repo secret. First run 2026-11-17. Last manual run: 2026-11-17 evening.",
  "shorts": [
   {
    "num": "17",
