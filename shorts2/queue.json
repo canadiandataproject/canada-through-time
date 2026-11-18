@@ -109,7 +109,18 @@
     "title": "Edmonton: one city, 349 neighbourhoods",
     "caption": "Edmonton, 349 neighbourhoods: household income $33,600 to $172,000, median age 24 to 60. Where do you land? 🏙️\n\nFree explorer, link in bio.\n\n#edmonton #alberta #canada #dataviz"
    },
-   "status": {}
+   "status": {
+    "youtube": "scheduled",
+    "x": "scheduled",
+    "tiktok": "error"
+   },
+   "buffer_ids": {
+    "youtube": "6afd022d93fa11d37dfabcb4",
+    "x": "6afd022d9f3765f6ab22afe3"
+   },
+   "errors": {
+    "tiktok": "Scheduled posts limit reached. You have 10 scheduled posts out of 10 allowed."
+   }
   },
   {
    "num": "22",
@@ -123,7 +134,18 @@
     "title": "Vancouver: one city, 535 neighbourhoods",
     "caption": "Vancouver, 535 neighbourhoods: born outside Canada from 5% to 74%, household income $32,000 to $170,000. Same city. 🏙️\n\nFree explorer, link in bio.\n\n#vancouver #bc #canada #dataviz"
    },
-   "status": {}
+   "status": {
+    "youtube": "scheduled",
+    "x": "scheduled",
+    "tiktok": "error"
+   },
+   "buffer_ids": {
+    "youtube": "6afd022faa3b065dd964f969",
+    "x": "6afd022faa3b065dd964f9ab"
+   },
+   "errors": {
+    "tiktok": "Scheduled posts limit reached. You have 10 scheduled posts out of 10 allowed."
+   }
   }
  ]
 }
