@@ -40,10 +40,10 @@ def ext(cma, f):
 def make(cma, mode, ms, out):
     T = tracts(cma); name = NAMES[cma[-3:]].split(" - ")[0]; pop = A[cma]["v"][F.index("pop")]
     can = sum(v["v"][F.index("pop")] or 0 for v in A.values() if v["level"] == "Census metropolitan area")
-    cards = [dict(t0=0, t1=0.9, big="Canada", sub="36.99 million people (2021 Census)"),
-             dict(t0=0.9, t1=4.8, big=name, sub=f"{pop / 1e6:.2f} million people" if pop >= 1e6 else f"{pop:,.0f} people"),
+    # opener (2026-11-17): the city and a question on frame 1, camera already moving, source stamp up front (no "Canada" card)
+    cards = [dict(t0=0, t1=4.8, kick="How different can one city get?", big=name, sub=f"{pop / 1e6:.2f} million people" if pop >= 1e6 else f"{pop:,.0f} people"),
              dict(t0=4.8, t1=7.9, big=f"{len(T):,}", sub="neighbourhoods (census tracts)")]
-    cam = [dict(t=0, at=[6350000, 2700000], zoom=-13.2), dict(t=0.7, at=[6350000, 2650000], zoom=-12.9), dict(t=3.4, at="city", zoom="fit:city"),
+    cam = [dict(t=0, at="city", zoom="fit:city", dz=-1.8), dict(t=3.4, at="city", zoom="fit:city"),
            dict(t=4.8, at="city", zoom="fit:city", dz=0.1), dict(t=6.6, at="city", zoom="fit:city", dz=0.3)]
     hl, measures, t = [], [dict(t=0, k=ms[0])], 8.6
     spans = [(2.8, 2.5), (1.9, 2.2), (1.4, 4.4)]
@@ -107,6 +107,10 @@ def overlay(img, t, cues):
         if c.get("kick"): d.text((W / 2, y - 108), c["kick"], font=kick, fill=hexc(S["accent"], int(255 * a)), anchor="mm")
         d.text((W / 2, y), c["big"], font=f, fill=hexc(S["ink"], int(255 * a)), anchor="mm")
         if c.get("sub"): d.text((W / 2, y + 104), c["sub"], font=sub, fill=hexc(S["ink2"], int(255 * a)), anchor="mm")
+    if t < 3.6 and cues.get("proof", True):   # proof stamp: readable source on frame 1
+        a = min(1, (3.6 - t) / 0.25); pf = font("mono", 34, 600); ptxt = "DATA · STATISTICS CANADA · 2021 CENSUS"; pw = d.textlength(ptxt, font=pf) + 56
+        d.rounded_rectangle([W / 2 - pw / 2, 500, W / 2 + pw / 2, 566], 14, fill=(*S["glass"][:3], int(S["glass"][3] * a * 1.15)), outline=hexc(S["accent"], int(255 * a)), width=3)
+        d.text((W / 2, 533), ptxt, font=pf, fill=hexc(S["ink"], int(255 * a)), anchor="mm")
     txt = "2021 Census · Statistics Canada · The Canadian Data Project"
     tw = d.textlength(txt, font=src) + 48
     d.rounded_rectangle([W / 2 - tw / 2, H - 520, W / 2 + tw / 2, H - 470], 25, fill=S["glass"])

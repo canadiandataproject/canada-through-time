@@ -6,7 +6,9 @@
  "format": "9x16",
  "motion": "smooth",
  "id": "route-alberta-tripled",
- "title": "Alberta tripled",
+ "title": "Alberta",
+ "hookOver": 3.2,
+ "proof": "DATA · STATISTICS CANADA · TABLE 17-10-0009",
  "layer": "pop",
  "place": "AB",
  "from": 1971,
@@ -19,8 +21,8 @@
  "camera": "push",
  "theme": "bluehour",
  "hook": [
-  "Alberta had 1.67 million people in 1971.",
-  "Guess how many now."
+  "How many people live in Alberta now?",
+  "1971: 1.67 million."
  ],
  "annotations": [
   {

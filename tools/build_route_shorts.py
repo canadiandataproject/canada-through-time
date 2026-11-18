@@ -24,10 +24,10 @@ ab71, ab26 = pop("AB", 1971), pop("AB", 2026); k = ab26 / ab71; can = pop("CAN",
 assert (round(ab71), round(ab26)) == (1665717, 5101050) and round(k, 2) == 3.06 and round(can, 2) == 1.90
 first = lambda m: next(y for y in sorted(JUL) if y >= 1971 and pop("AB", y) >= m)
 assert [first(m) for m in (2e6, 3e6, 4e6, 5e6)] == [1978, 2000, 2014, 2025]
-alberta = dict(base, id="route-alberta-tripled", title="Alberta tripled", layer="pop", place="AB", **{"from": 1971, "to": 2026},
+alberta = dict(base, id="route-alberta-tripled", title="Alberta", hookOver=3.2, proof="DATA · STATISTICS CANADA · TABLE 17-10-0009", layer="pop", place="AB", **{"from": 1971, "to": 2026},
   subtitle="People in each province and territory on July 1, 1971 to 2026. Column height shows the number of people.",
   intro=2.6, perYear=0.36, hold=0.8, outro=3.5, camera="push", theme="bluehour",
-  hook=["Alberta had 1.67 million people in 1971.", "Guess how many now."],
+  hook=["How many people live in Alberta now?", "1971: 1.67 million."],
   annotations=[{"year": y, "text": f"Alberta passes {n} million people"} for n, y in zip((2, 3, 4, 5), (1978, 2000, 2014, 2025))] + [{"year": 2026, "text": "2026 is a preliminary estimate"}],
   summary={"seconds": 6, "items": [
     {"big": mil(ab26), "kicker": "Alberta, July 1, 2026 (preliminary)", "text": f"up from {mil(ab71)} in 1971", "scope": "year"},
@@ -37,7 +37,7 @@ alberta = dict(base, id="route-alberta-tripled", title="Alberta tripled", layer=
 assert round(rh("Vancouver", 2025), 1) == 72.8 and round(rh("Kelowna", 1997), 1) == 39.8 and round(rh("Kelowna", 2025), 1) == 64.6
 jump = max((c for c in R if R[c].get("1997") and R[c].get("2025")), key=lambda c: rh(c, 2025) - rh(c, 1997)); assert jump == "Kelowna"
 low = min((c for c in R if R[c].get("2025")), key=lambda c: rh(c, 2025)); assert low == "Saguenay" and round(rh(low, 2025), 1) == 32.9
-rent = dict(base, id="route-rent-hours", title="Rent in hours of work", layer="renth", place=None, **{"from": 1997, "to": 2025},
+rent = dict(base, id="route-rent-hours", title="Rent in hours of work", hookOver=3.2, proof="DATA · CMHC RENTS · STATISTICS CANADA WAGES", layer="renth", place=None, **{"from": 1997, "to": 2025},
   subtitle="Hours of work at the province's median hourly wage to pay one month of the average two-bedroom rent, CMHC October survey.",
   city="Vancouver", intro=2.6, perYear=0.55, hold=0.8, outro=3.5, camera="push", theme="whiteout",
   hook=["How many hours do you work", "just to pay one month of rent?"],
@@ -51,7 +51,7 @@ rent = dict(base, id="route-rent-hours", title="Rent in hours of work", layer="r
 # 3 · Gasoline in hours of work (provinces, 1997 = 1.00)
 bc, cn, sk = hx("BC", "gas", 2025), hx("CAN", "gas", 2025), hx("SK", "gas", 2025)
 assert (round(bc, 2), round(cn, 2), round(sk, 2)) == (1.39, 1.11, 0.93)
-gas = dict(base, id="route-gas-hours", title="Gasoline in hours of work", layer="gash", place="BC", **{"from": 1997, "to": 2025},
+gas = dict(base, id="route-gas-hours", title="Gasoline in hours of work", hookOver=3.2, proof="DATA · STATISTICS CANADA PRICES AND WAGES", layer="gash", place="BC", **{"from": 1997, "to": 2025},
   subtitle="Hours of work at the median hourly wage to buy the same gasoline, each province against its own 1997 (1.00).",
   intro=2.6, perYear=0.55, hold=0.8, outro=3.5, camera="push", theme="bluehour",
   hook=["Is a tank of gas harder to pay for", "than it was in 1997?"],

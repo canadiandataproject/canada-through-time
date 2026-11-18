@@ -7,6 +7,8 @@
  "motion": "smooth",
  "id": "route-rent-hours",
  "title": "Rent in hours of work",
+ "hookOver": 3.2,
+ "proof": "DATA · CMHC RENTS · STATISTICS CANADA WAGES",
  "layer": "renth",
  "place": null,
  "from": 1997,

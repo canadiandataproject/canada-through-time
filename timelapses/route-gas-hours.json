@@ -7,6 +7,8 @@
  "motion": "smooth",
  "id": "route-gas-hours",
  "title": "Gasoline in hours of work",
+ "hookOver": 3.2,
+ "proof": "DATA · STATISTICS CANADA PRICES AND WAGES",
  "layer": "gash",
  "place": "BC",
  "from": 1997,

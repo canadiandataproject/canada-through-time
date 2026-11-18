@@ -52,13 +52,8 @@
  "cards": [
   {
    "t0": 0,
-   "t1": 0.9,
-   "big": "Canada",
-   "sub": "36.99 million people (2021 Census)"
-  },
-  {
-   "t0": 0.9,
    "t1": 4.8,
+   "kick": "How different can one city get?",
    "big": "Montréal",
    "sub": "4.29 million people"
   },
@@ -114,19 +109,9 @@
  "camera": [
   {
    "t": 0,
-   "at": [
-    6350000,
-    2700000
-   ],
-   "zoom": -13.2
-  },
-  {
-   "t": 0.7,
-   "at": [
-    6350000,
-    2650000
-   ],
-   "zoom": -12.9
+   "at": "city",
+   "zoom": "fit:city",
+   "dz": -1.8
   },
   {
    "t": 3.4,
