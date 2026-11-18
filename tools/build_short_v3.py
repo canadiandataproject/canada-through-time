@@ -29,7 +29,7 @@ cues = [(r["frame"], r["cue"]) for r in log if r.get("cue")]
 GAIN = {"tick": 0.30, "riser": 0.55, "hit": 0.85}
 FILE = {"tick": "tick", "riser": "riser", "hit": "hit"}
 if STYLE == "calm":
-    GAIN = {"tick": 0.0, "riser": 0.12, "hit": 0.35}     # no per-year ticks; a quiet swell and a soft low bloom on reveals
+    GAIN = {"tick": 0.0, "riser": 0.0, "hit": 0.35}      # no per-year ticks, no swell (reads as "breathing", Tyson 2026-11-17); a soft low bloom on reveals
     FILE = {"tick": "soft_tick", "riser": "swell", "hit": "soft_hit"}
 def load(p):
     raw = subprocess.run(["ffmpeg", "-v", "error", "-i", str(p), "-f", "f32le", "-ac", "2", "-ar", "48000", "-"], capture_output=True, check=True).stdout

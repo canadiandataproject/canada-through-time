@@ -28,7 +28,7 @@ if "--scratch" in sys.argv or not vp.exists():
 else:
     voice = load(vp); voice = voice / max(1e-9, np.abs(voice).max()) * 0.9
 bedf = Path("/tmp") / f"bed_{eng}.wav"
-subprocess.run(["python3", str(ROOT / "tools/make_bed_calm.py"), f"{dur:.3f}", str(bedf)] + (["steady"] if cues.get("bed") == "steady" else []), check=True)
+subprocess.run(["python3", str(ROOT / "tools/make_bed_calm.py"), f"{dur:.3f}", str(bedf)] + ["steady"], check=True)   # always steady: a swelling bed reads as "breathing" (Tyson, 2026-11-17)
 bed = load(bedf); bed = bed / max(1e-9, np.abs(bed).max()) * 0.30
 fx = np.zeros((N, 2), np.float32)
 t_ = np.arange(int(0.6 * SR)) / SR
@@ -54,15 +54,8 @@ elif eng == "splitflap":
             t0 = p["t"] + k * 0.011 + rng.uniform(0, 0.01)
             dens = max(0, 1 - k * 0.011 / 3.2)
             if rng.random() < 0.85 * dens: place(fx, clk(), t0, 0.16 * (0.5 + rng.random() * 0.5))
-elif eng == "zoom":
-    cam = cues["camera"]
-    for a, b in zip(cam, cam[1:]):
-        if b["t"] - a["t"] > 0.4 and (a["at"] != b["at"] or a["zoom"] != b["zoom"]):
-            d = b["t"] - a["t"]; tt = np.arange(int(d * SR)) / SR
-            w = lp(rng.normal(0, 1, len(tt)), 30) * np.sin(np.pi * tt / d) ** 2 * 0.22
-            place(fx, w, a["t"])
-elif eng == "sprawl":
-    pass                                          # no effects: a steady bed under the voice (Tyson, 2026-11-16: no "breathing")
+elif eng in ("sprawl", "zoom"):
+    pass   # no effects. Tyson (2026-11-16, again 2026-11-17 on #14 Toronto): no "breathing" / Bane-style noise whooshes on camera moves, ever
 elif eng == "swarm":
     for p in cues["phases"]:
         d = 1.6; tt = np.arange(int(d * SR)) / SR
@@ -70,7 +63,7 @@ elif eng == "swarm":
         place(fx, sh + lp(rng.normal(0, 1, len(tt)), 4) * 0.02 * np.exp(-tt * 3), p["t"])
 
 # duck bed and effects under the voice
-env = lp(np.abs(voice).mean(1), int((0.9 if cues.get("bed") == "steady" else 0.25) * SR)); talk = np.clip(env / max(1e-9, np.percentile(env[env > 0], 60) if (env > 0).any() else 1), 0, 1)[:, None]
+env = lp(np.abs(voice).mean(1), int(0.9 * SR)); talk = np.clip(env / max(1e-9, np.percentile(env[env > 0], 60) if (env > 0).any() else 1), 0, 1)[:, None]
 mix = bed * (0.45 - 0.27 * talk) + fx * (1 - 0.35 * talk) + voice
 k = int(0.25 * SR); mix[-k:] *= np.linspace(1, 0.3, k)[:, None]
 raw = Path("/tmp") / f"mix_{eng}.f32"; raw.write_bytes(mix.astype(np.float32).tobytes())
