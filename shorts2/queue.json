@@ -39,14 +39,12 @@
    "status": {
     "youtube": "scheduled",
     "x": "scheduled",
-    "tiktok": "error"
+    "tiktok": "scheduled"
    },
    "buffer_ids": {
     "youtube": "6afce476bb12698d1581933f",
-    "x": "6afce476fc933ac285acd7c8"
-   },
-   "errors": {
-    "tiktok": "Scheduled posts limit reached. You have 10 scheduled posts out of 10 allowed."
+    "x": "6afce476fc933ac285acd7c8",
+    "tiktok": "6afd0196bb12698d158bc3cb"
    }
   },
   {
@@ -85,6 +83,18 @@
    "tiktok": {
     "title": "Montréal: one city, 1,004 neighbourhoods",
     "caption": "Same city: median household income from $23,400 to $360,000 across Montréal's 1,004 neighbourhoods. Which one is yours? 🏙️\n\nFree explorer, link in bio.\n\n#montreal #quebec #canada #dataviz"
+   },
+   "status": {
+    "youtube": "scheduled",
+    "x": "scheduled",
+    "tiktok": "error"
+   },
+   "buffer_ids": {
+    "youtube": "6afd0199fc933ac285b6d4dc",
+    "x": "6afd0199aa3b065dd964c982"
+   },
+   "errors": {
+    "tiktok": "Scheduled posts limit reached. You have 10 scheduled posts out of 10 allowed."
    }
   },
   {
@@ -98,7 +108,8 @@
    "tiktok": {
     "title": "Edmonton: one city, 349 neighbourhoods",
     "caption": "Edmonton, 349 neighbourhoods: household income $33,600 to $172,000, median age 24 to 60. Where do you land? 🏙️\n\nFree explorer, link in bio.\n\n#edmonton #alberta #canada #dataviz"
-   }
+   },
+   "status": {}
   },
   {
    "num": "22",
@@ -111,7 +122,8 @@
    "tiktok": {
     "title": "Vancouver: one city, 535 neighbourhoods",
     "caption": "Vancouver, 535 neighbourhoods: born outside Canada from 5% to 74%, household income $32,000 to $170,000. Same city. 🏙️\n\nFree explorer, link in bio.\n\n#vancouver #bc #canada #dataviz"
-   }
+   },
+   "status": {}
   }
  ]
 }
