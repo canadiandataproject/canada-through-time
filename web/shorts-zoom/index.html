@@ -7,13 +7,23 @@
 // Capture page for Short #14: one continuous camera move from Canada to Toronto's census tracts, using the explorer's
 // own data files and its Field Paper · Ember palette. Coordinates: Statistics Canada Lambert, metres (same as the explorer).
 const { Deck, OrthographicView, GeoJsonLayer, BitmapLayer } = deck;
-const PAL = { ocean: [220, 229, 228], land: [251, 248, 241], coast: [127, 143, 144], bound: [107, 100, 87], miss: [201, 195, 182], sel: [15, 42, 51],
-  seq: ['#EFC4A0', '#E39A72', '#C8663F', '#8E3F2A', '#4E2318'].map(h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16))) };
+// ?cma=<DGUID>&mode=dark|light (Blue hour / Whiteout, 2026-11-17). No parameters = the original Toronto Short (#14, Ember).
+const QP = new URLSearchParams(location.search), MODE = QP.get('mode');
+const hex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+const PALS = {
+  ember: { ocean: [220, 229, 228], land: [251, 248, 241], coast: [127, 143, 144], bound: [107, 100, 87], miss: [201, 195, 182], sel: [15, 42, 51], line: [251, 248, 241], nbr: null,
+    seq: ['#EFC4A0', '#E39A72', '#C8663F', '#8E3F2A', '#4E2318'].map(hex) },
+  dark: { ocean: hex('#11264F'), land: hex('#2B4776'), bound: hex('#A9C3EA'), miss: hex('#1B3058'), sel: [255, 255, 255], line: hex('#0B1A3D'), nbr: hex('#1C2638'),
+    seq: ['#2E4F8C', '#4F80CC', '#8FBDF2', '#C6E6FF', '#F2FAFF'].map(hex) },
+  light: { ocean: hex('#CFDAE6'), land: hex('#F4F7FB'), bound: hex('#7E92AE'), miss: hex('#D9E0E9'), sel: hex('#0A1322'), line: [255, 255, 255], nbr: hex('#D9DBE0'),
+    seq: ['#D6E2F5', '#9DB8EC', '#5F86E6', '#2D50D9', '#12207A'].map(hex) } };
+const PAL = PALS[MODE] || PALS.ember;
+document.documentElement.style.background = document.body.style.background = `rgb(${PAL.ocean})`;
 const lerp = (a, b, t) => a.map((x, i) => Math.round(x + (b[i] - x) * t));
 const rampAt = t => { t = Math.max(0, Math.min(1, t)) * 4; const i = Math.min(3, Math.floor(t)); return lerp(PAL.seq[i], PAL.seq[i + 1], t - i); };
 const J = u => fetch(u).then(r => r.json());
-let P, F, SH, PROV, LAKES, RELIEF, D = {}, cur = {};
-const CMA = '2021S0503535';
+let P, F, SH, PROV, LAKES, RELIEF, NBR, D = {}, cur = {};
+const CMA = QP.get('cma') || '2021S0503535';
 const val = (a, k) => a && a.v[F.indexOf(k)];
 function domain(k) { const xs = SH.features.map(f => val(P.areas[f.properties.DGUID], k)).filter(v => v != null).sort((a, b) => a - b);
   return { lo: xs[Math.floor((xs.length - 1) * 0.02)], hi: xs[Math.floor((xs.length - 1) * 0.98)] }; }
@@ -21,7 +31,8 @@ function col(k, v) { if (v == null) return PAL.miss; const d = D[k]; return ramp
 const deckI = new Deck({ parent: document.getElementById('map'), views: new OrthographicView({ flipY: false }), controller: false,
   initialViewState: { target: [7000000, 1500000, 0], zoom: -13 }, layers: [] });
 async function init() {
-  const [p, s, pr, lk, rel] = await Promise.all([J('../data/cities/ct_profile.json'), J('../data/cities/ct_shapes.geojson'), J('../data/provinces.geojson'), J('../data/lakes.geojson'), J('../data/relief/relief.json')]);
+  const [p, s, pr, lk, rel, nb] = await Promise.all([J('../data/cities/ct_profile.json'), J('../data/cities/ct_shapes.geojson'), J('../data/provinces.geojson'), J('../data/lakes.geojson'), J('../data/relief/relief.json'), PAL.nbr ? J('../data/context_countries.geojson') : null]);
+  NBR = nb;
   P = p; F = p.fields; PROV = pr; LAKES = lk;
   SH = { type: 'FeatureCollection', features: s.features.filter(f => P.areas[f.properties.DGUID] && P.areas[f.properties.DGUID].cma === CMA) };
   for (const k of ['hhinc', 'imm', 'age', 'rent', 'nonoff']) D[k] = domain(k);
@@ -33,13 +44,14 @@ window.setFrame = async (st) => {
   const [l, b, r, t] = RELIEF.b, ta = st.tractAlpha ?? 1;
   const fill = f => { const a = P.areas[f.properties.DGUID]; const c1 = col(st.a, val(a, st.a)); const c2 = st.b ? col(st.b, val(a, st.b)) : c1; return [...lerp(c1, c2, st.mix || 0), Math.round(255 * ta)]; };
   const layers = [
-    new GeoJsonLayer({ id: 'prov', data: PROV, filled: true, stroked: true, getFillColor: PAL.land, getLineColor: PAL.bound, lineWidthUnits: 'pixels', getLineWidth: 1.2 }),
-    new BitmapLayer({ id: 'relief', image: RELIEF.img, bounds: [l, b, r, t], opacity: 0.32, parameters: { depthTest: false } }),
+    ...(NBR ? [new GeoJsonLayer({ id: 'nbr', data: NBR, filled: true, stroked: false, getFillColor: PAL.nbr })] : []),
+    new GeoJsonLayer({ id: 'prov', data: PROV, filled: true, stroked: true, getFillColor: PAL.land, getLineColor: [...PAL.bound, MODE ? 150 : 255], lineWidthUnits: 'pixels', getLineWidth: 1.2 }),
+    new BitmapLayer({ id: 'relief', image: RELIEF.img, bounds: [l, b, r, t], opacity: MODE === 'dark' ? 0.45 : 0.32, parameters: { depthTest: false } }),
     new GeoJsonLayer({ id: 'lakes', data: LAKES, filled: true, stroked: false, getFillColor: PAL.ocean }),
-    new GeoJsonLayer({ id: 'tracts', data: SH, filled: true, stroked: true, getFillColor: fill, getLineColor: [251, 248, 241, Math.round(200 * ta)], lineWidthUnits: 'pixels', getLineWidth: st.zoom > -7.5 ? 0.6 : 0.2,
+    new GeoJsonLayer({ id: 'tracts', data: SH, filled: true, stroked: true, getFillColor: fill, getLineColor: [...PAL.line, Math.round(200 * ta)], lineWidthUnits: 'pixels', getLineWidth: st.zoom > -7.5 ? 0.6 : 0.2,
       updateTriggers: { getFillColor: [st.a, st.b, st.mix, ta], getLineColor: ta } }),
     new GeoJsonLayer({ id: 'hl0', data: { type: 'FeatureCollection', features: SH.features.filter(f => (st.hl || []).includes(f.properties.DGUID)) }, filled: false, stroked: true,
-      getLineColor: [251, 248, 241], lineWidthUnits: 'pixels', getLineWidth: 9, updateTriggers: { getLineColor: (st.hl || []).join() } }),
+      getLineColor: PAL.line, lineWidthUnits: 'pixels', getLineWidth: 9, updateTriggers: { getLineColor: (st.hl || []).join() } }),
     new GeoJsonLayer({ id: 'hl', data: { type: 'FeatureCollection', features: SH.features.filter(f => (st.hl || []).includes(f.properties.DGUID)) }, filled: false, stroked: true,
       getLineColor: PAL.sel, lineWidthUnits: 'pixels', getLineWidth: 4, updateTriggers: { getLineColor: (st.hl || []).join() } }),
   ];

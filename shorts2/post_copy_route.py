@@ -67,3 +67,40 @@ Groceries and new homes in hours of work too: {SITE}#gash-2025""",
 for n in ("17", "18", "19"): assert len(out[n]["x"]) <= 280, (n, len(out[n]["x"]))
 OUT.parent.mkdir(parents=True, exist_ok=True); OUT.write_text(json.dumps(out, indent=1, ensure_ascii=False))
 print({n: len(out[n]["x"]) for n in ("17", "18", "19")})
+
+# ---- #20–#22 city zooms (shorts2/zoom_city.py), 2021 Census tracts with 500+ people
+P2 = json.loads((D / "cities/ct_profile.json").read_text()); F2, A2 = P2["fields"], P2["areas"]
+def city(cma, ms):
+    T = [v for v in A2.values() if v["level"] != "Census metropolitan area" and v["cma"] == cma]
+    ex = {}
+    for m in ms:
+        xs = sorted(v["v"][F2.index(m)] for v in T if v["v"][F2.index(m)] is not None and (v["v"][F2.index("pop")] or 0) >= 500)
+        ex[m] = (xs[0], xs[-1])
+    return len(T), A2[cma]["v"][F2.index("pop")], A2[cma]["v"][F2.index("hhinc")], ex
+def zoom_copy(num, cma, name, slug, ms, tag):
+    n, pop, hh, ex = city(cma, ms)
+    lab = {"hhinc": ("Median household income", lambda v: f"${v:,.0f}"), "imm": ("Born outside Canada", lambda v: f"{v:.0f}%"),
+           "age": ("Median age", lambda v: f"{v:.0f}"), "rent": ("Households that rent", lambda v: f"{v:.0f}%")}
+    lines = "\n".join(f"• {lab[m][0]}: {lab[m][1](ex[m][0])} to {lab[m][1](ex[m][1])}" for m in ms)
+    xl = "\n".join(f"{lab[m][0]}: {lab[m][1](ex[m][0])} to {lab[m][1](ex[m][1])}" for m in ms)
+    out[num] = dict(
+        title=f"{name}: one city, {n:,} neighbourhoods",
+        desc=f"""One zoom from Canada into every census tract in {name}.
+
+📊 The numbers (2021 Census, Statistics Canada; neighbourhoods = census tracts with 500+ people)
+{lines}
+• {name} overall: {pop/1e6:.2f} million people, median household income ${hh:,.0f}
+
+💬 Which city should we zoom into next?
+
+Income is for 2020 (pandemic benefits included).
+
+Every neighbourhood in 50 cities, free: {SITE}#nb={slug}/hhinc""",
+        x=f"{name} has {n:,} neighbourhoods (census tracts).\n\n{xl}\n\nSame city.\n\nSource: 2021 Census, Statistics Canada\n{SITE}#nb={slug}/hhinc")
+    assert len(out[num]["x"]) <= 280, (num, len(out[num]["x"]))
+    return ex
+e = zoom_copy("20", "2021S0503462", "Montréal", "462", ["hhinc", "imm", "age"], "montreal"); assert e["hhinc"] == (23400.0, 360000.0)
+e = zoom_copy("21", "2021S0503835", "Edmonton", "835", ["hhinc", "age", "rent"], "edmonton"); assert e["hhinc"] == (33600.0, 172000.0)
+e = zoom_copy("22", "2021S0503933", "Vancouver", "933", ["hhinc", "imm", "age"], "vancouver"); assert e["hhinc"] == (32000.0, 170000.0)
+OUT.write_text(json.dumps(out, indent=1, ensure_ascii=False))
+print({n: len(out[n]["x"]) for n in ("20", "21", "22")})

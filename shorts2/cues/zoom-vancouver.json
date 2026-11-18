@@ -1,0 +1,242 @@
+{
+ "cma": "2021S0503933",
+ "mode": "dark",
+ "city": "Vancouver",
+ "duration": 30.3,
+ "measures": [
+  {
+   "t": 0,
+   "k": "hhinc"
+  },
+  {
+   "t": 13.799999999999999,
+   "k": "imm"
+  },
+  {
+   "t": 18.4,
+   "k": "age"
+  }
+ ],
+ "highlights": [
+  {
+   "id": "hhinc_lo",
+   "t0": 8.6,
+   "t1": 11.399999999999999
+  },
+  {
+   "id": "hhinc_hi",
+   "t0": 11.399999999999999,
+   "t1": 13.899999999999999
+  },
+  {
+   "id": "imm_lo",
+   "t0": 14.399999999999999,
+   "t1": 16.299999999999997
+  },
+  {
+   "id": "imm_hi",
+   "t0": 16.299999999999997,
+   "t1": 18.499999999999996
+  },
+  {
+   "id": "age_lo",
+   "t0": 19.0,
+   "t1": 20.4
+  },
+  {
+   "id": "age_hi",
+   "t0": 20.4,
+   "t1": 24.799999999999997
+  }
+ ],
+ "cards": [
+  {
+   "t0": 0,
+   "t1": 0.9,
+   "big": "Canada",
+   "sub": "36.99 million people (2021 Census)"
+  },
+  {
+   "t0": 0.9,
+   "t1": 4.8,
+   "big": "Vancouver",
+   "sub": "2.64 million people"
+  },
+  {
+   "t0": 4.8,
+   "t1": 7.9,
+   "big": "535",
+   "sub": "neighbourhoods (census tracts)"
+  },
+  {
+   "t0": 8.799999999999999,
+   "t1": 11.399999999999999,
+   "kick": "Median household income: lowest",
+   "big": "$32,000"
+  },
+  {
+   "t0": 11.399999999999999,
+   "t1": 13.899999999999999,
+   "kick": "Median household income: highest",
+   "big": "$170,000"
+  },
+  {
+   "t0": 14.599999999999998,
+   "t1": 16.299999999999997,
+   "kick": "Born outside Canada: lowest",
+   "big": "5%"
+  },
+  {
+   "t0": 16.299999999999997,
+   "t1": 18.499999999999996,
+   "kick": "Born outside Canada: highest",
+   "big": "74%"
+  },
+  {
+   "t0": 19.2,
+   "t1": 20.4,
+   "kick": "Median age: lowest",
+   "big": "30"
+  },
+  {
+   "t0": 20.4,
+   "t1": 24.799999999999997,
+   "kick": "Median age: highest",
+   "big": "68"
+  },
+  {
+   "t0": 25.3,
+   "t1": 30.3,
+   "big": "Same city.",
+   "sub": "50 cities, free map: link below"
+  }
+ ],
+ "camera": [
+  {
+   "t": 0,
+   "at": [
+    6350000,
+    2700000
+   ],
+   "zoom": -13.2
+  },
+  {
+   "t": 0.7,
+   "at": [
+    6350000,
+    2650000
+   ],
+   "zoom": -12.9
+  },
+  {
+   "t": 3.4,
+   "at": "city",
+   "zoom": "fit:city"
+  },
+  {
+   "t": 4.8,
+   "at": "city",
+   "zoom": "fit:city",
+   "dz": 0.1
+  },
+  {
+   "t": 6.6,
+   "at": "city",
+   "zoom": "fit:city",
+   "dz": 0.3
+  },
+  {
+   "t": 8.6,
+   "at": "hhinc_lo",
+   "zoom": "fit:hhinc_lo"
+  },
+  {
+   "t": 10.559999999999999,
+   "at": "hhinc_lo",
+   "zoom": "fit:hhinc_lo",
+   "dz": 0.15
+  },
+  {
+   "t": 11.399999999999999,
+   "at": "hhinc_hi",
+   "zoom": "fit:hhinc_hi"
+  },
+  {
+   "t": 13.274999999999999,
+   "at": "hhinc_hi",
+   "zoom": "fit:hhinc_hi",
+   "dz": 0.15
+  },
+  {
+   "t": 14.399999999999999,
+   "at": "imm_lo",
+   "zoom": "fit:imm_lo"
+  },
+  {
+   "t": 15.729999999999999,
+   "at": "imm_lo",
+   "zoom": "fit:imm_lo",
+   "dz": 0.15
+  },
+  {
+   "t": 16.299999999999997,
+   "at": "imm_hi",
+   "zoom": "fit:imm_hi"
+  },
+  {
+   "t": 17.949999999999996,
+   "at": "imm_hi",
+   "zoom": "fit:imm_hi",
+   "dz": 0.15
+  },
+  {
+   "t": 19.0,
+   "at": "age_lo",
+   "zoom": "fit:age_lo"
+  },
+  {
+   "t": 19.98,
+   "at": "age_lo",
+   "zoom": "fit:age_lo",
+   "dz": 0.15
+  },
+  {
+   "t": 20.4,
+   "at": "age_hi",
+   "zoom": "fit:age_hi"
+  },
+  {
+   "t": 23.7,
+   "at": "age_hi",
+   "zoom": "fit:age_hi",
+   "dz": 0.15
+  },
+  {
+   "t": 27.3,
+   "at": "city",
+   "zoom": "fit:city",
+   "dz": 0.1
+  },
+  {
+   "t": 30.3,
+   "at": "city",
+   "zoom": "fit:city"
+  }
+ ],
+ "facts": {
+  "hhinc": [
+   32000.0,
+   170000.0
+  ],
+  "imm": [
+   5.3,
+   74.4
+  ],
+  "age": [
+   30.4,
+   67.5
+  ]
+ },
+ "tracts": 535,
+ "pop": 2642825.0
+}
