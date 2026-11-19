@@ -62,14 +62,12 @@
    "status": {
     "youtube": "scheduled",
     "x": "scheduled",
-    "tiktok": "error"
+    "tiktok": "scheduled"
    },
    "buffer_ids": {
     "youtube": "6afd42bc747c69cf4666b72d",
-    "x": "6afd42bc8ffbb8256dc28358"
-   },
-   "errors": {
-    "tiktok": "Scheduled posts limit reached. You have 10 scheduled posts out of 10 allowed."
+    "x": "6afd42bc8ffbb8256dc28358",
+    "tiktok": "6afe660f46636f319e81b0fe"
    }
   },
   {
