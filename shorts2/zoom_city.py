@@ -25,6 +25,7 @@ MEAS = {  # kicker, how to show a value
     "age": ("Median age", lambda v: f"{v:.0f}"),
     "rent": ("Households that rent", lambda v: f"{v:.0f}%"),
     "own": ("Households that own", lambda v: f"{v:.0f}%"),
+    "fr": ("Mother tongue: French", lambda v: f"{v:.0f}%"),
 }
 
 
@@ -155,7 +156,12 @@ async def run(cues, out, stills=None):
                 bb = await pg.evaluate(f"window.tractBox('{k}')")
                 geo[f"{m}_{side}"] = [(bb[0] + bb[2]) / 2, (bb[1] + bb[3]) / 2]
                 geo[f"zoom_{m}_{side}"] = max(geo["zoom_city"] + 0.8, min(geo["zoom_city"] + 5.2, math.log2(540 * 0.42 / max(bb[2] - bb[0], (bb[3] - bb[1]) * 540 / 960))))
+        for name, dg in cues.get("targets", {}).items():          # extra named tracts (e.g. a cross-river pair)
+            bb = await pg.evaluate(f"window.tractBox('{dg}')")
+            geo[name] = [(bb[0] + bb[2]) / 2, (bb[1] + bb[3]) / 2]
+            geo[f"zoom_{name}"] = max(geo["zoom_city"] + 0.8, min(geo["zoom_city"] + 5.2, math.log2(540 * 0.42 / max(bb[2] - bb[0], (bb[3] - bb[1]) * 540 / 960))))
         lut = {f"{m}_{s}": ext(cues["cma"], m)[i][1] for m in {x["k"] for x in cues["measures"]} for i, s in enumerate(("lo", "hi"))}
+        lut.update(cues.get("targets", {}))
         for h in cues["highlights"]: h["id"] = lut.get(h["id"], h["id"])
         times = stills or [i / FPS for i in range(int(round(cues["duration"] * FPS)))]
         if RANGE: times = [x for x in times if RANGE[0] <= x < RANGE[1]]   # re-render a stretch, to splice into an earlier render

@@ -35,7 +35,7 @@ async function init() {
   NBR = nb;
   P = p; F = p.fields; PROV = pr; LAKES = lk;
   SH = { type: 'FeatureCollection', features: s.features.filter(f => P.areas[f.properties.DGUID] && P.areas[f.properties.DGUID].cma === CMA) };
-  for (const k of ['hhinc', 'imm', 'age', 'rent', 'nonoff']) D[k] = domain(k);
+  for (const k of ['hhinc', 'imm', 'age', 'rent', 'nonoff', 'fr']) D[k] = domain(k);
   const im = new Image(); im.src = '../data/relief/relief_canada_3km.png'; await im.decode(); RELIEF = { img: im, b: rel.bounds_km.map(x => x * 1000) };
   window.READY = true; return { tracts: SH.features.length, dom: D };
 }

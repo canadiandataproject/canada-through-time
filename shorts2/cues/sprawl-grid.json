@@ -1,0 +1,153 @@
+{
+ "short": 24,
+ "duration": 23.6,
+ "loop": true,
+ "bed": "steady",
+ "mode": "dark",
+ "voice": "short-24-which-city.wav",
+ "voice_fx": {
+  "formant": 1.06,
+  "pitch": 113,
+  "clean": 30
+ },
+ "tick": {
+  "t0": 0.0,
+  "t1": 9.0
+ },
+ "sort": {
+  "t0": 9.2,
+  "t1": 10.4
+ },
+ "expect_top2": [
+  "edmonton",
+  "calgary"
+ ],
+ "checks": [
+  {
+   "slug": "edmonton",
+   "what": "ratio",
+   "dp": 2,
+   "value": 1.97
+  },
+  {
+   "slug": "calgary",
+   "what": "ratio",
+   "dp": 2,
+   "value": 1.94
+  },
+  {
+   "slug": "toronto",
+   "what": "added",
+   "value": 234
+  },
+  {
+   "slug": "toronto",
+   "what": "ratio",
+   "dp": 2,
+   "value": 1.59
+  },
+  {
+   "slug": "edmonton",
+   "what": "k0",
+   "value": 84
+  },
+  {
+   "slug": "edmonton",
+   "what": "k1",
+   "value": 166
+  }
+ ],
+ "highlight": [
+  {
+   "t0": 10.6,
+   "t1": 13.4,
+   "slugs": [
+    "edmonton"
+   ]
+  },
+  {
+   "t0": 13.4,
+   "t1": 16.4,
+   "slugs": [
+    "calgary"
+   ]
+  },
+  {
+   "t0": 16.6,
+   "t1": 19.6,
+   "slugs": [
+    "toronto"
+   ]
+  }
+ ],
+ "cards": [
+  {
+   "t0": 0,
+   "t1": 2.4,
+   "kick": "12 cities, 1975 to 2020",
+   "big": "Which spread most?"
+  },
+  {
+   "t0": 2.6,
+   "t1": 9.2,
+   "kick": "Land covered by buildings",
+   "big": "All at once",
+   "sub": "brighter = newer"
+  },
+  {
+   "t0": 10.6,
+   "t1": 13.4,
+   "kick": "Spread the most",
+   "big": "Edmonton ×1.97",
+   "sub": "84 to 166 km² of built-up land"
+  },
+  {
+   "t0": 13.4,
+   "t1": 16.4,
+   "kick": "Right behind",
+   "big": "Calgary ×1.94"
+  },
+  {
+   "t0": 16.6,
+   "t1": 19.6,
+   "kick": "Added the most ground",
+   "big": "Toronto +234 km²",
+   "sub": "but it started huge: ×1.59"
+  },
+  {
+   "t0": 19.8,
+   "t1": 23.2,
+   "kick": "Is yours on here?",
+   "big": "Where did it land?",
+   "sub": "tell me in the comments"
+  }
+ ],
+ "note": "Built-up land in a fixed square around each city · each tile at its own scale",
+ "credit": "Data: EU JRC GHS-BUILT-S R2023A (satellite, 100 m)",
+ "script": [
+  {
+   "t": 0.2,
+   "say": "Twelve Canadian cities in 1975."
+  },
+  {
+   "t": 2.6,
+   "say": "Watch them all spread at once."
+  },
+  {
+   "t": 10.7,
+   "say": "The biggest spreader? Edmonton. Its built-up land nearly doubled."
+  },
+  {
+   "t": 13.5,
+   "say": "Calgary, right behind. That should settle nothing."
+  },
+  {
+   "t": 16.7,
+   "say": "Toronto added the most ground, but it started huge."
+  },
+  {
+   "t": 19.9,
+   "say": "Where did your city land? Tell me below."
+  }
+ ]
+}

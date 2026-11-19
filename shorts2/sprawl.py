@@ -25,6 +25,27 @@ f_lab = ImageFont.truetype(str(FONTS / "oswald-latin-400-normal.ttf"), 44)
 f_year = ImageFont.truetype(str(FONTS / "oswald-latin-700-normal.ttf"), 96)
 f_src = ImageFont.truetype(str(FONTS / "share-tech-mono-latin-400-normal.ttf"), 25)
 f_leg = ImageFont.truetype(str(FONTS / "oswald-latin-400-normal.ttf"), 32)
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from style import MODE as STYLE, font
+
+def hexrgb(h): return tuple(int(h[i:i + 2], 16) for i in (1, 3, 5))
+
+def use_route(mode):
+    """New identity (2026-11-17): Blue hour (dark) or Whiteout (light), Funnel Display/Sans + Martian Mono. No paper, no orange.
+    Then = dim, now = lit: snapshots run from a muted steel blue (1975) to the brightest tone (2020)."""
+    global PAPER, LAND, WATER, INK, ACC, MUTE, EPC, OFF, GLASS, f_big, f_mid, f_lab, f_year, f_src, f_leg
+    M = STYLE[mode]
+    PAPER = hexrgb(M["bg"]); INK = hexrgb(M["ink"]); ACC = hexrgb(M["accent"]); MUTE = hexrgb(M["ink3"]); GLASS = M["glass"]
+    if mode == "dark":
+        LAND = (30, 52, 94); WATER = (8, 20, 50)
+        EPC = [hexrgb(x) for x in ("#5F80B8", "#7493C8", "#8EAED9", "#ADCBEB", "#D3EAFB", "#FFFFFF")]; OFF = (40, 60, 102)
+    else:
+        LAND = hexrgb(M["land"]); WATER = (150, 182, 222)
+        EPC = [hexrgb(x) for x in ("#B4C2D8", "#8FA3C4", "#6B82AE", "#4A62A0", "#2D45B8", "#1E3CFF")]; OFF = (200, 210, 224)
+    f_big = font("display", 132, 700); f_mid = font("display", 92, 700); f_lab = font("ui", 44, 520)
+    f_year = font("mono", 84, 600); f_src = font("mono", 18, 400); f_leg = font("mono", 28, 500)
+
+GLASS = None; OFF = (215, 208, 196)
 
 def ease(x): x = min(1, max(0, x)); return x * x * (3 - 2 * x)
 
@@ -49,7 +70,8 @@ def load(cues):
     assert all(((appear <= e) == ((ep >= 1) & (ep <= i + 1))).all() for i, e in enumerate(E_))   # every snapshot year is exact
     rel = np.array(Image.open(ROOT / f"web/data/sprawl/{c['slug']}_relief.png").convert("L")).astype(np.float32) / 255
     wat = np.array(Image.open(ROOT / f"web/data/sprawl/{c['slug']}_water.png").convert("L")) > 0
-    land = np.array(LAND, np.float32) * (0.68 + 0.38 * rel[..., None])            # warm paper tinted by the hillshade
+    if "mode" in cues: use_route(cues["mode"])
+    land = np.array(LAND, np.float32) * (0.68 + 0.38 * rel[..., None])            # land tinted by the hillshade
     land[wat] = np.array(WATER, np.float32) * (0.92 + 0.08 * rel[wat][..., None])
     bg = Image.fromarray(np.clip(land, 0, 255).astype(np.uint8))
     return meta, c, ep, appear, bg
@@ -66,7 +88,7 @@ def city_frame(ep, appear, year, bg, size):
 def card(d, c, a):
     y = c.get("y", 250); big = c["big"]; fb = f_big if len(big) <= 14 else f_mid
     top = y - (150 if c.get("kick") else 95); bot = y + (150 if c.get("sub") else 85)
-    d.rounded_rectangle([50, top, W - 50, bot], 28, fill=(*PAPER, int(236 * a)))
+    d.rounded_rectangle([50, top, W - 50, bot], 28, fill=(*GLASS[:3], int(GLASS[3] * a * 1.3)) if GLASS else (*PAPER, int(236 * a)))
     if c.get("kick"): d.text((W // 2, y - 98), c["kick"], font=f_lab, fill=(*ACC, int(255 * a)), anchor="mm")
     d.text((W // 2, y), big, font=fb, fill=(*INK, int(255 * a)), anchor="mm")
     if c.get("sub"): d.text((W // 2, y + 104), c["sub"], font=f_lab, fill=(*INK, int(255 * a)), anchor="mm")
@@ -94,12 +116,12 @@ def frame(t, cues, meta, c, ep, appear, bg):
     img = Image.new("RGB", (W, H), PAPER); img.paste(base, (0, cues["map_y"]))
     d = ImageDraw.Draw(img, "RGBA")
     # year chip (top-right of the map) and legend under it
-    d.rounded_rectangle([W - 330, cues["map_y"] + 24, W - 30, cues["map_y"] + 150], 22, fill=(*PAPER, 230))
+    d.rounded_rectangle([W - 330, cues["map_y"] + 24, W - 30, cues["map_y"] + 150], 22, fill=(*GLASS[:3], 210) if GLASS else (*PAPER, 230))
     d.text((W - 180, cues["map_y"] + 87), str(yr), font=f_year, fill=INK, anchor="mm")
     ly = cues["map_y"] + 1080 + 34; x = 70
     for i, e in enumerate(E):
-        on = yf >= (E[i - 1] if i else E[0]) + (0.01 if i else 0); col = EPC[i] if on else (215, 208, 196)
-        d.rounded_rectangle([x, ly - 14, x + 28, ly + 14], 6, fill=col); d.text((x + 38, ly), str(e), font=f_leg, fill=INK if on else MUTE, anchor="lm"); x += 160
+        on = yf >= (E[i - 1] if i else E[0]) + (0.01 if i else 0); col = EPC[i] if on else OFF
+        d.rounded_rectangle([x, ly - 14, x + 28, ly + 14], 6, fill=col); d.text((x + 38, ly), str(e), font=f_leg, fill=INK if on else MUTE, anchor="lm"); x += 160 if not GLASS else 158
     # scale bar: 10 km (the picture is 60 km across, before any push-in)
     km = 1080 / (2 * c["half_km"]) * z; d.rectangle([60, cues["map_y"] + 1080 - 46, 60 + 10 * km, cues["map_y"] + 1080 - 40], fill=INK)
     d.text((60, cues["map_y"] + 1080 - 58), "10 km", font=f_src, fill=INK, anchor="ls")
