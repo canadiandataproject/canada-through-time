@@ -85,14 +85,12 @@
    "status": {
     "youtube": "scheduled",
     "x": "scheduled",
-    "tiktok": "error"
+    "tiktok": "scheduled"
    },
    "buffer_ids": {
     "youtube": "6afd42be8ffbb8256dc2851f",
-    "x": "6afd42be8ffbb8256dc2854f"
-   },
-   "errors": {
-    "tiktok": "Scheduled posts limit reached. You have 10 scheduled posts out of 10 allowed."
+    "x": "6afd42be8ffbb8256dc2854f",
+    "tiktok": "6b0108409ffbc8503cf2cd8a"
    }
   },
   {
@@ -110,14 +108,12 @@
    "status": {
     "youtube": "scheduled",
     "x": "scheduled",
-    "tiktok": "error"
+    "tiktok": "scheduled"
    },
    "buffer_ids": {
     "youtube": "6afd42c06032c1a98f19c2e3",
-    "x": "6afd42c0747c69cf4666b90b"
-   },
-   "errors": {
-    "tiktok": "Scheduled posts limit reached. You have 10 scheduled posts out of 10 allowed."
+    "x": "6afd42c0747c69cf4666b90b",
+    "tiktok": "6b0108419ffbc8503cf2cdba"
    }
   },
   {
