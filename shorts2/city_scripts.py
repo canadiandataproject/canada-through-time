@@ -58,8 +58,8 @@ SCRIPTS = {
         asserts=[lambda d, c: 1.9 <= d["facts"]["densest_km2"]["2020"] / W("toronto")["densest_km2"]["2020"] <= 2.1],   # "about twice"
         beats=beats(
             hook=dict(say="New York. Let's find the most packed square kilometre.", card=dict(kick="How packed can one square km get?", big="New York")),
-            then=dict(say="1975. {p1975} people. All of them in a hurry.", card=dict(counter=True, kick="Within {km} km of Midtown")),
-            grow=dict(say="By 2020, {p2020}. They found room. Somehow.", card=dict(counter=True, kick="Within {km} km of Midtown")),
+            then=dict(say="1975. {p1975} people. All of them in a hurry.", card=dict(counter=True, kick="Within {km} km of City Hall")),
+            grow=dict(say="By 2020, {p2020}. They found room. Somehow.", card=dict(counter=True, kick="Within {km} km of City Hall")),
             dense=dict(say="The busiest square kilometre: the {where}. Nobody actually lives in Times Square.",
                        card=dict(kick="People in one square km", big="{dk}", sub="Yorkville, {where} · 2020 estimate")),
             compare=dict(say="That's about twice Toronto's St. James Town.", card=dict(kick="Toronto's busiest square km ×{vs_x}", big="{dk}", sub="vs {vs_dk} in St. James Town")),
