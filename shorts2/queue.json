@@ -111,15 +111,10 @@
     "tiktok": "scheduled"
    },
    "buffer_ids": {
-    "youtube": "6afd42c06032c1a98f19c2e3",
-    "x": "6afd42c0747c69cf4666b90b",
-    "tiktok": "6b0108419ffbc8503cf2cdba"
-   },
-   "replace": [
-    "youtube",
-    "x",
-    "tiktok"
-   ]
+    "youtube": "6b03d35ea6de38de9ec10013",
+    "x": "6b03d35f846b0ee907e82959",
+    "tiktok": "6b03d35fa6de38de9ec10043"
+   }
   },
   {
    "num": "22",
