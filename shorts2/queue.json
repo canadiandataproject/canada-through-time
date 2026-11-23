@@ -95,7 +95,7 @@
   },
   {
    "num": "21",
-   "media": "short-21-edmonton.mp4",
+   "media": "short-21-edmonton-v2.mp4",
    "when": {
     "youtube": "2026-11-23T13:30",
     "x": "2026-11-23T13:30",
@@ -114,7 +114,12 @@
     "youtube": "6afd42c06032c1a98f19c2e3",
     "x": "6afd42c0747c69cf4666b90b",
     "tiktok": "6b0108419ffbc8503cf2cdba"
-   }
+   },
+   "replace": [
+    "youtube",
+    "x",
+    "tiktok"
+   ]
   },
   {
    "num": "22",
