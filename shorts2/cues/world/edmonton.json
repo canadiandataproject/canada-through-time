@@ -1,0 +1,335 @@
+{
+ "slug": "edmonton",
+ "city": "Edmonton",
+ "mode": "dark",
+ "duration": 32.2,
+ "camera": [
+  {
+   "t": 0,
+   "target": [
+    0,
+    0,
+    0
+   ],
+   "zoom": -6.75,
+   "pitch": 88,
+   "orbit": -60
+  },
+  {
+   "t": 4.0,
+   "target": [
+    0,
+    0,
+    2500
+   ],
+   "zoom": -6.15,
+   "pitch": 48,
+   "orbit": -35
+  },
+  {
+   "t": 12.799999999999999,
+   "target": [
+    0,
+    0,
+    2500
+   ],
+   "zoom": -6.0,
+   "pitch": 42,
+   "orbit": 15
+  },
+  {
+   "t": 15.2,
+   "target": [
+    -1700,
+    -500,
+    4500.0
+   ],
+   "zoom": -5.25,
+   "pitch": 52,
+   "orbit": 35
+  },
+  {
+   "t": 18.6,
+   "target": [
+    -1700,
+    -500,
+    4500.0
+   ],
+   "zoom": -5.1,
+   "pitch": 52,
+   "orbit": 55
+  },
+  {
+   "t": 23.6,
+   "target": [
+    -1700.0,
+    -500.0,
+    4500.0
+   ],
+   "zoom": -5.6,
+   "pitch": 52,
+   "orbit": 75
+  },
+  {
+   "t": 28.2,
+   "target": [
+    0,
+    0,
+    2500
+   ],
+   "zoom": -6.1,
+   "pitch": 46,
+   "orbit": 60
+  },
+  {
+   "t": 32.2,
+   "target": [
+    0,
+    0,
+    0
+   ],
+   "zoom": -6.75,
+   "pitch": 88,
+   "orbit": 0
+  }
+ ],
+ "year": [
+  {
+   "t": 0,
+   "y": 1975
+  },
+  {
+   "t": 7.8999999999999995,
+   "y": 1975
+  },
+  {
+   "t": 12.6,
+   "y": 2020
+  },
+  {
+   "t": 32.2,
+   "y": 2020
+  }
+ ],
+ "grow": [
+  {
+   "t": 0,
+   "g": 0.0
+  },
+  {
+   "t": 5.6,
+   "g": 1.0
+  },
+  {
+   "t": 29.7,
+   "g": 1.0
+  },
+  {
+   "t": 32.2,
+   "g": 0.0
+  }
+ ],
+ "wire": [
+  {
+   "t": 0,
+   "w": 0
+  },
+  {
+   "t": 8.4,
+   "w": 0
+  },
+  {
+   "t": 9.6,
+   "w": 0.85
+  },
+  {
+   "t": 28.2,
+   "w": 0.85
+  },
+  {
+   "t": 29.2,
+   "w": 0
+  }
+ ],
+ "rings": [
+  {
+   "t0": 14.399999999999999,
+   "t1": 23.6,
+   "at": [
+    -1700,
+    -500
+   ]
+  },
+  {
+   "t0": 23.6,
+   "t1": 27.9,
+   "at": [
+    -1700,
+    -500
+   ]
+  }
+ ],
+ "cards": [
+  {
+   "t0": 0.0,
+   "t1": 3.4,
+   "kick": "How packed can one square km get?",
+   "big": "Edmonton"
+  },
+  {
+   "t0": 3.4,
+   "t1": 7.6,
+   "counter": true,
+   "kick": "Within 25 km of downtown"
+  },
+  {
+   "t0": 7.6,
+   "t1": 13.2,
+   "counter": true,
+   "kick": "Within 25 km of downtown"
+  },
+  {
+   "t0": 13.2,
+   "t1": 18.6,
+   "kick": "People in one square km",
+   "big": "15,495",
+   "sub": "Wîhkwêntôwin (Oliver) · 2020 estimate"
+  },
+  {
+   "t0": 18.6,
+   "t1": 23.6,
+   "kick": "Toronto's busiest square km",
+   "big": "35,018",
+   "sub": "vs 15,495 here"
+  },
+  {
+   "t0": 23.6,
+   "t1": 28.2,
+   "kick": "Since 1975",
+   "big": "×2.5",
+   "sub": "Mumbai: ×2.3"
+  },
+  {
+   "t0": 28.2,
+   "t1": 32.2,
+   "kick": "Comment a city",
+   "big": "Yours next?",
+   "sub": "Free map of Canada: link below"
+  }
+ ],
+ "captions": [
+  {
+   "t0": 0.1,
+   "t1": 3.35,
+   "text": "Edmonton. Two seasons: winter, and construction."
+  },
+  {
+   "t0": 3.5,
+   "t1": 7.55,
+   "text": "1975. Half a million people. Same potholes."
+  },
+  {
+   "t0": 10.5,
+   "t1": 13.149999999999999,
+   "text": "Then it grew ×2.5. Faster than Mumbai, somehow."
+  },
+  {
+   "t0": 13.3,
+   "t1": 18.55,
+   "text": "The busiest square kilometre: Wîhkwêntôwin. You might still call it Oliver."
+  },
+  {
+   "t0": 18.7,
+   "t1": 23.55,
+   "text": "Toronto's St. James Town fits in more than twice that."
+  },
+  {
+   "t0": 23.7,
+   "t1": 28.15,
+   "text": "Still easier to find a home here than parking on Whyte Ave on a Friday."
+  },
+  {
+   "t0": 28.3,
+   "t1": 32.150000000000006,
+   "text": "Which city should I do next?"
+  }
+ ],
+ "labels": [
+  {
+   "name": "Sherwood Park",
+   "x": 11445,
+   "y": -3254
+  },
+  {
+   "name": "St. Albert",
+   "x": -9532,
+   "y": 9719
+  },
+  {
+   "name": "Wîhkwêntôwin",
+   "x": -2054,
+   "y": -350
+  },
+  {
+   "name": "The Hamptons",
+   "x": -12241,
+   "y": -6460
+  },
+  {
+   "name": "Rutherford",
+   "x": -2570,
+   "y": -14231
+  }
+ ],
+ "label_window": [
+  4.4,
+  12.899999999999999
+ ],
+ "counter": {
+  "t0": 3.4,
+  "t1": 13.2
+ },
+ "totals": {
+  "1975": 510545,
+  "1990": 763947,
+  "2005": 916644,
+  "2020": 1299122
+ },
+ "densest": {
+  "at": [
+   -1700,
+   -500
+  ],
+  "name": "Wîhkwêntôwin",
+  "km2": 15495
+ },
+ "ctx": {
+  "city": "Edmonton",
+  "p1975": "510,545",
+  "p2020": "1.3 million",
+  "growth": "×2.5",
+  "dk": "15,495",
+  "dk75": "6,069",
+  "where": "Wîhkwêntôwin",
+  "where75": "Central Core",
+  "km": 25,
+  "ca": "",
+  "ca_pop": "",
+  "vs": "Toronto",
+  "vs_dk": "35,018",
+  "vs_x": "0.4",
+  "vs_where": "Downtown",
+  "mumbai_g": "×2.3"
+ },
+ "source": "GHSL GHS-POP R2023A · EU JRC · 25 km radius · GeoNames, OSM",
+ "voice": "/home/claude/audio/world/edmonton.wav",
+ "script": [
+  "Edmonton. Two seasons: winter, and construction.",
+  "1975. Half a million people. Same potholes.",
+  "Then it grew ×2.5. Faster than Mumbai, somehow.",
+  "The busiest square kilometre: Wîhkwêntôwin. You might still call it Oliver.",
+  "Toronto's St. James Town fits in more than twice that.",
+  "Still easier to find a home here than parking on Whyte Ave on a Friday.",
+  "Which city should I do next?"
+ ]
+}

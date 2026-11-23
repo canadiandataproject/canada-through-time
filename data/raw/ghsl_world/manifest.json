@@ -1,0 +1,206 @@
+{
+ "note": "Tiles for the world-city Shorts (tools/world_city.py). Not committed; tools/world_city.py re-downloads from the GHSL FTP and GeoNames.",
+ "retrieved": "2026-11-22",
+ "files": [
+  {
+   "file": "GHS_LAND_E2018_GLOBE_R2022A_54009_100_V1_0_R14_C32.tif",
+   "sha256": "52c0b5af8c0701dccee22944a96d6bbf7616affe008a33dd3a395cb414e74530",
+   "bytes": 1828274
+  },
+  {
+   "file": "GHS_LAND_E2018_GLOBE_R2022A_54009_100_V1_0_R3_C10.tif",
+   "sha256": "3b91e60fa54b2a250c08ee8f5a49d9c69e9c34b73359874faa1ab942af4eb5f4",
+   "bytes": 14484039
+  },
+  {
+   "file": "GHS_LAND_E2018_GLOBE_R2022A_54009_100_V1_0_R3_C18.tif",
+   "sha256": "bc44330a8b213a5f124f5e520cbc92742290cffec598e5c1cf31d2d15576cb41",
+   "bytes": 6925508
+  },
+  {
+   "file": "GHS_LAND_E2018_GLOBE_R2022A_54009_100_V1_0_R3_C19.tif",
+   "sha256": "9e39dcfc05d5a8d7d06ce64d1489aa17eca2988e0040a1b0d4868a7d8204ef32",
+   "bytes": 13059483
+  },
+  {
+   "file": "GHS_LAND_E2018_GLOBE_R2022A_54009_100_V1_0_R4_C12.tif",
+   "sha256": "5958fd760b3a20c653003787c4dee724296b32f5abc61f1f9e1977897dffd062",
+   "bytes": 21202493
+  },
+  {
+   "file": "GHS_LAND_E2018_GLOBE_R2022A_54009_100_V1_0_R5_C12.tif",
+   "sha256": "8c84f99c919ed564e810bc64809722ec9bafee1f7722b808a7061ea7b299c882",
+   "bytes": 8610359
+  },
+  {
+   "file": "GHS_LAND_E2018_GLOBE_R2022A_54009_100_V1_0_R7_C26.tif",
+   "sha256": "7282cdddc128be71a17adc8a884791d0d6d9edc8d6107a5d6c84b7de3e1d78f5",
+   "bytes": 11527798
+  },
+  {
+   "file": "GHS_POP_E1975_GLOBE_R2023A_54009_100_V1_0_R14_C32.tif",
+   "sha256": "fdaf50f14766e6119b58f3fbee1223d76594f16809e63f17a9e949ec0bb396d3",
+   "bytes": 8124421
+  },
+  {
+   "file": "GHS_POP_E1975_GLOBE_R2023A_54009_100_V1_0_R3_C10.tif",
+   "sha256": "adeb19a96e150c58618644a14bb7bbeb300b4b4719973443a19eb6a38754671d",
+   "bytes": 6253499
+  },
+  {
+   "file": "GHS_POP_E1975_GLOBE_R2023A_54009_100_V1_0_R3_C18.tif",
+   "sha256": "3f7b39b187a1efdcf5fddbf8ac5d7a3e32845452bfd4a4bacd9a09af4e6708ed",
+   "bytes": 24773871
+  },
+  {
+   "file": "GHS_POP_E1975_GLOBE_R2023A_54009_100_V1_0_R3_C19.tif",
+   "sha256": "9a290da92c1ef119f27c8a3c7d7586863210dc69cb26358b3c685b45e8e5e5ca",
+   "bytes": 33484302
+  },
+  {
+   "file": "GHS_POP_E1975_GLOBE_R2023A_54009_100_V1_0_R4_C12.tif",
+   "sha256": "1d6dbfcfdca838a4296b3f4d4d75498004b3c65aef0a916d217c2d308544b363",
+   "bytes": 28674828
+  },
+  {
+   "file": "GHS_POP_E1975_GLOBE_R2023A_54009_100_V1_0_R5_C12.tif",
+   "sha256": "682046221d8bbcfe2df07ce9786e9c5e7b3a19098f438e02b2a77014582a4093",
+   "bytes": 54826115
+  },
+  {
+   "file": "GHS_POP_E1975_GLOBE_R2023A_54009_100_V1_0_R7_C26.tif",
+   "sha256": "3b61649d7240213255a784572ceec3f8c8c3c9d5882896b4faaf443b38101fcb",
+   "bytes": 25802813
+  },
+  {
+   "file": "GHS_POP_E1990_GLOBE_R2023A_54009_100_V1_0_R14_C32.tif",
+   "sha256": "5a4a31e034dc378c9cd097d3ea0f9d95e9efbbb0510817c61df3275185842ee3",
+   "bytes": 9255496
+  },
+  {
+   "file": "GHS_POP_E1990_GLOBE_R2023A_54009_100_V1_0_R3_C10.tif",
+   "sha256": "2dd2494ce167bb1faab18af872f8d9c1bcb67e6abfe026d42d24ca0ef1221261",
+   "bytes": 6806827
+  },
+  {
+   "file": "GHS_POP_E1990_GLOBE_R2023A_54009_100_V1_0_R3_C18.tif",
+   "sha256": "765bfef43909def985a54ee5145702ca1b251b059e532e530d99881158e84d91",
+   "bytes": 26929043
+  },
+  {
+   "file": "GHS_POP_E1990_GLOBE_R2023A_54009_100_V1_0_R3_C19.tif",
+   "sha256": "ff56a481330c9a015fa44b2d8d14f8884c0b8b9cf91dd7a41be5ebf7902ffcf6",
+   "bytes": 36319669
+  },
+  {
+   "file": "GHS_POP_E1990_GLOBE_R2023A_54009_100_V1_0_R4_C12.tif",
+   "sha256": "316c018a081a6daee2a5ed9a2c72b3f86817566d8f142c32e0e6966864e405f9",
+   "bytes": 31756396
+  },
+  {
+   "file": "GHS_POP_E1990_GLOBE_R2023A_54009_100_V1_0_R5_C12.tif",
+   "sha256": "f4403bbf254affb3e5582a204b8494e7bfd6049f81d13ad9d7b6c71cd1d88dca",
+   "bytes": 60293141
+  },
+  {
+   "file": "GHS_POP_E1990_GLOBE_R2023A_54009_100_V1_0_R7_C26.tif",
+   "sha256": "2b404f301122f27fc83c1ce7133cffe2c2b68d20f12b1b0d84573464366fbf68",
+   "bytes": 37294112
+  },
+  {
+   "file": "GHS_POP_E2005_GLOBE_R2023A_54009_100_V1_0_R14_C32.tif",
+   "sha256": "ea05d4e84ae02902771c049b69dcaa6727ee587d1fa16fe86f95608c2f2434e1",
+   "bytes": 9712451
+  },
+  {
+   "file": "GHS_POP_E2005_GLOBE_R2023A_54009_100_V1_0_R3_C10.tif",
+   "sha256": "9c162c62f1a310734510f76a01ec21fd125d5a0cc5202a34a6aee3350a7dd1a8",
+   "bytes": 7005244
+  },
+  {
+   "file": "GHS_POP_E2005_GLOBE_R2023A_54009_100_V1_0_R3_C18.tif",
+   "sha256": "c4f13356f032060d4ecf0d03a08806f9e1fcd33a3487aad4fe2b1bed06a29177",
+   "bytes": 28569042
+  },
+  {
+   "file": "GHS_POP_E2005_GLOBE_R2023A_54009_100_V1_0_R3_C19.tif",
+   "sha256": "420a9003f26a12f0db801bdbe2e5c04f647f1f7c77954197e2a3b41d5429def9",
+   "bytes": 39588189
+  },
+  {
+   "file": "GHS_POP_E2005_GLOBE_R2023A_54009_100_V1_0_R4_C12.tif",
+   "sha256": "25165f2fe097a30a27924276ff71ebadb5b9a339ddaa9617f992c91a16f12d5c",
+   "bytes": 33882087
+  },
+  {
+   "file": "GHS_POP_E2005_GLOBE_R2023A_54009_100_V1_0_R5_C12.tif",
+   "sha256": "18f3f2ffaf7d86cc08814ce6e446b7f95594c7c6d885722eadd2755e472995f7",
+   "bytes": 64735529
+  },
+  {
+   "file": "GHS_POP_E2005_GLOBE_R2023A_54009_100_V1_0_R7_C26.tif",
+   "sha256": "ed7a09505672f9373a85b39a995d6d8ca56dfd6b73775a736b43416a3b4ca0d2",
+   "bytes": 46955447
+  },
+  {
+   "file": "GHS_POP_E2020_GLOBE_R2023A_54009_100_V1_0_R14_C32.tif",
+   "sha256": "a12305054dda1a42d925a87d8f34cb9bced86606a4a174b93e4d1679333b1911",
+   "bytes": 10527824
+  },
+  {
+   "file": "GHS_POP_E2020_GLOBE_R2023A_54009_100_V1_0_R3_C10.tif",
+   "sha256": "bfc6d4bfb44b0a5c17c9d7f8380c2995d56e9d359e092d17bc2a843744853a06",
+   "bytes": 7300541
+  },
+  {
+   "file": "GHS_POP_E2020_GLOBE_R2023A_54009_100_V1_0_R3_C18.tif",
+   "sha256": "cb91d96e7ed49b19801da9d7665b6220e5b4bc31e807259c40a9723a2942cf30",
+   "bytes": 31050825
+  },
+  {
+   "file": "GHS_POP_E2020_GLOBE_R2023A_54009_100_V1_0_R3_C19.tif",
+   "sha256": "2257e7522ceb7b43721021cefc84c1a6b19b0332b6bd7cd707abff63af4398bd",
+   "bytes": 43328601
+  },
+  {
+   "file": "GHS_POP_E2020_GLOBE_R2023A_54009_100_V1_0_R4_C12.tif",
+   "sha256": "3a22b3f34501cce619a267297906583210c4126b8abc88b55726bbee23673444",
+   "bytes": 36552976
+  },
+  {
+   "file": "GHS_POP_E2020_GLOBE_R2023A_54009_100_V1_0_R5_C12.tif",
+   "sha256": "31b14ed6c298a8c721ce64c1a0adf7943b81cc921ac1a8b7673de4962b2baa9b",
+   "bytes": 69862419
+  },
+  {
+   "file": "GHS_POP_E2020_GLOBE_R2023A_54009_100_V1_0_R7_C26.tif",
+   "sha256": "d3845dfec52a94e7e2ae7439b627070afcc2e91aa5b6d2c9ada1f2654cb075a2",
+   "bytes": 70908229
+  },
+  {
+   "file": "geonames_AU.zip",
+   "sha256": "9815868b59404ff4f9995fe572ce92b1dc5357a5350b4077a6ea61ffdc7b7385",
+   "bytes": 5745170
+  },
+  {
+   "file": "geonames_CA.zip",
+   "sha256": "855e9df0d935dcf7ac369fcb6581602e096735d26370f074648dabf4b36a3836",
+   "bytes": 8120805
+  },
+  {
+   "file": "geonames_GB.zip",
+   "sha256": "532cef682348083e9e4004c5de935b7f816fcf17ab76393c2d6b69af008342db",
+   "bytes": 3639414
+  },
+  {
+   "file": "geonames_IN.zip",
+   "sha256": "f1ce814c1841d5e3a57c7f89c5df294d793b6e1a0adcbe7b34c72cb325378725",
+   "bytes": 15755147
+  },
+  {
+   "file": "geonames_US.zip",
+   "sha256": "d2c593513509fc8947d7e62f6bed0e1b19bb5bd5a939f3f0be1a681bbf3aa7ad",
+   "bytes": 71110775
+  }
+ ]
+}

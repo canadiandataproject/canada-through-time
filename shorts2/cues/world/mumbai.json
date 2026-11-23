@@ -1,0 +1,334 @@
+{
+ "slug": "mumbai",
+ "city": "Mumbai",
+ "mode": "dark",
+ "duration": 32.2,
+ "camera": [
+  {
+   "t": 0,
+   "target": [
+    0,
+    0,
+    0
+   ],
+   "zoom": -6.75,
+   "pitch": 88,
+   "orbit": -60
+  },
+  {
+   "t": 4.0,
+   "target": [
+    0,
+    0,
+    2500
+   ],
+   "zoom": -6.15,
+   "pitch": 48,
+   "orbit": -35
+  },
+  {
+   "t": 12.799999999999999,
+   "target": [
+    0,
+    0,
+    2500
+   ],
+   "zoom": -6.0,
+   "pitch": 42,
+   "orbit": 15
+  },
+  {
+   "t": 15.2,
+   "target": [
+    -4000,
+    9500,
+    5400.0
+   ],
+   "zoom": -5.25,
+   "pitch": 52,
+   "orbit": 35
+  },
+  {
+   "t": 18.6,
+   "target": [
+    -4000,
+    9500,
+    5400.0
+   ],
+   "zoom": -5.1,
+   "pitch": 52,
+   "orbit": 55
+  },
+  {
+   "t": 23.6,
+   "target": [
+    -4500.0,
+    -650.0,
+    5400.0
+   ],
+   "zoom": -5.6,
+   "pitch": 52,
+   "orbit": 75
+  },
+  {
+   "t": 28.2,
+   "target": [
+    0,
+    0,
+    2500
+   ],
+   "zoom": -6.1,
+   "pitch": 46,
+   "orbit": 60
+  },
+  {
+   "t": 32.2,
+   "target": [
+    0,
+    0,
+    0
+   ],
+   "zoom": -6.75,
+   "pitch": 88,
+   "orbit": 0
+  }
+ ],
+ "year": [
+  {
+   "t": 0,
+   "y": 1975
+  },
+  {
+   "t": 7.8999999999999995,
+   "y": 1975
+  },
+  {
+   "t": 12.6,
+   "y": 2020
+  },
+  {
+   "t": 32.2,
+   "y": 2020
+  }
+ ],
+ "grow": [
+  {
+   "t": 0,
+   "g": 0.0
+  },
+  {
+   "t": 5.6,
+   "g": 1.0
+  },
+  {
+   "t": 29.7,
+   "g": 1.0
+  },
+  {
+   "t": 32.2,
+   "g": 0.0
+  }
+ ],
+ "wire": [
+  {
+   "t": 0,
+   "w": 0
+  },
+  {
+   "t": 8.4,
+   "w": 0
+  },
+  {
+   "t": 9.6,
+   "w": 0.85
+  },
+  {
+   "t": 28.2,
+   "w": 0.85
+  },
+  {
+   "t": 29.2,
+   "w": 0
+  }
+ ],
+ "rings": [
+  {
+   "t0": 14.399999999999999,
+   "t1": 23.6,
+   "at": [
+    -4000,
+    9500
+   ]
+  },
+  {
+   "t0": 23.6,
+   "t1": 27.9,
+   "at": [
+    -5000,
+    -10800
+   ]
+  }
+ ],
+ "cards": [
+  {
+   "t0": 0.0,
+   "t1": 3.4,
+   "kick": "How packed can one square km get?",
+   "big": "Mumbai"
+  },
+  {
+   "t0": 3.4,
+   "t1": 7.6,
+   "counter": true,
+   "kick": "Within 30 km of the centre"
+  },
+  {
+   "t0": 7.6,
+   "t1": 13.2,
+   "counter": true,
+   "kick": "Within 30 km of the centre"
+  },
+  {
+   "t0": 13.2,
+   "t1": 18.6,
+   "kick": "People in one square km",
+   "big": "134,293",
+   "sub": "Jogeshwari West · 2020 estimate"
+  },
+  {
+   "t0": 18.6,
+   "t1": 23.6,
+   "kick": "More people than all of",
+   "big": "Saint John, N.B.",
+   "sub": "130,613 people (2021 Census)"
+  },
+  {
+   "t0": 23.6,
+   "t1": 28.2,
+   "kick": "Busiest square km in 1975",
+   "big": "Girgaon",
+   "sub": "104,999 people"
+  },
+  {
+   "t0": 28.2,
+   "t1": 32.2,
+   "kick": "Comment a city",
+   "big": "Yours next?",
+   "sub": "Free map of Canada: link below"
+  }
+ ],
+ "captions": [
+  {
+   "t0": 0.1,
+   "t1": 3.35,
+   "text": "Mumbai. Let's find the most packed square kilometre."
+  },
+  {
+   "t0": 3.5,
+   "t1": 7.55,
+   "text": "1975. 9.2 million people. The Virar fast was already full."
+  },
+  {
+   "t0": 10.5,
+   "t1": 13.149999999999999,
+   "text": "By 2020, 21.4 million. Same trains."
+  },
+  {
+   "t0": 13.3,
+   "t1": 18.55,
+   "text": "The busiest square kilometre? Not Dharavi. Jogeshwari West."
+  },
+  {
+   "t0": 18.7,
+   "t1": 23.55,
+   "text": "More people than all of Saint John, New Brunswick. Minus the fog. Plus vada pav."
+  },
+  {
+   "t0": 23.7,
+   "t1": 28.15,
+   "text": "In 1975 the busiest square was down in Girgaon. Then everyone took the train north."
+  },
+  {
+   "t0": 28.3,
+   "t1": 32.150000000000006,
+   "text": "Which city should I do next?"
+  }
+ ],
+ "labels": [
+  {
+   "name": "Navi Mumbai",
+   "x": 15434,
+   "y": -2007
+  },
+  {
+   "name": "Thāne",
+   "x": 9922,
+   "y": 15726
+  },
+  {
+   "name": "Dhārāvi",
+   "x": -267,
+   "y": -553
+  },
+  {
+   "name": "Borivli",
+   "x": -993,
+   "y": 19921
+  },
+  {
+   "name": "Uran",
+   "x": 7380,
+   "y": -19576
+  }
+ ],
+ "label_window": [
+  4.4,
+  12.899999999999999
+ ],
+ "counter": {
+  "t0": 3.4,
+  "t1": 13.2
+ },
+ "totals": {
+  "1975": 9242784,
+  "1990": 14007492,
+  "2005": 18481420,
+  "2020": 21375834
+ },
+ "densest": {
+  "at": [
+   -4000,
+   9500
+  ],
+  "name": "Jogeshwari West",
+  "km2": 134293
+ },
+ "ctx": {
+  "city": "Mumbai",
+  "p1975": "9.2 million",
+  "p2020": "21.4 million",
+  "growth": "×2.3",
+  "dk": "134,293",
+  "dk75": "104,999",
+  "where": "Jogeshwari West",
+  "where75": "Girgaon",
+  "km": 30,
+  "ca": "Saint John",
+  "ca_pop": "130,613",
+  "vs": "Toronto",
+  "vs_dk": "35,018",
+  "vs_x": "3.8",
+  "vs_where": "Downtown"
+ },
+ "source": "GHSL GHS-POP R2023A · EU JRC · 30 km radius · GeoNames, OSM",
+ "voice": "/home/claude/audio/world/mumbai.wav",
+ "script": [
+  "Mumbai. Let's find the most packed square kilometre.",
+  "1975. 9.2 million people. The Virar fast was already full.",
+  "By 2020, 21.4 million. Same trains.",
+  "The busiest square kilometre? Not Dharavi. Jogeshwari West.",
+  "More people than all of Saint John, New Brunswick. Minus the fog. Plus vada pav.",
+  "In 1975 the busiest square was down in Girgaon. Then everyone took the train north.",
+  "Which city should I do next?"
+ ]
+}

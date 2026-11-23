@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Short capture: any city in 3D</title>
+<style>
+html,body{margin:0;height:100%;overflow:hidden}
+#sky{position:fixed;inset:0}
+#map{position:fixed;inset:0}
+</style></head>
+<body><div id="sky"></div><div id="map"></div>
+<script src="../vendor/deck.min.js"></script>
+<script>
+// Capture page for the world-city Shorts (shorts2/city3d.py). One city from web/data/world/<slug>.json: every 400 m
+// square of land is a column whose height is the people living there (GHSL), interpolated between 1975 … 2020.
+// Then = wireframe, now = lit solid; the sea is small stepped cubes (route identity, 2026-11-17). Units are metres.
+// ?city=<slug>&mode=dark|light
+const { Deck, OrbitView, ColumnLayer, LineLayer, ScatterplotLayer, LightingEffect, AmbientLight, DirectionalLight, COORDINATE_SYSTEM } = deck;
+const QP = new URLSearchParams(location.search), MODE = QP.get('mode') || 'dark', SLUG = QP.get('city') || 'mumbai';
+const hex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+const PAL = {
+  dark: { skyTop: '#040B22', skyBot: '#2E4F8C', land: hex('#1E3A6B'), land2: hex('#18305A'), sea: ['#07122E', '#091633', '#0B1938', '#0D1C3E'].map(hex),
+          ramp: ['#2C5BAA', '#4F86D6', '#8FBDF2', '#D6EEFF', '#FFFFFF'].map(hex), wire: hex('#BDEBFF'), hot: hex('#F09AC4'), ring: hex('#F09AC4') },
+  light: { skyTop: '#C7D3E2', skyBot: '#EEF2F7', land: hex('#F4F7FB'), land2: hex('#E9EEF5'), sea: ['#B9C9DC', '#BFCEE0', '#C5D3E3', '#CBD8E7'].map(hex),
+           ramp: ['#B4C9F0', '#7C9DEB', '#3F66E0', '#1E3CC8', '#0B1460'].map(hex), wire: hex('#1E3CFF'), hot: hex('#D9799F'), ring: hex('#D9799F') } }[MODE];
+document.getElementById('sky').style.background = `linear-gradient(180deg, ${PAL.skyTop} 0%, ${PAL.skyBot} 100%)`;
+const lerp = (a, b, t) => a.map((x, i) => Math.round(x + (b[i] - x) * t));
+const ramp = t => { t = Math.max(0, Math.min(1, t)) * (PAL.ramp.length - 1); const i = Math.min(PAL.ramp.length - 2, Math.floor(t)); return lerp(PAL.ramp[i], PAL.ramp[i + 1], t - i); };
+
+let D, CELLS, SEA, MAXP, HMAX, EP;
+const lighting = new LightingEffect({
+  amb: new AmbientLight({ color: [255, 255, 255], intensity: MODE === 'dark' ? 0.85 : 1.1 }),
+  sun: new DirectionalLight({ color: [255, 255, 255], intensity: MODE === 'dark' ? 0.9 : 0.8, direction: [-1, -2, -3] }),
+  rim: new DirectionalLight({ color: MODE === 'dark' ? [170, 215, 255] : [255, 255, 255], intensity: 0.45, direction: [2, 1, -1] }) });
+const deckI = new Deck({ parent: document.getElementById('map'), views: new OrbitView({ orbitAxis: 'Z', fovy: 38, near: 0.1, far: 2000 }), controller: false,
+  effects: [lighting], initialViewState: { target: [0, 0, 0], zoom: -6, rotationX: 90, rotationOrbit: 0 }, layers: [], parameters: { clearColor: [0, 0, 0, 0] } });
+
+// population of a cell at a fractional year, linear between epochs
+function popAt(c, yr) {
+  if (yr <= EP[0]) return c[3];
+  for (let k = 0; k < EP.length - 1; k++) if (yr <= EP[k + 1]) { const f = (yr - EP[k]) / (EP[k + 1] - EP[k]); return c[3 + k] + (c[4 + k] - c[3 + k]) * f; }
+  return c[3 + EP.length - 1];
+}
+async function init() {
+  D = await fetch(`../data/world/${SLUG}.json`).then(r => r.json()); EP = D.epochs;
+  const C = D.cell_m, R = D.radius_m, n = Math.round(2 * R / C), have = new Set();
+  const IN = (x, y) => x * x + y * y <= R * R * 0.995;
+  CELLS = D.cells.filter(c => (c[2] > 0.5 || Math.max(...c.slice(3)) >= 1) && IN(c[0], c[1]));
+  for (const c of CELLS) have.add(Math.round((c[0] + R) / C - 0.5) + ',' + Math.round((R - c[1]) / C - 0.5));
+  SEA = [];                                                       // everything not on the land list is water: stepped cubes
+  for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) if (!have.has(j + ',' + i)) {
+    const x = -R + (j + 0.5) * C, y = R - (i + 0.5) * C; if (!IN(x, y)) continue;
+    SEA.push({ x, y, ph: ((i * 7 + j * 13) % 17) / 17, k: (i * 3 + j * 5) % 4 }); }
+  for (const c of CELLS) if (c[2] <= 0.5) SEA.push({ x: c[0], y: c[1], ph: 0.3, k: 1 });   // mostly-water cells that still hold people
+  MAXP = Math.max(...CELLS.map(c => c[3 + EP.length - 1]));
+  HMAX = 2 * R * 0.20;                                            // tallest column = 20% of the box width, every city (heights are per-city)
+  window.READY = true; return { cells: CELLS.length, sea: SEA.length, maxp: MAXP, R, C, facts: D.facts };
+}
+const H = p => p / MAXP * HMAX;
+// st: {target:[x,y,z], zoom, pitch, orbit, year, wire:0..1 (1975 wireframe opacity), grow:0..1 (columns rise from flat), ring:[x,y]|null, ringR, t, dim:[x,y,r]|null}
+window.setFrame = async (st) => {
+  const C = D.cell_m, yr = st.year, g = st.grow ?? 1, t = st.t || 0;
+  const elev = c => Math.max(C * 0.04, H(popAt(c, yr)) * g);
+  const layers = [
+    new ColumnLayer({ id: 'sea', data: SEA, coordinateSystem: COORDINATE_SYSTEM.CARTESIAN, diskResolution: 4, angle: 45, radius: C * 0.5 * Math.SQRT2 * 0.86, extruded: true,
+      getPosition: d => [d.x, d.y, -C * 0.6], getElevation: d => C * (0.12 + 0.08 * Math.sin(6.283 * (d.ph + t * 0.18))), getFillColor: d => PAL.sea[d.k],
+      material: { ambient: 0.6, diffuse: 0.4, shininess: 8 }, updateTriggers: { getElevation: Math.round(t * 30) } }),
+    new ColumnLayer({ id: 'city', data: CELLS, coordinateSystem: COORDINATE_SYSTEM.CARTESIAN, diskResolution: 4, angle: 45, radius: C * 0.5 * Math.SQRT2 * 0.92, extruded: true,
+      getPosition: c => [c[0], c[1], 0], getElevation: elev,
+      getFillColor: c => { const p = popAt(c, yr); if (st.hot && Math.abs(c[0] - st.hot[0]) <= 520 && Math.abs(c[1] - st.hot[1]) <= 520) return lerp(ramp(Math.pow(p / MAXP, 0.75)), PAL.hot, st.hotA ?? 1); const dim = st.hot ? 0.6 * (st.hotA ?? 1) : 0; const base = p < 1 ? (c[2] > 0.5 ? PAL.land : PAL.land2) : ramp(Math.pow(p / MAXP, 0.75)); return dim ? lerp(base, PAL.land2, dim) : base; },
+      material: { ambient: 0.55, diffuse: 0.55, shininess: 32, specularColor: [90, 110, 140] },
+      updateTriggers: { getElevation: [yr, g], getFillColor: [yr, (st.hot || []).join(), st.hotA] } }),
+  ];
+  if ((st.wire || 0) > 0.01) layers.push(new ColumnLayer({ id: 'then', data: CELLS.filter(c => c[3] >= 30), coordinateSystem: COORDINATE_SYSTEM.CARTESIAN, diskResolution: 4, angle: 45,
+    radius: C * 0.5 * Math.SQRT2 * 0.92, extruded: true, filled: false, wireframe: true, getPosition: c => [c[0], c[1], 0], getElevation: c => H(c[3]) * g,
+    getLineColor: [...PAL.wire, Math.round(200 * st.wire)], updateTriggers: { getLineColor: st.wire, getElevation: g } }));
+  if (st.ring) {
+    const r = st.ringR || C * 3; layers.push(new ScatterplotLayer({ id: 'ring', data: [0, 1], coordinateSystem: COORDINATE_SYSTEM.CARTESIAN, stroked: true, filled: false,
+      getPosition: [st.ring[0], st.ring[1], 2], getRadius: k => r * (1 + 0.6 * ((t * 0.9 + k * 0.5) % 1)), getLineColor: k => [...PAL.ring, Math.round(230 * (1 - ((t * 0.9 + k * 0.5) % 1)))],
+      lineWidthUnits: 'pixels', getLineWidth: 3, updateTriggers: { getRadius: t, getLineColor: t } })); }
+  deckI.setProps({ layers, viewState: { target: st.target, zoom: st.zoom, rotationX: st.pitch, rotationOrbit: st.orbit } });
+  await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))); deckI.redraw(true);
+  await new Promise(r => requestAnimationFrame(r)); return true;
+};
+// screen position (CSS px) of world points, for leader lines and labels drawn by the overlay
+window.project = pts => { const vp = deckI.getViewports()[0]; return pts.map(p => vp.project(p)); };
+window.HMAXv = () => HMAX;
+window.heightAt = (x, y, yr) => { let b = null, bd = 1e18; for (const c of CELLS) { const d = (c[0] - x) ** 2 + (c[1] - y) ** 2; if (d < bd) { bd = d; b = c; } } return H(popAt(b, yr)); };
+window.INIT = init();
+</script></body></html>

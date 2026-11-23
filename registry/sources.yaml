@@ -1362,3 +1362,45 @@ sources:
       - "Positions are rounded to 0.2 degrees of latitude and 0.5 degrees of longitude (roughly 15-25 km) before mapping, because the species is endangered."
     limitations:
       - "Twelve birds from one colony; transmitters stopped at different times, so fewer birds are tracked in later years. Not a census of the population."
+  jrc_ghsl_pop_world:
+    title: "GHS-POP R2023A: GHS population grid, 1975-2020 (5-year epochs), 100 m, Mollweide — tiles around world cities"
+    publisher: "European Commission, Joint Research Centre (JRC)"
+    doi: "https://doi.org/10.2905/2FF68A52-5B5B-4A22-8F40-C41DA8332CFE"
+    landing_url: "https://human-settlement.emergency.copernicus.eu/download.php?ds=pop"
+    download_url: "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_POP_GLOBE_R2023A/"
+    raw_file: "data/raw/ghsl_world/manifest.json"
+    retrieved: "2026-11-22"
+    release_in_file: "R2023A, version 1.0; epochs 1975, 1990, 2005, 2020 (tiles and SHA-256 in the manifest)"
+    reporting_period: "Epochs (snapshot years)"
+    coverage: "Global grid; this project uses tiles around the cities in shorts2/city_scripts.py"
+    units: "Residents per 100 m cell"
+    licence: "Creative Commons Attribution 4.0 International (CC BY 4.0)"
+    licence_url: "https://creativecommons.org/licenses/by/4.0/"
+    attribution: "Schiavina M., Freire S., Carioli A., MacManus K. (2023): GHS-POP R2023A - GHS population grid multitemporal (1975-2030). European Commission, Joint Research Centre (JRC)."
+    quality_class: modelled_estimate
+    methodology_notes:
+      - "Census or administrative population disaggregated to 100 m cells using GHSL built-up volume; the same method in every country, so cities are comparable."
+      - "'Busiest square kilometre' = the highest sum over any 1 km x 1 km window of 100 m cells (sliding), after reprojection to a local azimuthal-equidistant grid around the city centre."
+      - "City totals are everyone within a fixed radius of the centre (stated on screen), not an official city or metro boundary."
+      - "2025 and 2030 epochs are projections and are not used; 2020 is called a 2020 estimate on screen."
+    limitations:
+      - "Modelled estimate; the busiest square kilometre can differ from census-tract figures or popular claims (e.g. Mumbai's Dharavi scores lower than Jogeshwari West in this grid)."
+  jrc_ghsl_land_world:
+    title: "GHS-LAND R2022A: land fraction grid, 100 m (water mask for the world-city Shorts)"
+    publisher: "European Commission, Joint Research Centre (JRC)"
+    landing_url: "https://human-settlement.emergency.copernicus.eu/download.php?ds=land"
+    download_url: "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_LAND_GLOBE_R2022A/"
+    raw_file: "data/raw/ghsl_world/manifest.json"
+    retrieved: "2026-11-22"
+    licence: "Creative Commons Attribution 4.0 International (CC BY 4.0)"
+    quality_class: modelled_estimate
+  geonames_places_world:
+    title: "GeoNames country dumps (populated places) and OpenStreetMap Nominatim (city centres, neighbourhood names)"
+    publisher: "GeoNames; OpenStreetMap contributors"
+    download_url: "https://download.geonames.org/export/dump/"
+    raw_file: "data/raw/ghsl_world/manifest.json"
+    retrieved: "2026-11-22"
+    licence: "GeoNames CC BY 4.0; OpenStreetMap ODbL 1.0"
+    quality_class: reference
+    limitations:
+      - "Names only (labels and the neighbourhood of the busiest square km); no numbers come from these. Each script can override a name after a manual check."
