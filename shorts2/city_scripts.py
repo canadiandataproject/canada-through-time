@@ -94,3 +94,33 @@ SCRIPTS = {
             joke=dict(say="In 1975 it was Bondi. Now Bondi's mostly the brunch queue.",
                       card=dict(kick="Busiest square km in 1975", big="{where75}", sub="{dk75} people")))),
 }
+
+# Nature-documentary narration (Tyson, 2026-11-24): a hushed, awed narrator who isn't anyone in particular (no impression
+# of a real person). Payoff-first open (open="payoff"): frame 1 is the busiest square km already lit, with its number,
+# then the year rewinds to 1975. Hook test vs the question open: Toronto (moving from frame 1) held 64%.
+PAYOFF_HOOK = lambda say, city: dict(say=say, card=dict(kick="People in ONE square km", big="{dk}", sub=city + " · 2020 estimate"))
+
+SCRIPTS["newyork_doc"] = dict(SCRIPTS["newyork"], open="payoff", base="newyork", beats=beats(
+    hook=PAYOFF_HOOK("Here, in a single square kilometre, {dk} New Yorkers have made their nest.", "New York"),
+    then=dict(say="1975. {p1975}. The herd is already restless.", card=dict(counter=True, kick="Within {km} km of City Hall")),
+    grow=dict(say="By 2020, {p2020}. Space is scarce. And yet, they keep coming.", card=dict(counter=True, kick="Within {km} km of City Hall")),
+    dense=dict(say="Their densest nesting ground: the {where}. Times Square, curiously, is uninhabited.",
+               card=dict(kick="People in one square km", big="{dk}", sub="Yorkville, {where} · 2020 estimate")),
+    compare=dict(say="Twice as crowded as their northern cousins, in Toronto's St. James Town.",
+                 card=dict(kick="Toronto's busiest square km ×{vs_x}", big="{dk}", sub="vs {vs_dk} in St. James Town")),
+    joke=dict(say="Each one-bedroom, a hallway with ambition.", card=dict(kick="Busiest square km", big="Yorkville", sub="{where}, Manhattan")),
+    end=dict(END, say="Which habitat should we observe next?")))
+
+SCRIPTS["london_doc"] = dict(SCRIPTS["london"], open="payoff", base="london", beats=beats(
+    hook=PAYOFF_HOOK("Here, in one square kilometre of west London, {dk} people have made their burrow.", "London"),
+    then=dict(say="1975. {p1975}. Then, mysteriously, the colony shrank.", card=dict(counter=True, kick="Within {km} km of the centre")),
+    grow=dict(say="The rents rose. The colony grew anyway. {p2020}.", card=dict(counter=True, kick="Within {km} km of the centre")),
+    dense=dict(say="The densest burrow: {where}. Remarkably, not even Zone 1.", card=dict(kick="People in one square km", big="{dk}", sub="{where} · 2020 estimate")),
+    compare=dict(say="And yet Toronto's St. James Town packs in more. {vs_dk}. Mind the gap.",
+                 card=dict(kick="Toronto's busiest square km", big="{vs_dk}", sub="St. James Town beats all of London")),
+    joke=dict(say="In 1975, the colony gathered at {where75}. Before it learned what {where75} costs.",
+              card=dict(kick="Busiest square km in 1975", big="{where75}", sub="{dk75} people")),
+    end=dict(END, say="Which habitat should we observe next?")))
+
+for _k in ("newyork_doc", "london_doc"):            # the slower narrator needs room: longer hook and dense beats (~34 s total)
+    _b = SCRIPTS[_k]["beats"]; _b[0]["dur"] = 4.4; _b[3]["dur"] = 6.2

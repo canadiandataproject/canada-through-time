@@ -1,0 +1,363 @@
+{
+ "slug": "newyork",
+ "key": "newyork_doc",
+ "city": "New York City",
+ "mode": "dark",
+ "duration": 34.0,
+ "camera": [
+  {
+   "t": 0,
+   "target": [
+    4600,
+    7100,
+    5400.0
+   ],
+   "zoom": -5.35,
+   "pitch": 52,
+   "orbit": 20
+  },
+  {
+   "t": 3.9000000000000004,
+   "target": [
+    4600,
+    7100,
+    5400.0
+   ],
+   "zoom": -5.25,
+   "pitch": 52,
+   "orbit": 30
+  },
+  {
+   "t": 5.6000000000000005,
+   "target": [
+    0,
+    0,
+    2500
+   ],
+   "zoom": -6.15,
+   "pitch": 48,
+   "orbit": -35
+  },
+  {
+   "t": 13.799999999999999,
+   "target": [
+    0,
+    0,
+    2500
+   ],
+   "zoom": -6.0,
+   "pitch": 42,
+   "orbit": 15
+  },
+  {
+   "t": 16.2,
+   "target": [
+    4600,
+    7100,
+    5400.0
+   ],
+   "zoom": -5.25,
+   "pitch": 52,
+   "orbit": 35
+  },
+  {
+   "t": 20.4,
+   "target": [
+    4600,
+    7100,
+    5400.0
+   ],
+   "zoom": -5.1,
+   "pitch": 52,
+   "orbit": 55
+  },
+  {
+   "t": 25.4,
+   "target": [
+    4600.0,
+    7100.0,
+    5400.0
+   ],
+   "zoom": -5.6,
+   "pitch": 52,
+   "orbit": 75
+  },
+  {
+   "t": 30.4,
+   "target": [
+    0,
+    0,
+    2500
+   ],
+   "zoom": -6.1,
+   "pitch": 46,
+   "orbit": 40
+  },
+  {
+   "t": 34.0,
+   "target": [
+    4600,
+    7100,
+    5400.0
+   ],
+   "zoom": -5.35,
+   "pitch": 52,
+   "orbit": 20
+  }
+ ],
+ "year": [
+  {
+   "t": 0,
+   "y": 2020
+  },
+  {
+   "t": 4.1000000000000005,
+   "y": 2020
+  },
+  {
+   "t": 4.9,
+   "y": 1975
+  },
+  {
+   "t": 8.9,
+   "y": 1975
+  },
+  {
+   "t": 13.6,
+   "y": 2020
+  },
+  {
+   "t": 34.0,
+   "y": 2020
+  }
+ ],
+ "grow": [
+  {
+   "t": 0,
+   "g": 1.0
+  },
+  {
+   "t": 34.0,
+   "g": 1.0
+  }
+ ],
+ "wire": [
+  {
+   "t": 0,
+   "w": 0
+  },
+  {
+   "t": 9.4,
+   "w": 0
+  },
+  {
+   "t": 10.6,
+   "w": 0.85
+  },
+  {
+   "t": 30.0,
+   "w": 0.85
+  },
+  {
+   "t": 31.0,
+   "w": 0
+  }
+ ],
+ "rings": [
+  {
+   "t0": -1,
+   "t1": 4.2,
+   "at": [
+    4600,
+    7100
+   ]
+  },
+  {
+   "t0": 32.8,
+   "t1": 35.0,
+   "at": [
+    4600,
+    7100
+   ]
+  },
+  {
+   "t0": 15.399999999999999,
+   "t1": 25.4,
+   "at": [
+    4600,
+    7100
+   ]
+  },
+  {
+   "t0": 25.4,
+   "t1": 29.7,
+   "at": [
+    4600,
+    7100
+   ]
+  }
+ ],
+ "cards": [
+  {
+   "t0": 0.0,
+   "t1": 4.4,
+   "kick": "People in ONE square km",
+   "big": "69,217",
+   "sub": "New York · 2020 estimate"
+  },
+  {
+   "t0": 4.4,
+   "t1": 8.6,
+   "counter": true,
+   "kick": "Within 30 km of City Hall"
+  },
+  {
+   "t0": 8.6,
+   "t1": 14.2,
+   "counter": true,
+   "kick": "Within 30 km of City Hall"
+  },
+  {
+   "t0": 14.2,
+   "t1": 20.4,
+   "kick": "People in one square km",
+   "big": "69,217",
+   "sub": "Yorkville, Upper East Side · 2020 estimate"
+  },
+  {
+   "t0": 20.4,
+   "t1": 25.4,
+   "kick": "Toronto's busiest square km ×2.0",
+   "big": "69,217",
+   "sub": "vs 35,018 in St. James Town"
+  },
+  {
+   "t0": 25.4,
+   "t1": 30.0,
+   "kick": "Busiest square km",
+   "big": "Yorkville",
+   "sub": "Upper East Side, Manhattan"
+  },
+  {
+   "t0": 30.0,
+   "t1": 34.0,
+   "kick": "Comment a city",
+   "big": "Yours next?",
+   "sub": "Free map of Canada: link below"
+  }
+ ],
+ "captions": [
+  {
+   "t0": 0.1,
+   "t1": 4.3500000000000005,
+   "text": "Here, in a single square kilometre, 69,217 New Yorkers have made their nest."
+  },
+  {
+   "t0": 4.5,
+   "t1": 8.549999999999999,
+   "text": "1975. 11.0 million. The herd is already restless."
+  },
+  {
+   "t0": 11.5,
+   "t1": 14.149999999999999,
+   "text": "By 2020, 12.8 million. Space is scarce. And yet, they keep coming."
+  },
+  {
+   "t0": 14.3,
+   "t1": 20.349999999999998,
+   "text": "Their densest nesting ground: the Upper East Side. Times Square, curiously, is uninhabited."
+  },
+  {
+   "t0": 20.5,
+   "t1": 25.349999999999998,
+   "text": "Twice as crowded as their northern cousins, in Toronto's St. James Town."
+  },
+  {
+   "t0": 25.5,
+   "t1": 29.95,
+   "text": "Each one-bedroom, a hallway with ambition."
+  },
+  {
+   "t0": 30.1,
+   "t1": 33.95,
+   "text": "Which habitat should we observe next?"
+  }
+ ],
+ "labels": [
+  {
+   "name": "Brooklyn",
+   "x": 4773,
+   "y": -6953
+  },
+  {
+   "name": "Queens",
+   "x": 14329,
+   "y": -3455
+  },
+  {
+   "name": "The Bronx",
+   "x": 11772,
+   "y": 15237
+  },
+  {
+   "name": "Staten Island",
+   "x": -11335,
+   "y": -16693
+  },
+  {
+   "name": "Newark",
+   "x": -14052,
+   "y": 2560
+  }
+ ],
+ "label_window": [
+  5.4,
+  13.899999999999999
+ ],
+ "counter": {
+  "t0": 4.4,
+  "t1": 14.2
+ },
+ "totals": {
+  "1975": 10966616,
+  "1990": 11071486,
+  "2005": 12339873,
+  "2020": 12812646
+ },
+ "densest": {
+  "at": [
+   4600,
+   7100
+  ],
+  "name": "Upper East Side",
+  "km2": 69217
+ },
+ "ctx": {
+  "city": "New York City",
+  "p1975": "11.0 million",
+  "p2020": "12.8 million",
+  "growth": "×1.2",
+  "dk": "69,217",
+  "dk75": "59,227",
+  "where": "Upper East Side",
+  "where75": "Manhattan",
+  "km": 30,
+  "ca": "",
+  "ca_pop": "",
+  "vs": "Toronto",
+  "vs_dk": "35,018",
+  "vs_x": "2.0",
+  "vs_where": "Downtown"
+ },
+ "source": "GHSL GHS-POP R2023A · EU JRC · 30 km radius · GeoNames, OSM",
+ "voice": "/home/claude/audio/world/newyork.wav",
+ "script": [
+  "Here, in a single square kilometre, 69,217 New Yorkers have made their nest.",
+  "1975. 11.0 million. The herd is already restless.",
+  "By 2020, 12.8 million. Space is scarce. And yet, they keep coming.",
+  "Their densest nesting ground: the Upper East Side. Times Square, curiously, is uninhabited.",
+  "Twice as crowded as their northern cousins, in Toronto's St. James Town.",
+  "Each one-bedroom, a hallway with ambition.",
+  "Which habitat should we observe next?"
+ ]
+}

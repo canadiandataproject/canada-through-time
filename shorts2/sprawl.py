@@ -19,12 +19,14 @@ ROOT = Path(__file__).resolve().parents[1]; FONTS = Path("/home/claude/fonts")
 W, H, FPS = 1080, 1920, 30
 PAPER = (251, 248, 241); LAND = (240, 234, 222); WATER = (138, 178, 205); INK = (29, 35, 38); ACC = (194, 64, 42); MUTE = (92, 96, 98)
 EPC = [(52, 48, 42), (104, 92, 76), (146, 128, 98), (196, 164, 104), (222, 132, 78), ACC]   # oldest dark → newest the accent (as in the explorer)
-f_big = ImageFont.truetype(str(FONTS / "oswald-latin-700-normal.ttf"), 128)
-f_mid = ImageFont.truetype(str(FONTS / "oswald-latin-700-normal.ttf"), 84)
-f_lab = ImageFont.truetype(str(FONTS / "oswald-latin-400-normal.ttf"), 44)
-f_year = ImageFont.truetype(str(FONTS / "oswald-latin-700-normal.ttf"), 96)
-f_src = ImageFont.truetype(str(FONTS / "share-tech-mono-latin-400-normal.ttf"), 25)
-f_leg = ImageFont.truetype(str(FONTS / "oswald-latin-400-normal.ttf"), 32)
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from style import MODE as STYLE, font
+def _f(name, size, kind="ui"):     # the old Oswald/Share Tech files live outside the repo; fall back to the route fonts (use_route replaces them anyway)
+    try: return ImageFont.truetype(str(FONTS / name), size)
+    except OSError: return font(kind, size)
+f_big = _f("oswald-latin-700-normal.ttf", 128, "display"); f_mid = _f("oswald-latin-700-normal.ttf", 84, "display")
+f_lab = _f("oswald-latin-400-normal.ttf", 44); f_year = _f("oswald-latin-700-normal.ttf", 96, "mono")
+f_src = _f("share-tech-mono-latin-400-normal.ttf", 25, "mono"); f_leg = _f("oswald-latin-400-normal.ttf", 32)
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from style import MODE as STYLE, font
 
@@ -128,7 +130,21 @@ def frame(t, cues, meta, c, ep, appear, bg):
     for cd in cues["cards"]:
         if cd["t0"] <= t < cd["t1"]:
             a = min(1, (t - cd["t0"]) / 0.25 if cd["t0"] > 0 else 1, (cd["t1"] - t) / 0.25); card(d, cd, a)
-    d.text((W // 2, H - 150), cues["credit"], font=f_src, fill=MUTE, anchor="mm")
+    if cues.get("captions"):                 # burned-in narration (lands with the sound off), between the legend and the credit
+        sc = cues["script"]; cf = font("ui", 44, 600)
+        for i, s in enumerate(sc):
+            t1 = (sc[i + 1]["t"] - 0.15) if i + 1 < len(sc) else cues["duration"] - 0.1
+            if not (s["t"] <= t < t1): continue
+            a = min(1, (t - s["t"]) / 0.15, (t1 - t) / 0.15); words, lines, cur = s["say"].split(), [], ""
+            for w_ in words:
+                if d.textlength((cur + " " + w_).strip(), font=cf) > W - 160: lines.append(cur); cur = w_
+                else: cur = (cur + " " + w_).strip()
+            lines.append(cur)
+            for j, ln in enumerate(lines):
+                tw = d.textlength(ln, font=cf); yy = 1672 + j * 58 - 29 * (len(lines) - 1)
+                d.rounded_rectangle([W / 2 - tw / 2 - 20, yy - 29, W / 2 + tw / 2 + 20, yy + 29], 14, fill=(*INK, int(215 * a)))
+                d.text((W / 2, yy), ln, font=cf, fill=(*PAPER, int(255 * a)), anchor="mm")
+    d.text((W // 2, H - 150 + (60 if cues.get("captions") else 0)), cues["credit"], font=f_src, fill=MUTE, anchor="mm")
     # loop: the last 0.4 s cross-fade into the opening frame
     if t > cues["duration"] - 0.4 and cues.get("loop"):
         first = frame(0.0, {**cues, "loop": False}, meta, c, ep, appear, bg); img = Image.blend(img, first, ease((t - (cues["duration"] - 0.4)) / 0.4))

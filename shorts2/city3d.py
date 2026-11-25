@@ -19,6 +19,7 @@ from style import MODE as STYLE, font
 from city_scripts import SCRIPTS
 
 ROOT = Path(__file__).resolve().parents[1]
+FR = [0, None]
 W, H, FPS = 1080, 1920, 30
 CP = json.loads((ROOT / "web/data/cities/ct_profile.json").read_text())
 CA_CITIES = sorted((v["v"][CP["fields"].index("pop")], v["name"]) for v in CP["areas"].values() if v["level"] == "Census metropolitan area")
@@ -39,7 +40,8 @@ def ease(x): x = min(1, max(0, x)); return x * x * (3 - 2 * x)
 
 
 def make(slug, out):
-    d = world(slug); f = d["facts"]; S = SCRIPTS[slug]; R = d["radius_m"]
+    S = SCRIPTS[slug]; key = slug; slug = S.get("base", slug)
+    d = world(slug); f = d["facts"]; R = d["radius_m"]
     tot = {int(k): v for k, v in f["total"].items()}; dk = f["densest_km2"]["2020"]; at = f["densest_at"]["2020"]; at75 = f["densest_at"]["1975"]
     ctx = dict(city=d["name"], p1975=fmt_m(tot[1975]), p2020=fmt_m(tot[2020]), growth=f"×{f['growth']:.1f}", dk=f"{dk:,}", dk75=f"{f['densest_km2']['1975']:,}",
                where=S.get("where") or f["densest_name"]["2020"], where75=S.get("where75") or f["densest_name"]["1975"], km=int(R / 1000))
@@ -68,7 +70,17 @@ def make(slug, out):
     year = [dict(t=0, y=1975), dict(t=T["grow"]["t0"] + 0.3, y=1975), dict(t=T["grow"]["t1"] - 0.6, y=2020), dict(t=dur, y=2020)]
     grow = [dict(t=0, g=0.0), dict(t=T["then"]["t0"] + 2.2, g=1.0), dict(t=T["end"]["t0"] + 1.5, g=1.0), dict(t=dur, g=0.0)]  # rises, then sinks to frame 1
     wire = [dict(t=0, w=0), dict(t=T["grow"]["t0"] + 0.8, w=0), dict(t=T["grow"]["t0"] + 2.0, w=0.85), dict(t=T["joke"]["t1"], w=0.85), dict(t=T["end"]["t0"] + 1.0, w=0)]
-    rings = [dict(t0=T["dense"]["t0"] + 1.2, t1=T["compare"]["t1"], at=at), dict(t0=T["joke"]["t0"], t1=T["joke"]["t1"] - 0.3, at=at75)] if S.get("ring75", True) else \
+    if S.get("open") == "payoff":                                 # frame 1 = the answer, lit; then rewind to 1975; end back on it (loops)
+        h = T["hook"]; lit = dict(near, zoom=-5.35, orbit=20)
+        cam = [dict(t=0, **lit), dict(t=h["t1"] - 0.5, **dict(lit, orbit=30, zoom=-5.25)), dict(t=T["then"]["t0"] + 1.2, **dict(wide, zoom=-6.15, orbit=-35))] + \
+              [k for k in cam if k["t"] > T["then"]["t0"] + 1.2 and k["t"] < T["end"]["t0"]] + [dict(t=T["end"]["t0"] + 0.4, **dict(wide, orbit=40, zoom=-6.1, pitch=46)), dict(t=dur, **lit)]
+        year = [dict(t=0, y=2020), dict(t=h["t1"] - 0.3, y=2020), dict(t=T["then"]["t0"] + 0.5, y=1975), dict(t=T["grow"]["t0"] + 0.3, y=1975),
+                dict(t=T["grow"]["t1"] - 0.6, y=2020), dict(t=dur, y=2020)]
+        grow = [dict(t=0, g=1.0), dict(t=dur, g=1.0)]
+        wire = [dict(t=0, w=0), dict(t=T["grow"]["t0"] + 0.8, w=0), dict(t=T["grow"]["t0"] + 2.0, w=0.85), dict(t=T["joke"]["t1"], w=0.85), dict(t=T["end"]["t0"] + 1.0, w=0)]
+        rings0 = [dict(t0=-1, t1=h["t1"] - 0.2, at=at), dict(t0=T["end"]["t1"] - 1.2, t1=dur + 1, at=at)]
+    else: rings0 = []
+    rings = rings0 + [dict(t0=T["dense"]["t0"] + 1.2, t1=T["compare"]["t1"], at=at), dict(t0=T["joke"]["t0"], t1=T["joke"]["t1"] - 0.3, at=at75)] if S.get("ring75", True) else \
             [dict(t0=T["dense"]["t0"] + 1.2, t1=T["compare"]["t1"], at=at)]
     # place labels for the wide shots: biggest named places, spread out, inside the disc
     labs = []
@@ -77,7 +89,7 @@ def make(slug, out):
         if all(math.hypot(p["x"] - q["x"], p["y"] - q["y"]) > R * 0.28 for q in labs): labs.append(p)
         if len(labs) >= S.get("n_labels", 5): break
     labels = [dict(name=S.get("rename", {}).get(p["name"], p["name"]), x=p["x"], y=p["y"]) for p in labs]
-    cues = dict(slug=slug, city=d["name"], mode=S.get("mode", "dark"), duration=dur, camera=cam, year=year, grow=grow, wire=wire, rings=rings,
+    cues = dict(slug=slug, key=key, city=d["name"], mode=S.get("mode", "dark"), duration=dur, camera=cam, year=year, grow=grow, wire=wire, rings=rings,
                 cards=cards, captions=caps, labels=labels, label_window=[T["then"]["t0"] + 1.0, T["grow"]["t1"] - 0.3],
                 counter=dict(t0=T["then"]["t0"], t1=T["grow"]["t1"]), totals={str(k): v for k, v in tot.items()},
                 densest=dict(at=at, name=ctx["where"], km2=dk), ctx={k: v for k, v in ctx.items()},
@@ -189,12 +201,25 @@ def overlay(img, t, cues, st, lab_px):
     return img
 
 
+async def serve_web(pg):
+    """Serve web/ to the page straight from disk (no separate http.server process to keep alive)."""
+    import mimetypes
+    from urllib.parse import urlparse, unquote
+    async def handle(route):
+        p = (ROOT / "web" / unquote(urlparse(route.request.url).path).lstrip("/")).resolve()
+        if p.is_dir(): p = p / "index.html"
+        if not p.is_file() or ROOT / "web" not in p.parents: return await route.fulfill(status=404, body="")
+        await route.fulfill(status=200, body=p.read_bytes(), content_type=mimetypes.guess_type(str(p))[0] or "application/octet-stream")
+    await pg.route("http://localhost:8765/**", handle)
+
+
 async def run(cues, out, stills=None, scale=1.0):
     async with async_playwright() as pw:
         b = await pw.chromium.launch(executable_path="/usr/bin/google-chrome", args=["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"])
         pg = await b.new_page(viewport={"width": 540, "height": 960}, device_scale_factor=2 * scale)
+        await serve_web(pg)
         await pg.goto(f"http://localhost:8765/shorts-city3d/index.html?city={cues['slug']}&mode={cues['mode']}"); await pg.evaluate("window.INIT")
-        times = stills or [i / FPS for i in range(int(round(cues["duration"] * FPS)))]
+        times = stills or [i / FPS for i in range(int(round(cues["duration"] * FPS)))][FR[0]:FR[1]]
         proc = None
         if not stills:
             proc = subprocess.Popen(["ffmpeg", "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-",
@@ -218,4 +243,5 @@ if __name__ == "__main__":
     cues = json.loads(Path(sys.argv[1]).read_text())
     st = [float(x) for x in sys.argv[sys.argv.index("--stills") + 1].split(",")] if "--stills" in sys.argv else None
     sc = float(sys.argv[sys.argv.index("--scale") + 1]) if "--scale" in sys.argv else 1.0
+    if "--frames" in sys.argv: FR = [int(x) for x in sys.argv[sys.argv.index("--frames") + 1].split(":")]   # render a slice (segments are joined with ffmpeg concat)
     asyncio.run(run(cues, sys.argv[2], st, sc))

@@ -62,6 +62,10 @@ elif eng == "swarm":
         sh = sum(np.sin(2 * np.pi * f * tt + rng.uniform(0, 6)) for f in (880, 1320, 1760, 2640)) * 0.012 * np.exp(-tt * 2.2) * np.minimum(1, tt / 0.05)
         place(fx, sh + lp(rng.normal(0, 1, len(tt)), 4) * 0.02 * np.exp(-tt * 3), p["t"])
 
+if "--hit" in sys.argv:   # one low hit on frame 1 so the Short never opens on silence (a tone, not a noise whoosh)
+    th = np.arange(int(1.2 * SR)) / SR
+    place(fx, (np.sin(2 * np.pi * 48 * th) * 0.8 + np.sin(2 * np.pi * 96 * th) * 0.25) * np.exp(-th * 3.2) * np.minimum(1, th / 0.004), 0.0, 0.9)
+
 # duck bed and effects under the voice
 env = lp(np.abs(voice).mean(1), int(0.9 * SR)); talk = np.clip(env / max(1e-9, np.percentile(env[env > 0], 60) if (env > 0).any() else 1), 0, 1)[:, None]
 mix = bed * (0.45 - 0.27 * talk) + fx * (1 - 0.35 * talk) + voice

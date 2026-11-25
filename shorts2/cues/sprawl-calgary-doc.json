@@ -1,0 +1,137 @@
+{
+ "short": 28,
+ "city": "calgary",
+ "duration": 34.0,
+ "map_y": 470,
+ "open_zoom": {
+  "from": 1.3,
+  "t1": 3.6
+ },
+ "push": [
+  {
+   "t0": 16.2,
+   "t1": 21.2,
+   "ramp": 1.1,
+   "zoom": 1.9,
+   "at": [
+    0.646,
+    0.764
+   ]
+  }
+ ],
+ "loop": true,
+ "credit": "Buildings: EU JRC GHS-BUILT-S · Relief: Copernicus DEM · Water: ESA WorldCover",
+ "checks": [
+  {
+   "epoch": 1975,
+   "value": 69
+  },
+  {
+   "epoch": 2020,
+   "value": 135
+  },
+  {
+   "a": 1975,
+   "b": 2000,
+   "value": 29
+  },
+  {
+   "a": 2000,
+   "b": 2020,
+   "value": 36
+  }
+ ],
+ "cards": [
+  {
+   "t0": 0.0,
+   "t1": 3.6,
+   "y": 260,
+   "kick": "Calgary from space, 1975 to 2020",
+   "big": "Nearly doubled"
+  },
+  {
+   "t0": 3.8,
+   "t1": 16.0,
+   "y": 250,
+   "kick": "Land covered by buildings",
+   "big": "Watch it spread",
+   "sub": "brighter = newer"
+  },
+  {
+   "t0": 16.2,
+   "t1": 21.2,
+   "y": 260,
+   "kick": "Built since 2000",
+   "big": "+36 km²",
+   "sub": "vs +29 km² in the 25 years before"
+  },
+  {
+   "t0": 21.4,
+   "t1": 26.2,
+   "y": 260,
+   "kick": "Land covered by buildings",
+   "big": "69 to 135 km²",
+   "sub": "nearly double since 1975"
+  },
+  {
+   "t0": 26.4,
+   "t1": 30.6,
+   "y": 260,
+   "kick": "Grew since 1975",
+   "big": "Edmonton ×1.97",
+   "sub": "Calgary ×1.94"
+  },
+  {
+   "t0": 30.8,
+   "t1": 34.0,
+   "y": 260,
+   "kick": "Comment a city",
+   "big": "Yours next?",
+   "sub": "Free map of Canada: link below"
+  }
+ ],
+ "voice": "short-28-calgary-doc.wav",
+ "script": [
+  {
+   "t": 0.2,
+   "say": "Calgary. From above, a rare chance to watch a city migrate."
+  },
+  {
+   "t": 4.0,
+   "say": "1975. Each light square: land covered by buildings."
+  },
+  {
+   "t": 9.5,
+   "say": "Year after year, the herd pushes further onto the prairie."
+  },
+  {
+   "t": 16.3,
+   "say": "After 2000, the migration quickens."
+  },
+  {
+   "t": 21.5,
+   "say": "Sixty-nine square kilometres in 1975. A hundred and thirty-five by 2020."
+  },
+  {
+   "t": 26.5,
+   "say": "Its northern rival, Edmonton, spread just slightly more. Calgary has been informed."
+  },
+  {
+   "t": 30.9,
+   "say": "Which habitat should we observe next?"
+  }
+ ],
+ "tick": {
+  "t0": 3.6,
+  "t1": 16.0
+ },
+ "bed": "steady",
+ "voice_fx": {
+  "formant": 1.06,
+  "pitch": 113,
+  "clean": 30
+ },
+ "mode": "dark",
+ "note": "Nature-documentary cut (2026-11-24), 34 s; frame-1 claim card 'Nearly doubled'. Edmonton x1.97 vs Calgary x1.94 asserted from web/data/sprawl/sprawl.json.",
+ "captions": true
+}
