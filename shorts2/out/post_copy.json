@@ -53,5 +53,30 @@
   "title": "How different can one city get? Vancouver, 535 neighbourhoods",
   "desc": "Every census tract in Vancouver, from the lowest to the highest.\n\n📊 The numbers (2021 Census, Statistics Canada; neighbourhoods = census tracts with 500+ people)\n• Median household income: $32,000 to $170,000\n• Born outside Canada: 5% to 74%\n• Median age: 30 to 68\n• Vancouver overall: 2.64 million people, median household income $90,000\n\n💬 Which city should we zoom into next?\n\nIncome is for 2020 (pandemic benefits included).\n\nEvery neighbourhood in 50 cities, free: https://canadiandataproject.github.io/canada-through-time/#nb=933/hhinc",
   "x": "Vancouver has 535 neighbourhoods (census tracts).\n\nMedian household income: $32,000 to $170,000\nBorn outside Canada: 5% to 74%\nMedian age: 30 to 68\n\nSame city.\n\nSource: 2021 Census, Statistics Canada\nhttps://canadiandataproject.github.io/canada-through-time/#nb=933/hhinc"
+ },
+ "29": {
+  "title": "New York's most packed square kilometre isn't Times Square",
+  "desc": "Every 400 m square of New York City as a column of people, 1975 to 2020.\n\n📊 The numbers\n• Within 30 km of the centre: 11.0 million people in 1975 → 12.8 million in 2020 (×1.2)\n• Busiest square km (2020): 69,217 people, Upper East Side\n• Busiest square km in 1975: 59,227 people, Manhattan\n• Toronto's busiest (St. James Town): 35,018\n\n💬 Which city should we do next?\n\nData: GHSL GHS-POP R2023A (European Commission JRC), 100 m population grid; 2020 is a modelled estimate. Places: GeoNames, OpenStreetMap. Narration: synthetic voice.\n\nFree interactive map of Canada: https://canadiandataproject.github.io/canada-through-time/",
+  "x": "New York City, every 400 m square as a column of people (all within 30 km).\n\n1975: 11.0 million\n2020: 12.8 million\nBusiest square km: 69,217 people (Upper East Side)\nToronto's busiest: 35,018\n\nSource: EU JRC GHSL\nhttps://canadiandataproject.github.io/canada-through-time/"
+ },
+ "30": {
+  "title": "London's most packed square kilometre isn't in Zone 1",
+  "desc": "Every 400 m square of London as a column of people, 1975 to 2020.\n\n📊 The numbers\n• Within 30 km of the centre: 8.5 million people in 1975 → 11.3 million in 2020 (×1.3)\n• Busiest square km (2020): 27,827 people, Maida Hill, W9\n• Busiest square km in 1975: 20,764 people, Earl's Court\n• Toronto's busiest (St. James Town): 35,018\n\n💬 Which city should we do next?\n\nData: GHSL GHS-POP R2023A (European Commission JRC), 100 m population grid; 2020 is a modelled estimate. Places: GeoNames, OpenStreetMap. Narration: synthetic voice.\n\nFree interactive map of Canada: https://canadiandataproject.github.io/canada-through-time/",
+  "x": "London, every 400 m square as a column of people (all within 30 km).\n\n1975: 8.5 million\n2020: 11.3 million\nBusiest square km: 27,827 people (Maida Hill, W9)\nToronto's busiest: 35,018\n\nSource: EU JRC GHSL\nhttps://canadiandataproject.github.io/canada-through-time/"
+ },
+ "31": {
+  "title": "Mumbai's most packed square kilometre isn't Dharavi",
+  "desc": "Every 400 m square of Mumbai as a column of people, 1975 to 2020.\n\n📊 The numbers\n• Within 30 km of the centre: 9.2 million people in 1975 → 21.4 million in 2020 (×2.3)\n• Busiest square km (2020): 134,293 people, Jogeshwari West\n• Busiest square km in 1975: 104,999 people, Girgaon\n• Toronto's busiest (St. James Town): 35,018\n\n💬 Which city should we do next?\n\nData: GHSL GHS-POP R2023A (European Commission JRC), 100 m population grid; 2020 is a modelled estimate. Places: GeoNames, OpenStreetMap. Narration: synthetic voice.\n\nFree interactive map of Canada: https://canadiandataproject.github.io/canada-through-time/",
+  "x": "Mumbai, every 400 m square as a column of people (all within 30 km).\n\n1975: 9.2 million\n2020: 21.4 million\nBusiest square km: 134,293 people (Jogeshwari West)\nToronto's busiest: 35,018\n\nSource: EU JRC GHSL\nhttps://canadiandataproject.github.io/canada-through-time/"
+ },
+ "32": {
+  "title": "Sydney's most packed square kilometre, 1975 vs now",
+  "desc": "Every 400 m square of Sydney as a column of people, 1975 to 2020.\n\n📊 The numbers\n• Within 30 km of the centre: 2.4 million people in 1975 → 4.0 million in 2020 (×1.6)\n• Busiest square km (2020): 28,114 people, Haymarket\n• Busiest square km in 1975: 9,654 people, Bondi\n• Toronto's busiest (St. James Town): 35,018\n\n💬 Which city should we do next?\n\nData: GHSL GHS-POP R2023A (European Commission JRC), 100 m population grid; 2020 is a modelled estimate. Places: GeoNames, OpenStreetMap. Narration: synthetic voice.\n\nFree interactive map of Canada: https://canadiandataproject.github.io/canada-through-time/",
+  "x": "Sydney, every 400 m square as a column of people (all within 30 km).\n\n1975: 2.4 million\n2020: 4.0 million\nBusiest square km: 28,114 people (Haymarket)\nToronto's busiest: 35,018\n\nSource: EU JRC GHSL\nhttps://canadiandataproject.github.io/canada-through-time/"
+ },
+ "33": {
+  "title": "Edmonton grew faster than Mumbai since 1975",
+  "desc": "Every 400 m square of Edmonton as a column of people, 1975 to 2020.\n\n📊 The numbers\n• Within 25 km of the centre: 510,545 people in 1975 → 1.3 million in 2020 (×2.5)\n• Busiest square km (2020): 15,495 people, Wîhkwêntôwin\n• Busiest square km in 1975: 6,069 people, Central Core\n• Toronto's busiest (St. James Town): 35,018\n\n💬 Which city should we do next?\n\nData: GHSL GHS-POP R2023A (European Commission JRC), 100 m population grid; 2020 is a modelled estimate. Places: GeoNames, OpenStreetMap. Narration: synthetic voice.\n\nFree interactive map of Canada: https://canadiandataproject.github.io/canada-through-time/",
+  "x": "Edmonton, every 400 m square as a column of people (all within 25 km).\n\n1975: 510,545\n2020: 1.3 million\nBusiest square km: 15,495 people (Wîhkwêntôwin)\nToronto's busiest: 35,018\n\nSource: EU JRC GHSL\nhttps://canadiandataproject.github.io/canada-through-time/"
  }
 }

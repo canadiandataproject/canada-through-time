@@ -47,7 +47,7 @@ def inputs(e, copy, site):
     if site == "x":
         return dict(base, text=copy["x"], assets=vid({"thumbnailOffset": 0}))
     return dict(base, text=e["tiktok"]["caption"], assets=vid({"thumbnailOffset": 0}),
-                metadata={"tiktok": {"title": e["tiktok"]["title"], "isAiGenerated": False}})
+                metadata={"tiktok": {"title": e["tiktok"]["title"], "isAiGenerated": bool(e.get("ai"))}})
 
 
 def main():

@@ -138,6 +138,101 @@
     "x": "6afd42c2b116b81c993414c2",
     "tiktok": "6b025a2ad5eabfb8cc79ff19"
    }
+  },
+  {
+   "num": "29",
+   "media": "short-29-world-newyork.mp4",
+   "ai": true,
+   "when": {
+    "youtube": "2026-11-27T13:30",
+    "x": "2026-11-27T13:30",
+    "tiktok": "2026-11-27T12:30"
+   },
+   "tiktok": {
+    "title": "New York's most packed square kilometre isn't Times Square",
+    "caption": "New York's most packed square kilometre isn't Times Square. Busiest square km: 69,217 people (Upper East Side). 1975 → 2020.\n\nWhich city next? 👇\n\n#nyc #newyork #dataviz #maps"
+   },
+   "status": {
+    "youtube": "pending",
+    "x": "pending",
+    "tiktok": "pending"
+   }
+  },
+  {
+   "num": "30",
+   "media": "short-30-world-london.mp4",
+   "ai": true,
+   "when": {
+    "youtube": "2026-11-28T13:30",
+    "x": "2026-11-28T13:30",
+    "tiktok": "2026-11-28T12:30"
+   },
+   "tiktok": {
+    "title": "London's most packed square kilometre isn't in Zone 1",
+    "caption": "London's most packed square kilometre isn't in Zone 1. Busiest square km: 27,827 people (Maida Hill, W9). 1975 → 2020.\n\nWhich city next? 👇\n\n#london #uk #dataviz #maps"
+   },
+   "status": {
+    "youtube": "pending",
+    "x": "pending",
+    "tiktok": "pending"
+   }
+  },
+  {
+   "num": "31",
+   "media": "short-31-world-mumbai.mp4",
+   "ai": true,
+   "when": {
+    "youtube": "2026-11-29T13:30",
+    "x": "2026-11-29T13:30",
+    "tiktok": "2026-11-29T12:30"
+   },
+   "tiktok": {
+    "title": "Mumbai's most packed square kilometre isn't Dharavi",
+    "caption": "Mumbai's most packed square kilometre isn't Dharavi. Busiest square km: 134,293 people (Jogeshwari West). 1975 → 2020.\n\nWhich city next? 👇\n\n#mumbai #india #dataviz #maps"
+   },
+   "status": {
+    "youtube": "pending",
+    "x": "pending",
+    "tiktok": "pending"
+   }
+  },
+  {
+   "num": "32",
+   "media": "short-32-world-sydney.mp4",
+   "ai": true,
+   "when": {
+    "youtube": "2026-11-30T13:30",
+    "x": "2026-11-30T13:30",
+    "tiktok": "2026-11-30T12:30"
+   },
+   "tiktok": {
+    "title": "Sydney's most packed square kilometre, 1975 vs now",
+    "caption": "Sydney's most packed square kilometre, 1975 vs now. Busiest square km: 28,114 people (Haymarket). 1975 → 2020.\n\nWhich city next? 👇\n\n#sydney #australia #dataviz #maps"
+   },
+   "status": {
+    "youtube": "pending",
+    "x": "pending",
+    "tiktok": "pending"
+   }
+  },
+  {
+   "num": "33",
+   "media": "short-33-world-edmonton.mp4",
+   "ai": true,
+   "when": {
+    "youtube": "2026-12-01T13:30",
+    "x": "2026-12-01T13:30",
+    "tiktok": "2026-12-01T12:30"
+   },
+   "tiktok": {
+    "title": "Edmonton grew faster than Mumbai since 1975",
+    "caption": "Edmonton grew faster than Mumbai since 1975. Busiest square km: 15,495 people (Wîhkwêntôwin). 1975 → 2020.\n\nWhich city next? 👇\n\n#edmonton #yeg #dataviz #maps"
+   },
+   "status": {
+    "youtube": "pending",
+    "x": "pending",
+    "tiktok": "pending"
+   }
   }
  ]
 }
