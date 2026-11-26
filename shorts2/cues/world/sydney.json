@@ -1,5 +1,6 @@
 {
  "slug": "sydney",
+ "key": "sydney",
  "city": "Sydney",
  "mode": "dark",
  "duration": 32.2,
@@ -226,7 +227,7 @@
   {
    "t0": 3.5,
    "t1": 7.55,
-   "text": "1975. 2.4 million people. Not one of them could afford a house here today."
+   "text": "1975. 2.4 million people. Houses were still cheap."
   },
   {
    "t0": 10.5,
@@ -324,7 +325,7 @@
  "voice": "/home/claude/audio/world/sydney.wav",
  "script": [
   "Sydney. Let's find the most packed square kilometre.",
-  "1975. 2.4 million people. Not one of them could afford a house here today.",
+  "1975. 2.4 million people. Houses were still cheap.",
   "By 2020, 4.0 million. Mostly on the M4.",
   "The busiest square kilometre: Haymarket. Right next to Central.",
   "Toronto's St. James Town still packs in more. 35,018.",

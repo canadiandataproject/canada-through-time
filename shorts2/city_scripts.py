@@ -35,7 +35,7 @@ SCRIPTS = {
             dense=dict(say="The busiest square kilometre? Not Dharavi. {where}.", card=dict(kick="People in one square km", big="{dk}", sub="{where} · 2020 estimate")),
             compare=dict(say="More people than all of {ca}, New Brunswick. Minus the fog. Plus vada pav.",
                          card=dict(kick="More people than all of", big="{ca}, N.B.", sub="{ca_pop} people (2021 Census)")),
-            joke=dict(say="In 1975 the busiest square was down in {where75}. Then everyone took the train north.",
+            joke=dict(say="In 1975 it was {where75}. Then everyone took the train north.",
                       card=dict(kick="Busiest square km in 1975", big="{where75}", sub="{dk75} people")))),
 
     "london": dict(
@@ -87,7 +87,7 @@ SCRIPTS = {
                  lambda d, c: d["facts"]["densest_name"]["1975"] == "Bondi Beach"],
         beats=beats(
             hook=dict(say="Sydney. Let's find the most packed square kilometre.", card=dict(kick="How packed can one square km get?", big="Sydney")),
-            then=dict(say="1975. {p1975} people. Not one of them could afford a house here today.", card=dict(counter=True, kick="Within {km} km of the CBD")),
+            then=dict(say="1975. {p1975} people. Houses were still cheap.", card=dict(counter=True, kick="Within {km} km of the CBD")),
             grow=dict(say="By 2020, {p2020}. Mostly on the M4.", card=dict(counter=True, kick="Within {km} km of the CBD")),
             dense=dict(say="The busiest square kilometre: {where}. Right next to Central.", card=dict(kick="People in one square km", big="{dk}", sub="{where} · 2020 estimate")),
             compare=dict(say="Toronto's St. James Town still packs in more. {vs_dk}.", card=dict(kick="Toronto's busiest square km", big="{vs_dk}", sub="vs {dk} in {where}")),

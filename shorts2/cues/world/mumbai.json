@@ -1,5 +1,6 @@
 {
  "slug": "mumbai",
+ "key": "mumbai",
  "city": "Mumbai",
  "mode": "dark",
  "duration": 32.2,
@@ -246,7 +247,7 @@
   {
    "t0": 23.7,
    "t1": 28.15,
-   "text": "In 1975 the busiest square was down in Girgaon. Then everyone took the train north."
+   "text": "In 1975 it was Girgaon. Then everyone took the train north."
   },
   {
    "t0": 28.3,
@@ -328,7 +329,7 @@
   "By 2020, 21.4 million. Same trains.",
   "The busiest square kilometre? Not Dharavi. Jogeshwari West.",
   "More people than all of Saint John, New Brunswick. Minus the fog. Plus vada pav.",
-  "In 1975 the busiest square was down in Girgaon. Then everyone took the train north.",
+  "In 1975 it was Girgaon. Then everyone took the train north.",
   "Which city should I do next?"
  ]
 }
